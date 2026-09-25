@@ -10,6 +10,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.listamercado.app.R
 import com.listamercado.app.model.ShoppingItem
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -18,9 +20,9 @@ class ShoppingItemAdapter(
     private val onEdit: (ShoppingItem) -> Unit,
     private val onDelete: (ShoppingItem) -> Unit
 ) : RecyclerView.Adapter<ShoppingItemAdapter.Holder>() {
-
     private val items = mutableListOf<ShoppingItem>()
     private val currency = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
+    private val quantityFormat = DecimalFormat("0.##", DecimalFormatSymbols(Locale("pt", "BR")))
 
     fun submitList(newItems: List<ShoppingItem>) {
         items.clear()
@@ -34,7 +36,6 @@ class ShoppingItemAdapter(
     }
 
     override fun onBindViewHolder(holder: Holder, position: Int) = holder.bind(items[position])
-
     override fun getItemCount() = items.size
 
     inner class Holder(view: View) : RecyclerView.ViewHolder(view) {
@@ -50,8 +51,8 @@ class ShoppingItemAdapter(
             check.setOnCheckedChangeListener(null)
             check.isChecked = item.purchased
             name.text = item.name
-            meta.text = "${formatQuantity(item.quantity)} ${item.unit} • ${item.category}"
-            price.text = currency.format(item.subtotal)
+            meta.text = "${quantityFormat.format(item.quantity)} ${item.unit} • ${item.category}"
+            price.text = if (item.unitPrice > 0.0) currency.format(item.subtotal) else "Sem preço"
             note.text = item.note
             note.visibility = if (item.note.isBlank()) View.GONE else View.VISIBLE
             name.paintFlags = if (item.purchased) {
@@ -64,8 +65,5 @@ class ShoppingItemAdapter(
             edit.setOnClickListener { onEdit(item) }
             delete.setOnClickListener { onDelete(item) }
         }
-
-        private fun formatQuantity(value: Double): String =
-            if (value % 1.0 == 0.0) value.toInt().toString() else value.toString()
     }
 }

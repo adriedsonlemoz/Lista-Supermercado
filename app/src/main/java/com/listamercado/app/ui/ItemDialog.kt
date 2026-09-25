@@ -8,6 +8,10 @@ import android.widget.Spinner
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.listamercado.app.R
 import com.listamercado.app.model.ShoppingItem
+import com.listamercado.app.util.CurrencyTextWatcher
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.util.Locale
 
 object ItemDialog {
     private val categories = listOf(
@@ -16,11 +20,7 @@ object ItemDialog {
     )
     private val units = listOf("un", "kg", "g", "L", "mL", "pct", "cx")
 
-    fun show(
-        context: Context,
-        existing: ShoppingItem? = null,
-        onSave: (ShoppingItem) -> Unit
-    ) {
+    fun show(context: Context, existing: ShoppingItem? = null, onSave: (ShoppingItem) -> Unit) {
         val view = LayoutInflater.from(context).inflate(R.layout.dialog_item, null)
         val name = view.findViewById<EditText>(R.id.inputName)
         val quantity = view.findViewById<EditText>(R.id.inputQuantity)
@@ -28,6 +28,8 @@ object ItemDialog {
         val note = view.findViewById<EditText>(R.id.inputNote)
         val category = view.findViewById<Spinner>(R.id.spinnerCategory)
         val unit = view.findViewById<Spinner>(R.id.spinnerUnit)
+        val priceWatcher = CurrencyTextWatcher(price)
+        price.addTextChangedListener(priceWatcher)
 
         category.adapter = ArrayAdapter(context, android.R.layout.simple_spinner_dropdown_item, categories)
         unit.adapter = ArrayAdapter(context, android.R.layout.simple_spinner_dropdown_item, units)
@@ -35,7 +37,7 @@ object ItemDialog {
         existing?.let {
             name.setText(it.name)
             quantity.setText(it.quantity.toInput())
-            price.setText(if (it.unitPrice == 0.0) "" else it.unitPrice.toInput())
+            priceWatcher.setAmount(it.unitPrice)
             note.setText(it.note)
             category.setSelection(categories.indexOf(it.category).coerceAtLeast(0))
             unit.setSelection(units.indexOf(it.unit).coerceAtLeast(0))
@@ -57,11 +59,10 @@ object ItemDialog {
                 }
 
                 val parsedQuantity = quantity.text.toString().replace(',', '.').toDoubleOrNull() ?: 1.0
-                val parsedPrice = price.text.toString().replace(',', '.').toDoubleOrNull() ?: 0.0
                 val item = (existing?.copy() ?: ShoppingItem(name = itemName)).apply {
                     this.name = itemName
                     this.quantity = parsedQuantity.coerceAtLeast(0.01)
-                    this.unitPrice = parsedPrice.coerceAtLeast(0.0)
+                    this.unitPrice = priceWatcher.amount().coerceAtLeast(0.0)
                     this.category = category.selectedItem.toString()
                     this.unit = unit.selectedItem.toString()
                     this.note = note.text.toString().trim()
@@ -73,5 +74,8 @@ object ItemDialog {
         dialog.show()
     }
 
-    private fun Double.toInput(): String = if (this % 1.0 == 0.0) toInt().toString() else toString()
+    private fun Double.toInput(): String {
+        val symbols = DecimalFormatSymbols(Locale("pt", "BR"))
+        return DecimalFormat("0.##", symbols).format(this)
+    }
 }

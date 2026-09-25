@@ -1,67 +1,64 @@
 package com.listamercado.app.ui
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.listamercado.app.BuildConfig
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.listamercado.app.R
 import com.listamercado.app.data.ShoppingRepository
-import com.listamercado.app.model.ShoppingItem
-import java.text.NumberFormat
-import java.util.Locale
+import com.listamercado.app.model.ShoppingList
+import com.listamercado.app.util.ThemeController
 
 class MainActivity : AppCompatActivity() {
     private lateinit var repository: ShoppingRepository
-    private val items = mutableListOf<ShoppingItem>()
-    private lateinit var adapter: ShoppingItemAdapter
+    private val lists = mutableListOf<ShoppingList>()
+    private lateinit var adapter: ShoppingListAdapter
     private lateinit var search: EditText
     private lateinit var summary: TextView
     private lateinit var emptyState: TextView
-    private var filter: Filter = Filter.ALL
-    private val currency = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ThemeController.applySavedMode(this)
         setContentView(R.layout.activity_main)
-
         repository = ShoppingRepository(this)
-        items += repository.load()
         bindViews()
-        render()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        reload()
     }
 
     private fun bindViews() {
-        val recycler = findViewById<RecyclerView>(R.id.recyclerItems)
-        search = findViewById(R.id.inputSearch)
-        summary = findViewById(R.id.textSummary)
-        emptyState = findViewById(R.id.textEmpty)
+        val recycler = findViewById<RecyclerView>(R.id.recyclerLists)
+        search = findViewById(R.id.inputSearchLists)
+        summary = findViewById(R.id.textHomeSummary)
+        emptyState = findViewById(R.id.textEmptyLists)
 
-        adapter = ShoppingItemAdapter(
-            onChecked = { item, checked ->
-                item.purchased = checked
-                persistAndRender()
-            },
-            onEdit = { item -> editItem(item) },
-            onDelete = { item -> confirmDelete(item) }
+        adapter = ShoppingListAdapter(
+            onOpen = { openList(it) },
+            onMore = { showListActions(it) }
         )
         recycler.layoutManager = LinearLayoutManager(this)
         recycler.adapter = adapter
 
-        findViewById<FloatingActionButton>(R.id.fabAdd).setOnClickListener { addItem() }
-        findViewById<MaterialButton>(R.id.buttonAll).setOnClickListener { setFilter(Filter.ALL) }
-        findViewById<MaterialButton>(R.id.buttonPending).setOnClickListener { setFilter(Filter.PENDING) }
-        findViewById<MaterialButton>(R.id.buttonPurchased).setOnClickListener { setFilter(Filter.PURCHASED) }
-        findViewById<MaterialButton>(R.id.buttonClearPurchased).setOnClickListener { clearPurchased() }
-        findViewById<MaterialButton>(R.id.buttonAbout).setOnClickListener { showAbout() }
+        findViewById<ExtendedFloatingActionButton>(R.id.fabNewList).setOnClickListener { createList() }
+        findViewById<ImageButton>(R.id.buttonSettings).setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
+        findViewById<com.google.android.material.button.MaterialButton>(R.id.buttonCompare).setOnClickListener {
+            startActivity(Intent(this, CompareActivity::class.java))
+        }
 
         search.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
@@ -70,88 +67,84 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun addItem() = ItemDialog.show(this) { newItem ->
-        items += newItem
-        persistAndRender()
+    private fun reload() {
+        lists.clear()
+        lists += repository.loadLists()
+        render()
     }
 
-    private fun editItem(item: ShoppingItem) = ItemDialog.show(this, item) { edited ->
-        val index = items.indexOfFirst { it.id == item.id }
-        if (index >= 0) items[index] = edited
-        persistAndRender()
+    private fun createList() {
+        ListDialog.show(this) { name ->
+            lists.add(0, ShoppingList(name = name))
+            repository.saveLists(lists)
+            render()
+        }
     }
 
-    private fun confirmDelete(item: ShoppingItem) {
+    private fun openList(list: ShoppingList) {
+        startActivity(Intent(this, ListDetailActivity::class.java).putExtra(ListDetailActivity.EXTRA_LIST_ID, list.id))
+    }
+
+    private fun showListActions(list: ShoppingList) {
+        val options = arrayOf("Renomear", "Duplicar para nova compra", "Excluir")
         MaterialAlertDialogBuilder(this)
-            .setTitle("Excluir ${item.name}?")
-            .setMessage("O item será removido da lista.")
+            .setTitle(list.name)
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> renameList(list)
+                    1 -> duplicateList(list)
+                    2 -> confirmDelete(list)
+                }
+            }
+            .show()
+    }
+
+    private fun renameList(list: ShoppingList) {
+        ListDialog.show(this, list.name) { name ->
+            list.name = name
+            list.updatedAt = System.currentTimeMillis()
+            repository.saveLists(lists)
+            render()
+        }
+    }
+
+    private fun duplicateList(source: ShoppingList) {
+        ListDialog.show(this, "${source.name} - nova compra") { name ->
+            val now = System.currentTimeMillis()
+            val copiedItems = source.items.mapIndexed { index, item ->
+                item.copy(id = now + index + 1, purchased = false)
+            }.toMutableList()
+            lists.add(0, ShoppingList(id = now, name = name, createdAt = now, updatedAt = now, items = copiedItems))
+            repository.saveLists(lists)
+            render()
+        }
+    }
+
+    private fun confirmDelete(list: ShoppingList) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Excluir ${list.name}?")
+            .setMessage("A lista e seus preços serão removidos do histórico.")
             .setNegativeButton("Cancelar", null)
             .setPositiveButton("Excluir") { _, _ ->
-                items.removeAll { it.id == item.id }
-                persistAndRender()
+                lists.removeAll { it.id == list.id }
+                repository.saveLists(lists)
+                render()
             }
             .show()
-    }
-
-    private fun clearPurchased() {
-        if (items.none { it.purchased }) return
-        MaterialAlertDialogBuilder(this)
-            .setTitle("Limpar itens comprados?")
-            .setMessage("Todos os itens já marcados como comprados serão removidos.")
-            .setNegativeButton("Cancelar", null)
-            .setPositiveButton("Limpar") { _, _ ->
-                items.removeAll { it.purchased }
-                persistAndRender()
-            }
-            .show()
-    }
-
-
-    private fun showAbout() {
-        MaterialAlertDialogBuilder(this)
-            .setTitle("Lista de Mercado")
-            .setMessage(
-                "Versão ${BuildConfig.VERSION_NAME}+${BuildConfig.VERSION_CODE}\n\n" +
-                    "Lista de compras offline, simples e rápida para o supermercado."
-            )
-            .setPositiveButton("Fechar", null)
-            .show()
-    }
-
-    private fun setFilter(newFilter: Filter) {
-        filter = newFilter
-        render()
-    }
-
-    private fun persistAndRender() {
-        repository.save(items)
-        render()
     }
 
     private fun render() {
         val query = search.text?.toString()?.trim()?.lowercase().orEmpty()
-        val visible = items
-            .asSequence()
-            .filter { item ->
-                when (filter) {
-                    Filter.ALL -> true
-                    Filter.PENDING -> !item.purchased
-                    Filter.PURCHASED -> item.purchased
-                }
+        val visible = lists
+            .filter { list ->
+                query.isBlank() || list.name.lowercase().contains(query) ||
+                    list.items.any { it.name.lowercase().contains(query) }
             }
-            .filter { query.isBlank() || it.name.lowercase().contains(query) || it.category.lowercase().contains(query) }
-            .sortedWith(compareBy<ShoppingItem> { it.purchased }.thenBy { it.category }.thenBy { it.name.lowercase() })
-            .toList()
+            .sortedByDescending { it.updatedAt }
 
         adapter.submitList(visible)
         emptyState.visibility = if (visible.isEmpty()) View.VISIBLE else View.GONE
-
-        val pending = items.count { !it.purchased }
-        val purchased = items.count { it.purchased }
-        val estimated = items.sumOf { it.subtotal }
-        val purchasedTotal = items.filter { it.purchased }.sumOf { it.subtotal }
-        summary.text = "$pending pendentes • $purchased comprados\nEstimado: ${currency.format(estimated)} • No carrinho: ${currency.format(purchasedTotal)}"
+        val totalItems = lists.sumOf { it.items.size }
+        summary.text = "${lists.size} ${if (lists.size == 1) "lista" else "listas"} • $totalItems ${if (totalItems == 1) "item cadastrado" else "itens cadastrados"}"
     }
-
-    private enum class Filter { ALL, PENDING, PURCHASED }
 }

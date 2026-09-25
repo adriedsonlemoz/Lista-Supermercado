@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.0.6+7 — 2026-09-25
+
+- Nova tela inicial baseada em listas de compras, em vez de itens soltos.
+- Migração automática dos dados antigos para uma lista preservada.
+- Suporte a criar, renomear, duplicar e excluir listas.
+- Nova comparação entre listas e histórico de preço por produto.
+- Nova área Configurações com modo Sistema/Claro/Escuro, Últimas alterações, Doação Pix e Sobre.
+- Preço unitário passa a usar formatação automática em reais durante a digitação.
+- Filtros da lista reorganizados para caberem em telas menores.
+- `Limpar comprados` movido para ação separada dos filtros.
+- Interface de criação/edição de itens modernizada com campos Material 3.
+
+## 1.0.5+6 — 2026-09-25
+
+- Corrigido o build que falhava ao detectar `.github/workflows/android.yml` ainda presente no repositório.
+- O workflow principal agora remove automaticamente o workflow legado da branch `main`.
+- A limpeza é registrada em commit com `[skip ci]`, evitando uma execução em cascata.
+- Mantido somente `android-release.yml` no ZIP entregue.
+- Mantida geração de APK Release assinado e publicação direta na GitHub Release.
+
 ## 1.0.4+5 — 2026-09-25
 
 - Removido completamente o workflow redundante `Android CI`.

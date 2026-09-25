@@ -22,6 +22,35 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Remove legacy Android CI workflow
+        if: github.ref == 'refs/heads/main'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          LEGACY=".github/workflows/android.yml"
+          if [ ! -f "$LEGACY" ]; then
+            echo "Legacy Android CI workflow already absent."
+            exit 0
+          fi
+
+          echo "Removing legacy workflow: $LEGACY"
+          rm -f "$LEGACY"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -u "$LEGACY"
+
+          if git diff --cached --quiet; then
+            echo "No cleanup commit required."
+            exit 0
+          fi
+
+          git commit -m "Remove legacy Android CI workflow [skip ci]"
+          git push origin HEAD:main
 
       - name: Validate source and version
         run: |
@@ -83,19 +112,19 @@ jobs:
           KEY_PASS="$(first_non_empty "$KEY_ANDROID" "$KEY_LISTA" "$KEY_GENERIC" "$KEY_SIGNING" || true)"
 
           if [ -z "$KS" ]; then
-            echo "::error::Nenhuma chave permanente encontrada. Configure ANDROID_KEYSTORE_BASE64, LISTA_MERCADO_KEYSTORE_BASE64, KEYSTORE_BASE64 ou SIGNING_KEY."
+            echo "::error::Nenhuma chave permanente encontrada."
             exit 1
           fi
           if [ -z "$STORE_PASS" ]; then
-            echo "::error::Senha do keystore ausente. Configure ANDROID_KEYSTORE_PASSWORD, LISTA_MERCADO_KEYSTORE_PASSWORD, KEYSTORE_PASSWORD ou SIGNING_STORE_PASSWORD."
+            echo "::error::Senha do keystore ausente."
             exit 1
           fi
           if [ -z "$ALIAS" ]; then
-            echo "::error::Alias da chave ausente. Configure ANDROID_KEY_ALIAS, LISTA_MERCADO_KEY_ALIAS, KEY_ALIAS ou SIGNING_KEY_ALIAS."
+            echo "::error::Alias da chave ausente."
             exit 1
           fi
           if [ -z "$KEY_PASS" ]; then
-            echo "::error::Senha da chave ausente. Configure ANDROID_KEY_PASSWORD, LISTA_MERCADO_KEY_PASSWORD, KEY_PASSWORD ou SIGNING_KEY_PASSWORD."
+            echo "::error::Senha da chave ausente."
             exit 1
           fi
 
@@ -120,8 +149,6 @@ jobs:
       - name: Validate signing and rename APK
         id: apk
         shell: bash
-        env:
-          LISTA_MERCADO_KEY_ALIAS: ${{ steps.signing.outputs.key_alias }}
         run: |
           set -euo pipefail
 
@@ -138,7 +165,6 @@ jobs:
 
           echo "version=$VERSION_NAME" >> "$GITHUB_OUTPUT"
           echo "file=$OUT" >> "$GITHUB_OUTPUT"
-          echo "APK Release assinado pronto: $OUT"
 
       - name: Publish APK directly to GitHub Release
         uses: softprops/action-gh-release@v2
