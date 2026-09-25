@@ -1,0 +1,152 @@
+name: Build and Release Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "main"
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: meu-supermercado-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate source and version
+        run: |
+          python3 scripts/validate_version.py
+          python3 scripts/validate_source.py
+          python3 scripts/validate_workflow.py
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Setup Gradle 8.9
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Resolve signing secrets
+        id: signing
+        shell: bash
+        env:
+          KS_ANDROID: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KS_LISTA: ${{ secrets.LISTA_MERCADO_KEYSTORE_BASE64 }}
+          KS_GENERIC: ${{ secrets.KEYSTORE_BASE64 }}
+          KS_SIGNING: ${{ secrets.SIGNING_KEY }}
+
+          STORE_ANDROID: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          STORE_LISTA: ${{ secrets.LISTA_MERCADO_KEYSTORE_PASSWORD }}
+          STORE_GENERIC: ${{ secrets.KEYSTORE_PASSWORD }}
+          STORE_SIGNING: ${{ secrets.SIGNING_STORE_PASSWORD }}
+
+          ALIAS_ANDROID: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ALIAS_LISTA: ${{ secrets.LISTA_MERCADO_KEY_ALIAS }}
+          ALIAS_GENERIC: ${{ secrets.KEY_ALIAS }}
+          ALIAS_SIGNING: ${{ secrets.SIGNING_KEY_ALIAS }}
+
+          KEY_ANDROID: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KEY_LISTA: ${{ secrets.LISTA_MERCADO_KEY_PASSWORD }}
+          KEY_GENERIC: ${{ secrets.KEY_PASSWORD }}
+          KEY_SIGNING: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+
+          first_non_empty() {
+            for value in "$@"; do
+              if [ -n "$value" ]; then
+                printf '%s' "$value"
+                return 0
+              fi
+            done
+            return 1
+          }
+
+          KS="$(first_non_empty "$KS_ANDROID" "$KS_LISTA" "$KS_GENERIC" "$KS_SIGNING" || true)"
+          STORE_PASS="$(first_non_empty "$STORE_ANDROID" "$STORE_LISTA" "$STORE_GENERIC" "$STORE_SIGNING" || true)"
+          ALIAS="$(first_non_empty "$ALIAS_ANDROID" "$ALIAS_LISTA" "$ALIAS_GENERIC" "$ALIAS_SIGNING" || true)"
+          KEY_PASS="$(first_non_empty "$KEY_ANDROID" "$KEY_LISTA" "$KEY_GENERIC" "$KEY_SIGNING" || true)"
+
+          if [ -z "$KS" ]; then
+            echo "::error::Nenhuma chave permanente encontrada. Configure ANDROID_KEYSTORE_BASE64, LISTA_MERCADO_KEYSTORE_BASE64, KEYSTORE_BASE64 ou SIGNING_KEY."
+            exit 1
+          fi
+          if [ -z "$STORE_PASS" ]; then
+            echo "::error::Senha do keystore ausente. Configure ANDROID_KEYSTORE_PASSWORD, LISTA_MERCADO_KEYSTORE_PASSWORD, KEYSTORE_PASSWORD ou SIGNING_STORE_PASSWORD."
+            exit 1
+          fi
+          if [ -z "$ALIAS" ]; then
+            echo "::error::Alias da chave ausente. Configure ANDROID_KEY_ALIAS, LISTA_MERCADO_KEY_ALIAS, KEY_ALIAS ou SIGNING_KEY_ALIAS."
+            exit 1
+          fi
+          if [ -z "$KEY_PASS" ]; then
+            echo "::error::Senha da chave ausente. Configure ANDROID_KEY_PASSWORD, LISTA_MERCADO_KEY_PASSWORD, KEY_PASSWORD ou SIGNING_KEY_PASSWORD."
+            exit 1
+          fi
+
+          printf '%s' "$KS" | tr -d '\r\n ' | base64 --decode > "$RUNNER_TEMP/meu-supermercado-release.jks"
+          test -s "$RUNNER_TEMP/meu-supermercado-release.jks"
+
+          echo "store_password=$STORE_PASS" >> "$GITHUB_OUTPUT"
+          echo "key_alias=$ALIAS" >> "$GITHUB_OUTPUT"
+          echo "key_password=$KEY_PASS" >> "$GITHUB_OUTPUT"
+
+      - name: Build signed Release APK
+        shell: bash
+        env:
+          LISTA_MERCADO_KEYSTORE_PATH: ${{ runner.temp }}/meu-supermercado-release.jks
+          LISTA_MERCADO_KEYSTORE_PASSWORD: ${{ steps.signing.outputs.store_password }}
+          LISTA_MERCADO_KEY_ALIAS: ${{ steps.signing.outputs.key_alias }}
+          LISTA_MERCADO_KEY_PASSWORD: ${{ steps.signing.outputs.key_password }}
+        run: |
+          set -euo pipefail
+          gradle :app:assembleRelease --stacktrace
+
+      - name: Validate signing and rename APK
+        id: apk
+        shell: bash
+        env:
+          LISTA_MERCADO_KEY_ALIAS: ${{ steps.signing.outputs.key_alias }}
+        run: |
+          set -euo pipefail
+
+          VERSION="$(tr -d '\r\n' < VERSION)"
+          VERSION_NAME="${VERSION%%+*}"
+          SRC="app/build/outputs/apk/release/app-release.apk"
+          test -s "$SRC"
+
+          OUT="Meu-Supermercado-v${VERSION_NAME}.apk"
+          cp "$SRC" "$OUT"
+
+          unzip -t "$OUT" >/dev/null
+          keytool -printcert -jarfile "$OUT" >/dev/null
+
+          echo "version=$VERSION_NAME" >> "$GITHUB_OUTPUT"
+          echo "file=$OUT" >> "$GITHUB_OUTPUT"
+          echo "APK Release assinado pronto: $OUT"
+
+      - name: Publish APK directly to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.apk.outputs.version }}
+          name: Meu Supermercado v${{ steps.apk.outputs.version }}
+          target_commitish: ${{ github.sha }}
+          files: ${{ steps.apk.outputs.file }}
+          generate_release_notes: true
+          overwrite_files: true
+          make_latest: true
