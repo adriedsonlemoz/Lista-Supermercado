@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.11+12 — 2026-09-25
+
+- Adicionado orçamento por lista, com valor restante ou excedido e progresso visual.
+- Adicionado histórico inteligente de preços por produto: último, menor, maior, média e tendência.
+- Adicionado acesso ao histórico pelo menu de cada produto.
+- Corrigida a combinação visual verde + texto azul no tema escuro.
+- Nova paleta violeta/lilás aplicada ao aplicativo, mapa e ícone.
+- Botões preenchidos agora usam explicitamente cor principal + `colorOnPrimary`.
+- Tela de novidades atualizada para esta versão.
+
 ## 1.0.10+11 — 2026-09-25
 
 - Adicionado mapa de supermercados próximos com OpenStreetMap, localização do aparelho e consulta Overpass sem chave de API.

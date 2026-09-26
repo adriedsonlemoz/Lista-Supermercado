@@ -53,7 +53,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Produtos" />
+            android:text="Histórico" />
     </com.google.android.material.button.MaterialButtonToggleGroup>
 
     <LinearLayout
@@ -80,7 +80,7 @@
 
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Produto" android:textAppearance="@style/TextAppearance.Material3.LabelMedium" />
         <Spinner android:id="@+id/spinnerProduct" android:layout_width="match_parent" android:layout_height="52dp" android:layout_marginTop="4dp" android:background="@drawable/bg_input" android:paddingHorizontal="12dp" />
-        <com.google.android.material.button.MaterialButton android:id="@+id/buttonShowHistory" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="Ver histórico de preço" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/buttonShowHistory" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="Analisar histórico" />
     </LinearLayout>
 
     <TextView

@@ -78,3 +78,12 @@ O aplicativo cria uma única vez a lista padrão **Cicloviagem**, com 18 itens i
 - Cards dos produtos foram redesenhados: tocar no card edita e o menu de três pontos concentra editar/excluir.
 - Nova tela **O que mudou nesta atualização**, exibida somente na primeira abertura após cada versão.
 - `WhatsNewContent.kt` centraliza as novidades e deve ser atualizado em todas as próximas versões.
+
+
+## Versão 1.0.11+12
+
+- Orçamento configurável por lista, com restante, excesso e barra de uso.
+- Histórico inteligente de preços com último, menor, maior, média e tendência.
+- Atalho “Histórico de preço” diretamente no menu de cada produto.
+- Paleta principal alterada de verde para violeta/lilás, incluindo mapa, ícone e botões principais.
+- Contraste de `colorOnPrimary` definido explicitamente para impedir texto azul sobre botões preenchidos.

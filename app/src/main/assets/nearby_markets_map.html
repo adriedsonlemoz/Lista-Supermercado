@@ -10,7 +10,7 @@
     .market-popup { min-width:190px; font-family: sans-serif; }
     .market-popup h3 { margin:0 0 4px; font-size:15px; }
     .market-popup p { margin:2px 0 10px; font-size:12px; color:#555; }
-    .market-popup button { width:100%; border:0; border-radius:12px; padding:10px 12px; background:#2E6B47; color:white; font-weight:700; }
+    .market-popup button { width:100%; border:0; border-radius:12px; padding:10px 12px; background:#6D4FD3; color:white; font-weight:700; }
   </style>
 </head>
 <body>
@@ -41,7 +41,7 @@
 
     markets.forEach(function(m) {
       const marker = L.circleMarker([m.lat, m.lon], {
-        radius: 7, color: '#2E6B47', fillColor: '#4d8d68', fillOpacity: 1, weight: 2
+        radius: 7, color: '#6D4FD3', fillColor: '#8B6CF6', fillOpacity: 1, weight: 2
       }).addTo(marketLayer);
       const distance = m.distanceMeters < 1000
         ? Math.round(m.distanceMeters) + ' m'
@@ -95,7 +95,7 @@
     if (userMarker) bounds.push(userMarker.getLatLng());
 
     markets.forEach(function(m) {
-      const marker = L.circleMarker([m.lat, m.lon], {radius:7,color:'#2E6B47',fillColor:'#4d8d68',fillOpacity:1,weight:2}).addTo(marketLayer);
+      const marker = L.circleMarker([m.lat, m.lon], {radius:7,color:'#6D4FD3',fillColor:'#8B6CF6',fillOpacity:1,weight:2}).addTo(marketLayer);
       const safeName = String(m.name || 'Supermercado').replace(/'/g, "\\'").replace(/</g, '&lt;').replace(/>/g, '&gt;');
       const distance = m.distanceMeters < 1000
         ? Math.round(m.distanceMeters) + ' m'

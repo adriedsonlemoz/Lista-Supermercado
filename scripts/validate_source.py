@@ -16,6 +16,8 @@ required = [
     "app/src/main/java/com/listamercado/app/ui/NearbyMarketsActivity.kt",
     "app/src/main/java/com/listamercado/app/ui/WhatsNewActivity.kt",
     "app/src/main/java/com/listamercado/app/ui/WhatsNewContent.kt",
+    "app/src/main/java/com/listamercado/app/ui/BudgetDialog.kt",
+    "app/src/main/res/layout/dialog_budget.xml",
     "app/src/main/assets/nearby_markets_map.html",
     "app_identity.json",
     "github-manager.json",
@@ -95,6 +97,20 @@ if not match or int(match.group(1)) != current_code:
         f"WhatsNewContent.kt must be updated for versionCode {current_code}; "
         "set CONTENT_VERSION_CODE to the current version and refresh the change list"
     )
+
+
+list_model = (root / "app/src/main/java/com/listamercado/app/model/ShoppingList.kt").read_text(encoding="utf-8")
+repo_source = (root / "app/src/main/java/com/listamercado/app/data/ShoppingRepository.kt").read_text(encoding="utf-8")
+compare_source = (root / "app/src/main/java/com/listamercado/app/ui/CompareActivity.kt").read_text(encoding="utf-8")
+if "var budget: Double" not in list_model or 'put("budget", budget)' not in repo_source:
+    raise SystemExit("Per-list budget feature is missing or not persisted")
+if "buildPriceInsight" not in compare_source or "Média:" not in compare_source or "Histórico de preço" not in kotlin_sources:
+    raise SystemExit("Smart product price history is missing")
+
+colors = (root / "app/src/main/res/values/colors.xml").read_text(encoding="utf-8")
+night_colors = (root / "app/src/main/res/values-night/colors.xml").read_text(encoding="utf-8")
+if "#2E6B47" in colors or "#2E6B47" in night_colors or 'color name="on_primary"' not in colors:
+    raise SystemExit("Updated violet theme / explicit on-primary contrast is missing")
 
 # Keep source packages clean: APKs are release outputs and must not be committed/zipped.
 apks = [p.relative_to(root).as_posix() for p in root.rglob("*.apk")]

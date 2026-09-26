@@ -1,14 +1,9 @@
-# Release 1.0.10+11
+# Release 1.0.11+12
 
-## Principais novidades
+## Novidades
 
-- Supermercados próximos no mapa usando OpenStreetMap.
-- Pesquisa de supermercados em até 5 km com distância e criação de lista pelo mapa.
-- Tela de lista redesenhada para exibir mais itens e reduzir poluição visual.
-- Nova tela de novidades exibida uma única vez após cada atualização.
-
-## Entrega
-
-- APK Release assinado pelo workflow principal.
-- APK fora do ZIP do código-fonte.
-- Sem `actions/upload-artifact` e sem `source.zip` no workflow.
+- Orçamento por lista com acompanhamento em tempo real.
+- Histórico inteligente de preços por produto.
+- Atalho de histórico no menu do item.
+- Tema violeta/lilás no lugar do verde, com contraste corrigido no modo escuro.
+- Tela de atualização sincronizada com a versão.

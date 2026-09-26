@@ -19,6 +19,7 @@ import java.util.Locale
 class ShoppingItemAdapter(
     private val onChecked: (ShoppingItem, Boolean) -> Unit,
     private val onEdit: (ShoppingItem) -> Unit,
+    private val onHistory: (ShoppingItem) -> Unit,
     private val onDelete: (ShoppingItem) -> Unit
 ) : RecyclerView.Adapter<ShoppingItemAdapter.Holder>() {
     private val items = mutableListOf<ShoppingItem>()
@@ -77,10 +78,12 @@ class ShoppingItemAdapter(
             more.setOnClickListener { anchor ->
                 PopupMenu(anchor.context, anchor).apply {
                     menu.add("Editar")
+                    menu.add("Histórico de preço")
                     menu.add("Excluir")
                     setOnMenuItemClickListener { menuItem ->
                         when (menuItem.title.toString()) {
                             "Editar" -> onEdit(item)
+                            "Histórico de preço" -> onHistory(item)
                             "Excluir" -> onDelete(item)
                         }
                         true

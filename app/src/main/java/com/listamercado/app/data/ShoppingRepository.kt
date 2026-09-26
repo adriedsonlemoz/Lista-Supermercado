@@ -120,6 +120,7 @@ class ShoppingRepository(context: Context) {
         put("name", name)
         put("createdAt", createdAt)
         put("updatedAt", updatedAt)
+        put("budget", budget)
         put("items", JSONArray().apply { items.forEach { put(it.toJson()) } })
     }
 
@@ -141,6 +142,7 @@ class ShoppingRepository(context: Context) {
             name = optString("name", "Lista de compras"),
             createdAt = optLong("createdAt", System.currentTimeMillis()),
             updatedAt = optLong("updatedAt", System.currentTimeMillis()),
+            budget = optDouble("budget", 0.0),
             items = MutableList(itemArray.length()) { index -> itemArray.getJSONObject(index).toItem() }
         )
     }

@@ -46,6 +46,7 @@ class CompareActivity : AppCompatActivity() {
         bindViews()
         populateSelectors()
         renderMode()
+        openRequestedProductHistory()
     }
 
     private fun bindViews() {
@@ -150,17 +151,76 @@ class CompareActivity : AppCompatActivity() {
         if (productNames.isEmpty()) return
         val selected = product.selectedItem?.toString() ?: return
         val key = normalize(selected)
-        val rows = lists.mapNotNull { list ->
+        val occurrences = lists.mapNotNull { list ->
             val item = list.items.firstOrNull { normalize(it.name) == key } ?: return@mapNotNull null
+            list to item
+        }
+
+        val rows = occurrences.map { (list, item) ->
             ComparisonRow(
                 title = list.name,
                 subtitle = "${date.format(Date(list.createdAt))} • ${priceLabel(item.unitPrice.takeIf { it > 0 })} por ${item.unit}",
                 detail = "${formatQuantity(item.quantity)} ${item.unit} • subtotal ${currency.format(item.subtotal)}"
             )
         }
-        val prices = rows.size
-        summary.text = "$selected • encontrado em $prices ${if (prices == 1) "lista" else "listas"}"
+
+        val priced = occurrences.filter { (_, item) -> item.unitPrice > 0.0 }
+        summary.text = buildPriceInsight(selected, priced, occurrences.size)
         adapter.submitList(rows)
+    }
+
+    private fun buildPriceInsight(
+        productName: String,
+        priced: List<Pair<ShoppingList, ShoppingItem>>,
+        occurrenceCount: Int
+    ): String {
+        if (priced.isEmpty()) {
+            return "$productName • encontrado em $occurrenceCount ${if (occurrenceCount == 1) "lista" else "listas"}\nNenhum preço informado ainda."
+        }
+
+        val preferredGroup = priced.groupBy { it.second.unit }
+            .maxByOrNull { it.value.size }
+            ?: return "$productName • sem histórico compatível"
+        val unit = preferredGroup.key
+        val compatible = preferredGroup.value.sortedByDescending { it.first.createdAt }
+        val values = compatible.map { it.second.unitPrice }
+        val latest = compatible.first()
+        val minimum = values.minOrNull() ?: 0.0
+        val maximum = values.maxOrNull() ?: 0.0
+        val average = values.average()
+        val trend = compatible.getOrNull(1)?.let { previous ->
+            val difference = latest.second.unitPrice - previous.second.unitPrice
+            when {
+                abs(difference) < 0.005 -> "Sem alteração desde o registro anterior"
+                difference > 0 -> "Subiu ${currency.format(difference)} desde o registro anterior"
+                else -> "Caiu ${currency.format(abs(difference))} desde o registro anterior"
+            }
+        } ?: "Primeiro preço registrado nessa unidade"
+
+        val mixedUnits = priced.map { it.second.unit }.distinct().size > 1
+        val unitNote = if (mixedUnits) " • indicadores em $unit" else " • $unit"
+        return buildString {
+            append(productName)
+            append(" • ")
+            append(occurrenceCount)
+            append(if (occurrenceCount == 1) " registro" else " registros")
+            append(unitNote)
+            append("\nÚltimo: ${currency.format(latest.second.unitPrice)} • menor: ${currency.format(minimum)}")
+            append("\nMédia: ${currency.format(average)} • maior: ${currency.format(maximum)}")
+            append("\n$trend")
+        }
+    }
+
+    private fun openRequestedProductHistory() {
+        val requested = intent.getStringExtra(EXTRA_PRODUCT_NAME)?.trim().orEmpty()
+        if (requested.isBlank() || productNames.isEmpty()) return
+        val index = productNames.indexOfFirst { normalize(it) == normalize(requested) }
+        if (index < 0) return
+        mode = Mode.PRODUCTS
+        findViewById<MaterialButton>(R.id.buttonModeProducts).isChecked = true
+        product.setSelection(index)
+        renderMode()
+        showProductHistory()
     }
 
     private fun priceLabel(price: Double?): String = price?.let(currency::format) ?: "sem preço"
@@ -171,4 +231,8 @@ class CompareActivity : AppCompatActivity() {
     private fun normalize(value: String): String = value.trim().lowercase(Locale("pt", "BR"))
 
     private enum class Mode { LISTS, PRODUCTS }
+
+    companion object {
+        const val EXTRA_PRODUCT_NAME = "product_name"
+    }
 }

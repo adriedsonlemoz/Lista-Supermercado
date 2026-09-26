@@ -49,11 +49,16 @@ class ShoppingListAdapter(
             val count = list.items.size
             meta.text = "Atualizada ${date.format(Date(list.updatedAt))} • $count ${if (count == 1) "item" else "itens"}"
 
-            progressLabel.text = when {
+            val purchaseLabel = when {
                 count == 0 -> "Lista vazia"
                 list.purchasedCount == 0 -> "Nenhum item comprado"
                 list.purchasedCount == count -> "Compra concluída"
                 else -> "${list.purchasedCount} de $count comprados"
+            }
+            progressLabel.text = if (list.budget > 0.0) {
+                "$purchaseLabel • orçamento ${currency.format(list.budget)}"
+            } else {
+                purchaseLabel
             }
 
             val percent = if (count == 0) 0 else ((list.purchasedCount * 100.0) / count).toInt()

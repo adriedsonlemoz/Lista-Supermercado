@@ -1,14 +1,12 @@
-# Validação — 1.0.10+11
+# Validação — 1.0.11+12
 
-- [x] versionName `1.0.10`
-- [x] versionCode `11`
-- [x] VERSION `1.0.10+11`
-- [x] app_identity.json e github-manager.json sincronizados
-- [x] Mapa OpenStreetMap/Overpass sem chave de API
-- [x] Permissões INTERNET, localização aproximada e precisa declaradas
-- [x] Criação de lista a partir de supermercado do mapa
-- [x] Tela de lista e cards de produtos compactados
-- [x] Tela de novidades controlada por versionCode
-- [x] Últimas alterações reutilizam WhatsNewContent
-- [x] Workflow de Release preservado
-- [x] APK não incluído no ZIP do código-fonte
+- [x] versionName `1.0.11`
+- [x] versionCode `12`
+- [x] VERSION `1.0.11+12`
+- [x] orçamento persistido em `ShoppingList`
+- [x] histórico inteligente com último/mínimo/máximo/média/tendência
+- [x] atalho de histórico no menu de produto
+- [x] nova paleta violeta/lilás em claro e escuro
+- [x] `colorOnPrimary` definido explicitamente
+- [x] WhatsNewContent atualizado para versionCode 12
+- [x] workflow de Release preservado

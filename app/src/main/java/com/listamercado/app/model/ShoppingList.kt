@@ -5,6 +5,7 @@ data class ShoppingList(
     var name: String,
     val createdAt: Long = System.currentTimeMillis(),
     var updatedAt: Long = System.currentTimeMillis(),
+    var budget: Double = 0.0,
     val items: MutableList<ShoppingItem> = mutableListOf()
 ) {
     val estimatedTotal: Double
@@ -15,4 +16,7 @@ data class ShoppingList(
 
     val purchasedCount: Int
         get() = items.count { it.purchased }
+
+    val budgetRemaining: Double
+        get() = budget - estimatedTotal
 }
