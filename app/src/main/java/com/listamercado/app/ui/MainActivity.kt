@@ -15,7 +15,6 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.textfield.TextInputLayout
 import com.listamercado.app.BuildConfig
@@ -173,17 +172,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showListActions(list: ShoppingList) {
-        val options = arrayOf("Renomear", "Duplicar para nova compra", "Excluir")
-        MaterialAlertDialogBuilder(this)
-            .setTitle(list.name)
-            .setItems(options) { _, which ->
-                when (which) {
-                    0 -> renameList(list)
-                    1 -> duplicateList(list)
-                    2 -> confirmDelete(list)
-                }
-            }
-            .show()
+        ListActionsDialog.show(
+            activity = this,
+            listName = list.name,
+            onRename = { renameList(list) },
+            onDuplicate = { duplicateList(list) },
+            onDelete = { confirmDelete(list) }
+        )
     }
 
     private fun renameList(list: ShoppingList) {
@@ -208,16 +203,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun confirmDelete(list: ShoppingList) {
-        MaterialAlertDialogBuilder(this)
-            .setTitle("Excluir ${list.name}?")
-            .setMessage("A lista e seus preços serão removidos do histórico.")
-            .setNegativeButton("Cancelar", null)
-            .setPositiveButton("Excluir") { _, _ ->
-                lists.removeAll { it.id == list.id }
-                repository.saveLists(lists)
-                render()
-            }
-            .show()
+        ConfirmDialog.showDestructive(
+            context = this,
+            title = "Excluir ${list.name}?",
+            message = "A lista e seus preços serão removidos do histórico.",
+            confirmLabel = "Excluir"
+        ) {
+            lists.removeAll { it.id == list.id }
+            repository.saveLists(lists)
+            render()
+        }
     }
 
     private fun render() {

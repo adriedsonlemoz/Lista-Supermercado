@@ -1,22 +1,26 @@
 package com.listamercado.app.ui
 
 object WhatsNewContent {
-    const val CONTENT_VERSION_CODE = 16
+    const val CONTENT_VERSION_CODE = 17
     const val TITLE = "O que mudou nesta atualização"
-    const val SUBTITLE = "Tela inicial mais compacta e com busca sob demanda."
+    const val SUBTITLE = "Lista mais compacta, ações mais claras e mercados encontrados mais longe."
 
     val changes = listOf(
         Change(
-            "Busca no topo",
-            "A pesquisa saiu da tela principal e virou um botão de lupa ao lado das Configurações. Toque nele para abrir ou fechar o campo de busca."
+            "Detalhes da lista remodelados",
+            "A busca agora fica na lupa do cabeçalho. O resumo mostra Estimado, Carrinho e quanto falta do orçamento com mais destaque."
         ),
         Change(
-            "Resumo mais compacto",
-            "Listas, itens e comprados agora aparecem junto de Resumo das compras, liberando espaço e mantendo o valor estimado em destaque."
+            "Ações mais visíveis",
+            "Os três pontos agora acompanham a cor do tema. Renomear, Duplicar e Excluir ficam lado a lado em uma caixa mais compacta, com exclusão destacada em vermelho."
         ),
         Change(
-            "Mais espaço para suas listas",
-            "Com a busca recolhida e o resumo menor, mais listas ficam visíveis sem precisar rolar tanto a tela."
+            "Confirmações mais claras",
+            "Ações destrutivas como excluir lista, excluir item e limpar comprados usam confirmação padronizada com o botão perigoso em vermelho."
+        ),
+        Change(
+            "Mercados em até 30 km",
+            "A busca começa perto e amplia automaticamente para 15 km e 30 km quando encontra poucas opções. Mercados de conveniência também entram na consulta."
         )
     )
 

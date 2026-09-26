@@ -4,7 +4,7 @@ Aplicativo Android nativo, leve e offline para organizar compras em listas separ
 
 ## Versão
 
-`1.0.15+16`
+`1.0.16+17`
 
 ## Identidade técnica
 
@@ -71,8 +71,8 @@ O aplicativo cria uma única vez a lista padrão **Cicloviagem**, com 18 itens i
 
 ## Mapa e tela de novidades — 1.0.10+11
 
-- Novo **Supermercados próximos** com OpenStreetMap e consulta Overpass sem chave de API.
-- Usa a localização do Android, mostra mercados em até 5 km e distância até cada estabelecimento.
+- Novo **Mercados próximos** com OpenStreetMap e consulta Overpass sem chave de API.
+- Usa a localização do Android, mostra a distância e amplia automaticamente a busca de 5 km para 15 km e até 30 km quando necessário.
 - Cada marcador permite criar uma lista já nomeada com o supermercado e a data.
 - Tela de detalhes da lista foi compactada para mostrar mais produtos, com resumo, busca e filtros mais limpos.
 - Cards dos produtos foram redesenhados: tocar no card edita e o menu de três pontos concentra editar/excluir.
@@ -99,7 +99,7 @@ A tela de novidades agora é protegida contra abertura duplicada durante recria�
 A lista inicial Cicloviagem recebe os preços de referência que já tinham sido definidos nas conversas de planejamento. Em instalações existentes, apenas itens ainda sem preço são preenchidos. O tema escuro usa agora um grafite azulado (`#101820`/`#121B24`) em vez de preto puro, mantendo o violeta como destaque.
 
 
-## Correção de build 1.0.15+16
+## Correção de build 1.0.14+15
 
 O Android Lint exige que recursos definidos em `values-night` tenham uma declaração padrão em `values`. A versão anterior introduziu 12 cores exclusivas do tema escuro sem esses defaults. Esta versão adiciona os equivalentes padrão e uma validação automática para impedir regressão.
 
@@ -107,3 +107,13 @@ O Android Lint exige que recursos definidos em `values-night` tenham uma declara
 ## Interface da tela inicial — 1.0.15+16
 
 A busca agora é aberta pela lupa no cabeçalho, ao lado das Configurações. O resumo de compras foi compactado e mostra listas, itens e comprados junto ao título, deixando mais espaço para as listas cadastradas.
+
+
+## Interface e mercados — 1.0.16+17
+
+- Busca dentro da lista movida para uma lupa no cabeçalho, abrindo somente quando necessária.
+- Resumo da lista reorganizado para dar o mesmo destaque ao total estimado e ao valor do carrinho, além de mostrar quanto falta ou excedeu do orçamento.
+- Menus de três pontos ficam legíveis no tema escuro e as ações de lista aparecem lado a lado em um painel compacto.
+- Confirmações destrutivas usam vermelho para destacar exclusão/limpeza.
+- A busca de mercados é adaptativa: começa em 5 km, amplia para 15 km e pode chegar a 30 km se houver poucas opções.
+- A consulta inclui supermercados e mercados de conveniência cadastrados no OpenStreetMap.

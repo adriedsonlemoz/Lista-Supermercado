@@ -63,7 +63,8 @@ class NearbyMarketsActivity : AppCompatActivity(), LocationListener {
     private fun configureMap() {
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
-        webView.settings.userAgentString = webView.settings.userAgentString + " MeuSupermercado/${com.listamercado.app.BuildConfig.VERSION_NAME}"
+        webView.settings.userAgentString = webView.settings.userAgentString +
+            " MeuSupermercado/${com.listamercado.app.BuildConfig.VERSION_NAME}"
         webView.addJavascriptInterface(MapBridge(), "AndroidMarket")
         webView.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
@@ -112,7 +113,7 @@ class NearbyMarketsActivity : AppCompatActivity(), LocationListener {
 
         if (providers.isEmpty()) {
             progress.visibility = View.GONE
-            status.text = "Ative a localização do celular para procurar supermercados."
+            status.text = "Ative a localização do celular para procurar mercados próximos."
             return
         }
 
@@ -133,55 +134,60 @@ class NearbyMarketsActivity : AppCompatActivity(), LocationListener {
 
     private fun showLocationAndLoadMarkets(location: Location) {
         webView.evaluateJavascript("setUserLocation(${location.latitude},${location.longitude})", null)
-        status.text = "Procurando supermercados em até ${RADIUS_METERS / 1000} km…"
+        status.text = "Procurando mercados próximos…"
         loadMarkets(location)
     }
 
     private fun loadMarkets(location: Location) {
         progress.visibility = View.VISIBLE
         thread(name = "overpass-markets") {
-            val result = runCatching { queryMarkets(location) }
+            val result = runCatching { queryMarketsAdaptive(location) }
             runOnUiThread {
                 progress.visibility = View.GONE
-                result.onSuccess { markets ->
+                result.onSuccess { searchResult ->
+                    val markets = searchResult.markets
+                    val radiusKm = searchResult.radiusMeters / 1000
                     status.text = when (markets.size) {
-                        0 -> "Nenhum supermercado encontrado no raio de ${RADIUS_METERS / 1000} km."
-                        1 -> "1 supermercado encontrado no raio de ${RADIUS_METERS / 1000} km."
-                        else -> "${markets.size} supermercados encontrados no raio de ${RADIUS_METERS / 1000} km."
+                        0 -> "Nenhum mercado encontrado em até $radiusKm km."
+                        1 -> "1 mercado encontrado em até $radiusKm km."
+                        else -> "${markets.size} mercados encontrados em até $radiusKm km."
                     }
                     val payload = JSONArray().apply { markets.forEach { put(it.toJson()) } }
                     val quoted = JSONObject.quote(payload.toString())
                     webView.evaluateJavascript("renderMarkets(JSON.parse($quoted))", null)
                 }.onFailure {
-                    status.text = "Não foi possível consultar os supermercados. Verifique sua internet."
+                    status.text = "Não foi possível consultar os mercados. Verifique sua internet e tente novamente."
                 }
             }
         }
     }
 
-    private fun queryMarkets(location: Location): List<NearbyMarket> {
+    private fun queryMarketsAdaptive(location: Location): MarketSearchResult {
+        var lastResult = emptyList<NearbyMarket>()
+        var lastRadius = RADIUS_STEPS_METERS.first()
+
+        for (radius in RADIUS_STEPS_METERS) {
+            lastRadius = radius
+            runOnUiThread {
+                status.text = "Procurando em até ${radius / 1000} km…"
+            }
+            lastResult = queryMarkets(location, radius)
+            if (lastResult.size >= MIN_RESULTS_BEFORE_STOP) break
+        }
+        return MarketSearchResult(lastResult, lastRadius)
+    }
+
+    private fun queryMarkets(location: Location, radiusMeters: Int): List<NearbyMarket> {
         val query = """
-            [out:json][timeout:20];
+            [out:json][timeout:30];
             (
-              nwr["shop"="supermarket"](around:$RADIUS_METERS,${location.latitude},${location.longitude});
+              nwr["shop"="supermarket"](around:$radiusMeters,${location.latitude},${location.longitude});
+              nwr["shop"="convenience"](around:$radiusMeters,${location.latitude},${location.longitude});
             );
             out center tags;
         """.trimIndent()
 
-        val connection = (URL(OVERPASS_URL).openConnection() as HttpURLConnection).apply {
-            requestMethod = "POST"
-            connectTimeout = 15_000
-            readTimeout = 25_000
-            doOutput = true
-            setRequestProperty("User-Agent", "MeuSupermercado/1.0 Android")
-            setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-        }
-        val body = "data=" + URLEncoder.encode(query, Charsets.UTF_8.name())
-        connection.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
-        if (connection.responseCode !in 200..299) error("HTTP ${connection.responseCode}")
-
-        val json = connection.inputStream.bufferedReader().use { it.readText() }
-        connection.disconnect()
+        val json = executeOverpass(query)
         val elements = JSONObject(json).optJSONArray("elements") ?: JSONArray()
         val markets = mutableListOf<NearbyMarket>()
         for (i in 0 until elements.length()) {
@@ -195,14 +201,44 @@ class NearbyMarketsActivity : AppCompatActivity(), LocationListener {
             val distance = FloatArray(1)
             Location.distanceBetween(location.latitude, location.longitude, lat, lon, distance)
             markets += NearbyMarket(
-                name = tags.optString("name").ifBlank { tags.optString("brand").ifBlank { "Supermercado" } },
+                name = tags.optString("name").ifBlank { tags.optString("brand").ifBlank { "Mercado" } },
                 lat = lat,
                 lon = lon,
                 distanceMeters = distance[0].toDouble(),
                 address = buildAddress(tags)
             )
         }
-        return markets.sortedBy { it.distanceMeters }.take(MAX_RESULTS)
+        return markets
+            .distinctBy { "${it.name.lowercase(Locale.ROOT)}:${"%.5f".format(Locale.ROOT, it.lat)}:${"%.5f".format(Locale.ROOT, it.lon)}" }
+            .sortedBy { it.distanceMeters }
+            .take(MAX_RESULTS)
+    }
+
+    private fun executeOverpass(query: String): String {
+        var lastError: Throwable? = null
+        for (endpoint in OVERPASS_URLS) {
+            val result = runCatching {
+                val connection = (URL(endpoint).openConnection() as HttpURLConnection).apply {
+                    requestMethod = "POST"
+                    connectTimeout = 15_000
+                    readTimeout = 30_000
+                    doOutput = true
+                    setRequestProperty("User-Agent", "MeuSupermercado/${com.listamercado.app.BuildConfig.VERSION_NAME} Android")
+                    setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+                }
+                try {
+                    val body = "data=" + URLEncoder.encode(query, Charsets.UTF_8.name())
+                    connection.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
+                    if (connection.responseCode !in 200..299) error("HTTP ${connection.responseCode}")
+                    connection.inputStream.bufferedReader().use { it.readText() }
+                } finally {
+                    connection.disconnect()
+                }
+            }
+            if (result.isSuccess) return result.getOrThrow()
+            lastError = result.exceptionOrNull()
+        }
+        throw lastError ?: IllegalStateException("Falha ao consultar Overpass")
     }
 
     private fun buildAddress(tags: JSONObject): String {
@@ -222,7 +258,7 @@ class NearbyMarketsActivity : AppCompatActivity(), LocationListener {
                 startLocationLookup()
             } else {
                 progress.visibility = View.GONE
-                status.text = "Permissão de localização necessária para encontrar supermercados próximos."
+                status.text = "Permissão de localização necessária para encontrar mercados próximos."
             }
         }
     }
@@ -262,6 +298,8 @@ class NearbyMarketsActivity : AppCompatActivity(), LocationListener {
             .show()
     }
 
+    private data class MarketSearchResult(val markets: List<NearbyMarket>, val radiusMeters: Int)
+
     private data class NearbyMarket(
         val name: String,
         val lat: Double,
@@ -280,8 +318,12 @@ class NearbyMarketsActivity : AppCompatActivity(), LocationListener {
 
     companion object {
         private const val REQUEST_LOCATION = 7001
-        private const val RADIUS_METERS = 5000
-        private const val MAX_RESULTS = 60
-        private const val OVERPASS_URL = "https://overpass-api.de/api/interpreter"
+        private const val MIN_RESULTS_BEFORE_STOP = 5
+        private const val MAX_RESULTS = 80
+        private val RADIUS_STEPS_METERS = intArrayOf(5_000, 15_000, 30_000)
+        private val OVERPASS_URLS = listOf(
+            "https://overpass-api.de/api/interpreter",
+            "https://overpass.kumi.systems/api/interpreter"
+        )
     }
 }

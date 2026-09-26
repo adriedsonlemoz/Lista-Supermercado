@@ -1,8 +1,12 @@
-# Release 1.0.15+16
+# Release 1.0.16+17
 
-Ajuste compacto da tela inicial.
+Refinamento visual da lista e melhoria da localização de mercados.
 
-- Busca movida para a lupa no cabeçalho.
-- Campo de busca exibido somente quando solicitado.
-- Resumo de compras mais baixo e com estatísticas na linha superior.
+- Três pontos legíveis no modo escuro.
+- Ações Renomear/Duplicar/Excluir lado a lado.
+- Confirmações destrutivas com destaque vermelho.
+- Busca da lista movida para a lupa do topo.
+- Resumo remodelado: Estimado, Carrinho e Falta/Excedeu.
+- Busca de mercados adaptativa em 5 km, 15 km e até 30 km.
+- Consulta OpenStreetMap ampliada para supermercados e mercados de conveniência.
 - Tela de novidades sincronizada com a versão.

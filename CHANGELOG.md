@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.16+17 — 2026-09-26
+
+- Três pontos dos cards de listas e produtos agora usam `colorOnSurface`, ficando claros e legíveis no modo escuro.
+- Menu de ações da lista redesenhado em bottom sheet compacto, com Renomear, Duplicar e Excluir lado a lado.
+- Exclusão de listas/itens e limpeza de comprados passam a usar confirmação padronizada, com ação destrutiva em vermelho.
+- Busca da tela de detalhes movida para uma lupa no cabeçalho e recolhida por padrão.
+- Resumo da lista remodelado com Estimado, Carrinho e Falta/Excedeu em destaque; valor faltante usa vermelho nos temas claro e escuro.
+- Valor do carrinho recebeu o mesmo peso visual do total estimado.
+- Busca de mercados agora amplia automaticamente o raio de 5 km para 15 km e 30 km quando encontra poucas opções.
+- Consulta de mercados passou a considerar `shop=supermarket` e `shop=convenience` e ganhou endpoint Overpass de contingência.
+- HTML do mapa foi limpo para remover script duplicado.
+- Tela de novidades atualizada para esta versão.
+
 ## 1.0.15+16 — 2026-09-25
 
 - Busca da tela inicial movida para um ícone de lupa ao lado da engrenagem.

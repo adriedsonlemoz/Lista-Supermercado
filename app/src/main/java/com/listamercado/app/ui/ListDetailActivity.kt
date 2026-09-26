@@ -1,20 +1,25 @@
 package com.listamercado.app.ui
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.progressindicator.LinearProgressIndicator
+import com.google.android.material.textfield.TextInputLayout
 import com.listamercado.app.R
 import com.listamercado.app.data.ShoppingRepository
 import com.listamercado.app.model.ShoppingItem
@@ -30,14 +35,16 @@ class ListDetailActivity : AppCompatActivity() {
     private lateinit var current: ShoppingList
     private lateinit var adapter: ShoppingItemAdapter
     private lateinit var search: EditText
+    private lateinit var searchLayout: TextInputLayout
     private lateinit var title: TextView
     private lateinit var empty: TextView
     private lateinit var clearPurchased: MaterialButton
-    private lateinit var pendingCount: TextView
-    private lateinit var purchasedCount: TextView
     private lateinit var estimatedTotal: TextView
     private lateinit var cartTotal: TextView
+    private lateinit var purchaseStatus: TextView
     private lateinit var budgetStatus: TextView
+    private lateinit var budgetRemainingLabel: TextView
+    private lateinit var budgetRemaining: TextView
     private lateinit var budgetButton: MaterialButton
     private lateinit var budgetProgress: LinearProgressIndicator
     private var filter = Filter.ALL
@@ -64,19 +71,22 @@ class ListDetailActivity : AppCompatActivity() {
             scrollable = findViewById(R.id.recyclerItems),
             fab = findViewById(R.id.fabAddItem)
         )
+        registerBackBehavior()
         render()
     }
 
     private fun bindViews() {
         title = findViewById(R.id.textListTitle)
         search = findViewById(R.id.inputSearchItems)
+        searchLayout = findViewById(R.id.layoutSearchItems)
         empty = findViewById(R.id.textEmptyItems)
         clearPurchased = findViewById(R.id.buttonClearPurchased)
-        pendingCount = findViewById(R.id.textPendingCount)
-        purchasedCount = findViewById(R.id.textPurchasedCount)
         estimatedTotal = findViewById(R.id.textEstimatedTotal)
         cartTotal = findViewById(R.id.textCartTotal)
+        purchaseStatus = findViewById(R.id.textPurchaseStatus)
         budgetStatus = findViewById(R.id.textBudgetStatus)
+        budgetRemainingLabel = findViewById(R.id.textBudgetRemainingLabel)
+        budgetRemaining = findViewById(R.id.textBudgetRemaining)
         budgetButton = findViewById(R.id.buttonBudget)
         budgetProgress = findViewById(R.id.progressBudget)
         val recycler = findViewById<RecyclerView>(R.id.recyclerItems)
@@ -94,6 +104,7 @@ class ListDetailActivity : AppCompatActivity() {
         recycler.adapter = adapter
 
         findViewById<ImageButton>(R.id.buttonBack).setOnClickListener { finish() }
+        findViewById<ImageButton>(R.id.buttonSearchItems).setOnClickListener { toggleSearch() }
         findViewById<ImageButton>(R.id.buttonRenameList).setOnClickListener { renameList() }
         findViewById<FloatingActionButton>(R.id.fabAddItem).setOnClickListener { addItem() }
         findViewById<MaterialButton>(R.id.buttonAll).setOnClickListener { setFilter(Filter.ALL) }
@@ -107,6 +118,51 @@ class ListDetailActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = render()
             override fun afterTextChanged(s: Editable?) = Unit
         })
+        search.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                hideKeyboard()
+                search.clearFocus()
+                true
+            } else false
+        }
+    }
+
+    private fun registerBackBehavior() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (searchLayout.visibility == View.VISIBLE) {
+                    closeSearch(clear = true)
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        })
+    }
+
+    private fun toggleSearch() {
+        if (searchLayout.visibility == View.VISIBLE) {
+            closeSearch(clear = true)
+        } else {
+            searchLayout.visibility = View.VISIBLE
+            search.requestFocus()
+            search.post {
+                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.showSoftInput(search, InputMethodManager.SHOW_IMPLICIT)
+            }
+        }
+    }
+
+    private fun closeSearch(clear: Boolean) {
+        hideKeyboard()
+        search.clearFocus()
+        if (clear) search.text?.clear()
+        searchLayout.visibility = View.GONE
+    }
+
+    private fun hideKeyboard() {
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(search.windowToken, 0)
     }
 
     private fun editBudget() {
@@ -117,10 +173,7 @@ class ListDetailActivity : AppCompatActivity() {
     }
 
     private fun openPriceHistory(item: ShoppingItem) {
-        startActivity(
-            Intent(this, CompareActivity::class.java)
-                .putExtra(CompareActivity.EXTRA_PRODUCT_NAME, item.name)
-        )
+        startActivity(Intent(this, CompareActivity::class.java).putExtra(CompareActivity.EXTRA_PRODUCT_NAME, item.name))
     }
 
     private fun renameList() {
@@ -142,28 +195,28 @@ class ListDetailActivity : AppCompatActivity() {
     }
 
     private fun confirmDelete(item: ShoppingItem) {
-        MaterialAlertDialogBuilder(this)
-            .setTitle("Excluir ${item.name}?")
-            .setMessage("O item será removido desta lista.")
-            .setNegativeButton("Cancelar", null)
-            .setPositiveButton("Excluir") { _, _ ->
-                current.items.removeAll { it.id == item.id }
-                persistAndRender()
-            }
-            .show()
+        ConfirmDialog.showDestructive(
+            context = this,
+            title = "Excluir ${item.name}?",
+            message = "O item será removido desta lista.",
+            confirmLabel = "Excluir"
+        ) {
+            current.items.removeAll { it.id == item.id }
+            persistAndRender()
+        }
     }
 
     private fun clearPurchased() {
         if (current.items.none { it.purchased }) return
-        MaterialAlertDialogBuilder(this)
-            .setTitle("Limpar itens comprados?")
-            .setMessage("Os itens marcados como comprados serão removidos desta lista.")
-            .setNegativeButton("Cancelar", null)
-            .setPositiveButton("Limpar") { _, _ ->
-                current.items.removeAll { it.purchased }
-                persistAndRender()
-            }
-            .show()
+        ConfirmDialog.showDestructive(
+            context = this,
+            title = "Limpar itens comprados?",
+            message = "Os itens marcados como comprados serão removidos desta lista.",
+            confirmLabel = "Limpar"
+        ) {
+            current.items.removeAll { it.purchased }
+            persistAndRender()
+        }
     }
 
     private fun setFilter(newFilter: Filter) {
@@ -197,29 +250,36 @@ class ListDetailActivity : AppCompatActivity() {
 
         val pending = current.items.count { !it.purchased }
         val purchased = current.items.count { it.purchased }
-        pendingCount.text = pending.toString()
-        purchasedCount.text = purchased.toString()
         estimatedTotal.text = currency.format(current.estimatedTotal)
-        cartTotal.text = "Carrinho ${currency.format(current.purchasedTotal)}"
+        cartTotal.text = currency.format(current.purchasedTotal)
+        purchaseStatus.text = "$pending pendentes • $purchased comprados"
         renderBudget()
         clearPurchased.visibility = if (purchased > 0) View.VISIBLE else View.GONE
     }
 
     private fun renderBudget() {
+        val normalColor = MaterialColors.getColor(budgetRemaining, com.google.android.material.R.attr.colorOnPrimaryContainer)
+        val errorColor = MaterialColors.getColor(budgetRemaining, com.google.android.material.R.attr.colorError)
+
         if (current.budget <= 0.0) {
             budgetStatus.text = "Sem orçamento definido"
-            budgetButton.text = "Definir orçamento"
+            budgetButton.text = "Definir"
+            budgetRemainingLabel.text = "Orçamento"
+            budgetRemaining.text = "—"
+            budgetRemainingLabel.setTextColor(normalColor)
+            budgetRemaining.setTextColor(normalColor)
             budgetProgress.visibility = View.GONE
             return
         }
 
         val remaining = current.budgetRemaining
-        budgetStatus.text = if (remaining >= 0.0) {
-            "Orçamento ${currency.format(current.budget)} • restam ${currency.format(remaining)}"
-        } else {
-            "Orçamento ${currency.format(current.budget)} • acima em ${currency.format(-remaining)}"
-        }
+        budgetStatus.text = "Orçamento ${currency.format(current.budget)}"
         budgetButton.text = "Alterar"
+        budgetRemainingLabel.text = if (remaining >= 0.0) "Falta" else "Excedeu"
+        budgetRemaining.text = currency.format(kotlin.math.abs(remaining))
+        budgetRemainingLabel.setTextColor(errorColor)
+        budgetRemaining.setTextColor(errorColor)
+
         val percent = ((current.estimatedTotal / current.budget) * 100.0).toInt().coerceIn(0, 100)
         budgetProgress.setProgressCompat(percent, true)
         budgetProgress.visibility = View.VISIBLE
