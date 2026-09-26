@@ -15,6 +15,7 @@
         <activity android:name=".ui.NearbyMarketsActivity" android:exported="false" />
         <activity android:name=".ui.SettingsActivity" android:exported="false" />
         <activity android:name=".ui.CompareActivity" android:exported="false" />
+        <activity android:name=".ui.PurchaseModeActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".ui.ListDetailActivity" android:exported="false" />
         <activity
             android:name=".ui.MainActivity"

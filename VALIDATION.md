@@ -1,18 +1,25 @@
-# Validação — 1.0.16+17
+# Validação — 1.0.17+18
 
-- [x] versionName `1.0.16`
-- [x] versionCode `17`
-- [x] VERSION `1.0.16+17`
+- [x] versionName `1.0.17`
+- [x] versionCode `18`
+- [x] VERSION `1.0.17+18`
 - [x] app_identity.json sincronizado
 - [x] github-manager.json sincronizado
-- [x] WhatsNewContent sincronizado com versionCode 17
-- [x] Três pontos usam cor do tema
-- [x] Ações de lista em linha horizontal
-- [x] Confirmações destrutivas com ação vermelha
-- [x] Busca da lista recolhida no cabeçalho
-- [x] Resumo da lista remodelado
-- [x] Valor do carrinho ampliado
-- [x] Falta/Excedeu em cor de erro
-- [x] Busca de mercados adaptativa 5/15/30 km
-- [x] Overpass com endpoint de contingência
-- [x] HTML do mapa sem script duplicado
+- [x] WhatsNewContent sincronizado com versionCode 18
+- [x] Botão **Modo compra** disponível dentro da lista
+- [x] Tela dedicada usa os mesmos itens persistidos da lista original
+- [x] Apenas itens pendentes aparecem na lista ativa do modo de compra
+- [x] Checkbox ampliado e quantidade/unidade em destaque
+- [x] Campo de preço rápido salva o total da quantidade sem alterar o modelo de preço interno
+- [x] Marcação de comprado atualiza carrinho/orçamento e remove o item da lista ativa
+- [x] Ação **Desfazer** restaura a marcação
+- [x] Botão para encerrar o modo e voltar à lista normal
+- [x] Histórico/comparação existentes continuam usando o mesmo registro do item
+- [x] Manifest registra PurchaseModeActivity
+- [x] Apenas `android-release.yml` permanece em `.github/workflows`
+- [x] Workflow não usa `actions/upload-artifact`
+- [x] Workflow não gera `source.zip`
+- [x] APK não é armazenado dentro do ZIP do código-fonte
+- [x] Validadores `validate_version.py`, `validate_source.py` e `validate_workflow.py` executados com sucesso
+- [x] Todos os XMLs de `app/src/main` analisados sem erro de sintaxe
+- [ ] Build Gradle local não executado: o ZIP não contém Gradle Wrapper e o ambiente atual não possui executável `gradle`

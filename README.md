@@ -4,7 +4,7 @@ Aplicativo Android nativo, leve e offline para organizar compras em listas separ
 
 ## Versão
 
-`1.0.16+17`
+`1.0.17+18`
 
 ## Identidade técnica
 
@@ -25,6 +25,7 @@ Aplicativo Android nativo, leve e offline para organizar compras em listas separ
 - migração automática dos itens das versões antigas para `Minha lista`;
 - itens com quantidade, unidade, categoria, preço e observação;
 - marcação de comprado e totais estimado/no carrinho;
+- modo de compra rápida por lista, mostrando apenas pendentes, checkbox grande, preço total direto no item, carrinho/orçamento em tempo real e ação para desfazer;
 - busca por lista, supermercado, produto ou categoria;
 - filtros Todos/Pendentes/Comprados adaptados à largura da tela;
 - preço com formatação automática em real;
@@ -117,3 +118,8 @@ A busca agora é aberta pela lupa no cabeçalho, ao lado das Configurações. O 
 - Confirmações destrutivas usam vermelho para destacar exclusão/limpeza.
 - A busca de mercados é adaptativa: começa em 5 km, amplia para 15 km e pode chegar a 30 km se houver poucas opções.
 - A consulta inclui supermercados e mercados de conveniência cadastrados no OpenStreetMap.
+
+## Modo compra — 1.0.17+18
+
+Cada lista possui agora um **Modo compra** dedicado ao uso dentro do supermercado. A tela trabalha sobre os mesmos itens persistidos da lista normal, mostra apenas produtos pendentes, oferece checkbox grande, quantidade em destaque e entrada rápida do preço total da quantidade comprada. Ao marcar um item, ele sai da lista ativa, o carrinho e o orçamento são recalculados imediatamente e uma ação permite desfazer. Nenhum conjunto paralelo de itens ou histórico é criado.
+

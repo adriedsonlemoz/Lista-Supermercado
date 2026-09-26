@@ -244,6 +244,19 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonPurchaseMode"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="10dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:text="Modo compra"
+            android:textStyle="bold"
+            app:icon="@drawable/ic_store"
+            app:iconGravity="textStart" />
+
         <com.google.android.material.button.MaterialButtonToggleGroup
             android:id="@+id/groupFilters"
             android:layout_width="match_parent"

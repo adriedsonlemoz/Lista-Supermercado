@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.17+18 — 2026-09-26
+
+- Adicionado botão **Modo compra** dentro de cada lista.
+- Criada tela dedicada ao uso no supermercado, exibindo somente itens pendentes.
+- Cards do modo de compra usam checkbox ampliado, nome do produto e quantidade/unidade em destaque.
+- Adicionado campo de preço rápido diretamente no item; o valor digitado representa o total da quantidade e é convertido para o preço unitário interno já usado pelo app.
+- Ao marcar como comprado, o item é ocultado da lista ativa e itens restantes, carrinho e orçamento são atualizados imediatamente.
+- Adicionada ação **Desfazer** após a marcação de um item.
+- O modo de compra reutiliza os mesmos registros da lista original, sem duplicar itens ou criar armazenamento paralelo.
+- Histórico e comparação de preços permanecem compatíveis com o modelo existente.
+- Tela de novidades atualizada para esta versão.
+
 ## 1.0.16+17 — 2026-09-26
 
 - Três pontos dos cards de listas e produtos agora usam `colorOnSurface`, ficando claros e legíveis no modo escuro.

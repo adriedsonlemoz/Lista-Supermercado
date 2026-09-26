@@ -12,6 +12,7 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -49,6 +50,11 @@ class ListDetailActivity : AppCompatActivity() {
     private lateinit var budgetProgress: LinearProgressIndicator
     private var filter = Filter.ALL
     private val currency = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
+    private val purchaseModeLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        reloadCurrentList()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -110,6 +116,7 @@ class ListDetailActivity : AppCompatActivity() {
         findViewById<MaterialButton>(R.id.buttonAll).setOnClickListener { setFilter(Filter.ALL) }
         findViewById<MaterialButton>(R.id.buttonPending).setOnClickListener { setFilter(Filter.PENDING) }
         findViewById<MaterialButton>(R.id.buttonPurchased).setOnClickListener { setFilter(Filter.PURCHASED) }
+        findViewById<MaterialButton>(R.id.buttonPurchaseMode).setOnClickListener { openPurchaseMode() }
         clearPurchased.setOnClickListener { clearPurchased() }
         budgetButton.setOnClickListener { editBudget() }
 
@@ -163,6 +170,29 @@ class ListDetailActivity : AppCompatActivity() {
     private fun hideKeyboard() {
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(search.windowToken, 0)
+    }
+
+
+    private fun openPurchaseMode() {
+        purchaseModeLauncher.launch(
+            Intent(this, PurchaseModeActivity::class.java)
+                .putExtra(PurchaseModeActivity.EXTRA_LIST_ID, current.id)
+        )
+    }
+
+    private fun reloadCurrentList() {
+        if (!::current.isInitialized) return
+        val currentId = current.id
+        val refreshed = repository.loadLists()
+        val updated = refreshed.firstOrNull { it.id == currentId }
+        if (updated == null) {
+            finish()
+            return
+        }
+        lists.clear()
+        lists += refreshed
+        current = updated
+        render()
     }
 
     private fun editBudget() {

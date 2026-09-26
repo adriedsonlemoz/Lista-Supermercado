@@ -1,26 +1,26 @@
 package com.listamercado.app.ui
 
 object WhatsNewContent {
-    const val CONTENT_VERSION_CODE = 17
+    const val CONTENT_VERSION_CODE = 18
     const val TITLE = "O que mudou nesta atualização"
-    const val SUBTITLE = "Lista mais compacta, ações mais claras e mercados encontrados mais longe."
+    const val SUBTITLE = "Novo Modo compra para usar a lista com rapidez dentro do supermercado."
 
     val changes = listOf(
         Change(
-            "Detalhes da lista remodelados",
-            "A busca agora fica na lupa do cabeçalho. O resumo mostra Estimado, Carrinho e quanto falta do orçamento com mais destaque."
+            "Modo compra",
+            "Cada lista ganhou uma tela própria com foco somente nos itens pendentes, controles maiores e uso simplificado com uma mão."
         ),
         Change(
-            "Ações mais visíveis",
-            "Os três pontos agora acompanham a cor do tema. Renomear, Duplicar e Excluir ficam lado a lado em uma caixa mais compacta, com exclusão destacada em vermelho."
+            "Preço rápido no item",
+            "Digite diretamente o valor total da quantidade exibida. O app converte internamente para o preço unitário já usado nas comparações e no histórico."
         ),
         Change(
-            "Confirmações mais claras",
-            "Ações destrutivas como excluir lista, excluir item e limpar comprados usam confirmação padronizada com o botão perigoso em vermelho."
+            "Carrinho e orçamento ao vivo",
+            "Ao marcar um produto como comprado, ele sai da lista ativa e os itens restantes, o carrinho e o saldo ou excesso do orçamento são atualizados na hora."
         ),
         Change(
-            "Mercados em até 30 km",
-            "A busca começa perto e amplia automaticamente para 15 km e 30 km quando encontra poucas opções. Mercados de conveniência também entram na consulta."
+            "Desfazer sem perder dados",
+            "Uma ação Desfazer permite reverter a última marcação. O modo usa os mesmos itens da lista original, sem criar cópias ou um segundo histórico."
         )
     )
 

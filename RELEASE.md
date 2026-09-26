@@ -1,12 +1,13 @@
-# Release 1.0.16+17
+# Release 1.0.17+18
 
-Refinamento visual da lista e melhoria da localização de mercados.
+Modo de compra rápida integrado às listas existentes.
 
-- Três pontos legíveis no modo escuro.
-- Ações Renomear/Duplicar/Excluir lado a lado.
-- Confirmações destrutivas com destaque vermelho.
-- Busca da lista movida para a lupa do topo.
-- Resumo remodelado: Estimado, Carrinho e Falta/Excedeu.
-- Busca de mercados adaptativa em 5 km, 15 km e até 30 km.
-- Consulta OpenStreetMap ampliada para supermercados e mercados de conveniência.
-- Tela de novidades sincronizada com a versão.
+- Novo botão **Modo compra** em cada lista.
+- Tela focada apenas nos itens pendentes e otimizada para operação rápida.
+- Checkbox grande, produto e quantidade em destaque.
+- Preço total digitado diretamente no item, com conversão para o preço unitário interno.
+- Itens comprados somem da lista ativa e podem ser restaurados pela ação **Desfazer**.
+- Itens restantes, valor no carrinho e falta/excesso do orçamento atualizam imediatamente.
+- Mesmos dados da lista normal, sem duplicação e preservando comparação/histórico existentes.
+- Workflow principal permanece único, gera APK Release assinado e publica o `.apk` diretamente na GitHub Release.
+- APK permanece fora do ZIP do código-fonte e não há geração de `source.zip`.

@@ -19,6 +19,8 @@ object InsetsHelper {
 
         ViewCompat.setOnApplyWindowInsetsListener(root) { _, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
+            val bottomInset = maxOf(systemBars.bottom, ime.bottom)
             root.updatePadding(
                 left = rootPadding.left + systemBars.left,
                 top = rootPadding.top + systemBars.top,
@@ -32,7 +34,7 @@ object InsetsHelper {
                     left = scrollPadding?.left ?: view.paddingLeft,
                     top = scrollPadding?.top ?: view.paddingTop,
                     right = scrollPadding?.right ?: view.paddingRight,
-                    bottom = (scrollPadding?.bottom ?: view.paddingBottom) + systemBars.bottom + extraFabSpace
+                    bottom = (scrollPadding?.bottom ?: view.paddingBottom) + bottomInset + extraFabSpace
                 )
             }
 

@@ -11,6 +11,10 @@ required = [
     "app/src/main/AndroidManifest.xml",
     "app/src/main/java/com/listamercado/app/model/ShoppingList.kt",
     "app/src/main/java/com/listamercado/app/ui/ListDetailActivity.kt",
+    "app/src/main/java/com/listamercado/app/ui/PurchaseModeActivity.kt",
+    "app/src/main/java/com/listamercado/app/ui/PurchaseModeAdapter.kt",
+    "app/src/main/res/layout/activity_purchase_mode.xml",
+    "app/src/main/res/layout/item_purchase_mode.xml",
     "app/src/main/java/com/listamercado/app/ui/SettingsActivity.kt",
     "app/src/main/java/com/listamercado/app/ui/CompareActivity.kt",
     "app/src/main/java/com/listamercado/app/ui/NearbyMarketsActivity.kt",
@@ -145,6 +149,17 @@ if "KEY_CICLOVIAGEM_PRICES_V1" not in repo_source or '"arroz branco" to ("kg" to
 price_helper = (root / "app/src/main/java/com/listamercado/app/util/PriceUnitHelper.kt").read_text(encoding="utf-8")
 if '"g", "mL" -> internalPrice * 1000.0' not in price_helper:
     raise SystemExit("Readable kg/L price normalization is missing")
+
+
+purchase_mode_source = (root / "app/src/main/java/com/listamercado/app/ui/PurchaseModeActivity.kt").read_text(encoding="utf-8")
+purchase_adapter_source = (root / "app/src/main/java/com/listamercado/app/ui/PurchaseModeAdapter.kt").read_text(encoding="utf-8")
+detail_source = (root / "app/src/main/java/com/listamercado/app/ui/ListDetailActivity.kt").read_text(encoding="utf-8")
+if "PurchaseModeActivity" not in manifest or "buttonPurchaseMode" not in detail_source:
+    raise SystemExit("Purchase mode entry point is missing")
+if "filter { !it.purchased }" not in purchase_mode_source or 'setAction("Desfazer")' not in purchase_mode_source:
+    raise SystemExit("Purchase mode must focus pending items and support undo")
+if "totalPrice / item.quantity" not in purchase_mode_source or "inputQuickPrice" not in purchase_adapter_source:
+    raise SystemExit("Quick total-price editing is missing or does not preserve internal unit-price semantics")
 
 # Keep source packages clean: APKs are release outputs and must not be committed/zipped.
 apks = [p.relative_to(root).as_posix() for p in root.rglob("*.apk")]
