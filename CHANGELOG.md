@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.22+26 — 2026-09-26
+
+- Adicionado **preço-alvo opcional por produto** no catálogo.
+- O preço-alvo pode ser definido, editado ou removido pelo catálogo e pela tela Adicionar/Editar item.
+- Cards das listas mostram **abaixo do alvo**, **dentro do alvo** ou **acima do alvo** com texto e símbolo, sem depender somente de cor.
+- O **Modo compra** atualiza o status do alvo imediatamente conforme o preço é digitado.
+- Histórico de preços agora compara preço atual, alvo, último preço anterior e média histórica, além de menor e maior preço.
+- Backup atualizado para **schema 4**, preservando preço-alvo e unidade normalizada do alvo e mantendo compatibilidade com schemas anteriores.
+- Exportação CSV inclui preço-alvo e unidade do alvo.
+- Tela de novidades atualizada para versionCode 26.
+
 ## 1.0.21.1+25 — 2026-09-26
 
 - Leitor de código passou a exigir três confirmações consecutivas antes de retornar ao editor.

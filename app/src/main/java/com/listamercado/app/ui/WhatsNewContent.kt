@@ -1,30 +1,30 @@
 package com.listamercado.app.ui
 
 object WhatsNewContent {
-    const val CONTENT_VERSION_CODE = 25
+    const val CONTENT_VERSION_CODE = 26
     const val TITLE = "O que mudou nesta atualização"
-    const val SUBTITLE = "Leitura de código de barras mais estável, segura e clara."
+    const val SUBTITLE = "Preço-alvo por produto para saber rapidamente se vale a pena comprar."
 
     val changes = listOf(
         Change(
-            "Leitura mais confiável",
-            "O scanner agora confirma o mesmo código em três leituras consecutivas antes de voltar ao produto, reduzindo reconhecimentos acidentais."
+            "Preço-alvo por produto",
+            "Cada produto do catálogo pode ter um preço-alvo opcional, editável tanto no catálogo quanto ao adicionar ou editar um item."
         ),
         Change(
-            "Validação de códigos",
-            "EAN e UPC passam por validação do dígito verificador antes de serem aceitos quando o formato permite essa conferência."
+            "Status direto na lista",
+            "Produtos com alvo mostram se o preço atual está abaixo, dentro ou acima do valor definido usando texto e símbolo, sem depender apenas de cor."
         ),
         Change(
-            "Resultado não se perde",
-            "O código lido continua sendo aplicado mesmo se a tela da lista for recriada enquanto a câmera está aberta; quando não há produto automático, o número aparece claramente no editor."
+            "Modo compra mais útil",
+            "Ao informar o preço no supermercado, o status do preço-alvo é atualizado imediatamente no próprio card do produto."
         ),
         Change(
-            "Feedback da câmera protegido",
-            "A vibração de confirmação agora é tratada como feedback opcional e não interfere na leitura caso o aparelho não consiga executá-la."
+            "Histórico comparativo",
+            "O histórico passa a destacar preço atual, preço-alvo, último preço anterior, média, menor e maior valor registrados."
         ),
         Change(
-            "Busca de produto ampliada",
-            "Para códigos novos, a consulta opcional também considera nomes genéricos, marca e quantidade quando o nome principal não estiver disponível."
+            "Backup atualizado",
+            "O backup usa schema 4 e preserva preço-alvo e unidade do alvo, mantendo compatibilidade com backups anteriores."
         )
     )
 

@@ -272,9 +272,10 @@ class ListDetailActivity : AppCompatActivity() {
         catalogRepository = catalogRepository,
         initialBarcode = initialBarcode,
         onRequestBarcode = { consumer -> requestBarcode(BARCODE_TARGET_ADD, -1L, consumer) }
-    ) { newItem, barcode ->
+    ) { newItem, barcode, priceTarget, targetUnit ->
         current.items += newItem
         catalogRepository.recordItem(newItem, barcode)
+        catalogRepository.setPriceTargetByName(newItem.name, priceTarget, targetUnit)
         persistAndRender()
     }
 
@@ -284,10 +285,11 @@ class ListDetailActivity : AppCompatActivity() {
         existing = item,
         initialBarcode = initialBarcode,
         onRequestBarcode = { consumer -> requestBarcode(BARCODE_TARGET_EDIT, item.id, consumer) }
-    ) { edited, barcode ->
+    ) { edited, barcode, priceTarget, targetUnit ->
         val index = current.items.indexOfFirst { it.id == item.id }
         if (index >= 0) current.items[index] = edited
         catalogRepository.recordItem(edited, barcode)
+        catalogRepository.setPriceTargetByName(edited.name, priceTarget, targetUnit)
         persistAndRender()
     }
 
@@ -389,7 +391,7 @@ class ListDetailActivity : AppCompatActivity() {
             .sortedWith(compareBy<ShoppingItem> { it.purchased }.thenBy { it.category }.thenBy { it.name.lowercase() })
             .toList()
 
-        adapter.submitList(visible)
+        adapter.submitList(visible, catalogRepository.loadProducts())
         empty.visibility = if (visible.isEmpty()) View.VISIBLE else View.GONE
 
         val pending = current.items.count { !it.purchased }

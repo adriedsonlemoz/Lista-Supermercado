@@ -4,6 +4,7 @@ import android.content.Context
 import com.listamercado.app.model.CatalogProduct
 import com.listamercado.app.model.ShoppingItem
 import com.listamercado.app.model.ShoppingList
+import com.listamercado.app.util.PriceUnitHelper
 import org.json.JSONArray
 import org.json.JSONObject
 import java.text.Normalizer
@@ -101,6 +102,27 @@ class ProductCatalogRepository(context: Context) {
         saveProducts(products)
     }
 
+    fun setPriceTarget(productId: Long, displayPrice: Double?, unit: String) {
+        val products = loadProducts()
+        val product = products.firstOrNull { it.id == productId } ?: return
+        applyPriceTarget(product, displayPrice, unit)
+        saveProducts(products)
+    }
+
+    fun setPriceTargetByName(name: String, displayPrice: Double?, unit: String) {
+        val products = loadProducts()
+        val product = findByName(products, name) ?: return
+        applyPriceTarget(product, displayPrice, unit)
+        saveProducts(products)
+    }
+
+    private fun applyPriceTarget(product: CatalogProduct, displayPrice: Double?, unit: String) {
+        val target = displayPrice?.takeIf { it.isFinite() && it > 0.0 }
+        product.priceTarget = target
+        product.priceTargetUnit = target?.let { PriceUnitHelper.priceUnit(unit) }
+        product.updatedAt = System.currentTimeMillis()
+    }
+
     fun recurringProducts(): List<CatalogProduct> = loadProducts()
         .filter { !it.recurringFrequency.isNullOrBlank() }
         .sortedWith(compareByDescending<CatalogProduct> { it.favorite }.thenBy { it.name.lowercase(Locale("pt", "BR")) })
@@ -136,6 +158,8 @@ class ProductCatalogRepository(context: Context) {
                 existing.category = incoming.category
                 existing.unit = incoming.unit
                 existing.lastUnitPrice = incoming.lastUnitPrice.coerceAtLeast(0.0)
+                existing.priceTarget = incoming.priceTarget?.takeIf { it.isFinite() && it > 0.0 }
+                existing.priceTargetUnit = existing.priceTarget?.let { incoming.priceTargetUnit?.takeIf { unit -> unit.isNotBlank() } }
                 existing.barcode = sanitizeBarcode(incoming.barcode) ?: existing.barcode
                 existing.favorite = incoming.favorite
                 existing.recurringFrequency = incoming.recurringFrequency
@@ -249,6 +273,8 @@ class ProductCatalogRepository(context: Context) {
         put("category", category)
         put("unit", unit)
         put("lastUnitPrice", lastUnitPrice)
+        put("priceTarget", priceTarget ?: JSONObject.NULL)
+        put("priceTargetUnit", priceTargetUnit ?: JSONObject.NULL)
         put("barcode", barcode ?: JSONObject.NULL)
         put("favorite", favorite)
         put("recurringFrequency", recurringFrequency ?: JSONObject.NULL)
@@ -267,6 +293,8 @@ class ProductCatalogRepository(context: Context) {
             category = optString("category", "Outros"),
             unit = optString("unit", "un"),
             lastUnitPrice = optDouble("lastUnitPrice", 0.0).coerceAtLeast(0.0),
+            priceTarget = if (isNull("priceTarget")) null else optDouble("priceTarget").takeIf { it.isFinite() && it > 0.0 },
+            priceTargetUnit = if (isNull("priceTargetUnit")) null else optString("priceTargetUnit").takeIf { it.isNotBlank() },
             barcode = sanitizeBarcode(rawBarcode),
             favorite = optBoolean("favorite", false),
             recurringFrequency = if (isNull("recurringFrequency")) null else optString("recurringFrequency").takeIf { it.isNotBlank() },

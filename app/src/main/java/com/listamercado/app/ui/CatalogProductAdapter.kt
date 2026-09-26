@@ -15,7 +15,8 @@ import java.util.Locale
 
 class CatalogProductAdapter(
     private val onFavorite: (CatalogProduct) -> Unit,
-    private val onRecurring: (CatalogProduct) -> Unit
+    private val onRecurring: (CatalogProduct) -> Unit,
+    private val onPriceTarget: (CatalogProduct) -> Unit
 ) : RecyclerView.Adapter<CatalogProductAdapter.Holder>() {
     private val items = mutableListOf<CatalogProduct>()
     private val currency = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
@@ -39,8 +40,10 @@ class CatalogProductAdapter(
         private val meta: TextView = view.findViewById(R.id.textCatalogProductMeta)
         private val price: TextView = view.findViewById(R.id.textCatalogProductPrice)
         private val barcode: TextView = view.findViewById(R.id.textCatalogProductBarcode)
+        private val target: TextView = view.findViewById(R.id.textCatalogProductTarget)
         private val favorite: MaterialButton = view.findViewById(R.id.buttonCatalogFavorite)
         private val recurring: MaterialButton = view.findViewById(R.id.buttonCatalogRecurring)
+        private val priceTarget: MaterialButton = view.findViewById(R.id.buttonCatalogPriceTarget)
 
         fun bind(product: CatalogProduct) {
             name.text = product.name
@@ -52,10 +55,15 @@ class CatalogProductAdapter(
                 "Último preço: não informado"
             }
             barcode.text = product.barcode?.let { "Código: $it" } ?: "Sem código de barras"
+            target.text = product.priceTarget?.let { value ->
+                "Preço-alvo: ${currency.format(value)} / ${product.priceTargetUnit ?: PriceUnitHelper.priceUnit(product.unit)}"
+            } ?: "Preço-alvo: não definido"
             favorite.text = if (product.favorite) "★ Favorito" else "☆ Favorito"
             recurring.text = Recurrence.label(product.recurringFrequency)?.let { "Recorrente: $it" } ?: "Definir recorrência"
             favorite.setOnClickListener { onFavorite(product) }
             recurring.setOnClickListener { onRecurring(product) }
+            priceTarget.text = if (product.priceTarget != null) "Editar/remover preço-alvo" else "Definir preço-alvo"
+            priceTarget.setOnClickListener { onPriceTarget(product) }
         }
     }
 

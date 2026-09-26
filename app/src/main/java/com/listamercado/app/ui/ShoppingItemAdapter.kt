@@ -10,7 +10,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.listamercado.app.R
+import com.listamercado.app.model.CatalogProduct
 import com.listamercado.app.model.ShoppingItem
+import com.listamercado.app.util.PriceTargetHelper
 import com.listamercado.app.util.PriceUnitHelper
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -24,12 +26,14 @@ class ShoppingItemAdapter(
     private val onDelete: (ShoppingItem) -> Unit
 ) : RecyclerView.Adapter<ShoppingItemAdapter.Holder>() {
     private val items = mutableListOf<ShoppingItem>()
+    private var catalogByName: Map<String, CatalogProduct> = emptyMap()
     private val currency = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
     private val quantityFormat = DecimalFormat("0.##", DecimalFormatSymbols(Locale("pt", "BR")))
 
-    fun submitList(newItems: List<ShoppingItem>) {
+    fun submitList(newItems: List<ShoppingItem>, catalogProducts: List<CatalogProduct> = emptyList()) {
         items.clear()
         items.addAll(newItems)
+        catalogByName = catalogProducts.associateBy { it.normalizedName }
         notifyDataSetChanged()
     }
 
@@ -46,6 +50,7 @@ class ShoppingItemAdapter(
         private val name: TextView = view.findViewById(R.id.textName)
         private val meta: TextView = view.findViewById(R.id.textMeta)
         private val note: TextView = view.findViewById(R.id.textNote)
+        private val priceTargetStatus: TextView = view.findViewById(R.id.textPriceTargetStatus)
         private val unitPrice: TextView = view.findViewById(R.id.textUnitPrice)
         private val totalPrice: TextView = view.findViewById(R.id.textPrice)
         private val more: ImageButton = view.findViewById(R.id.buttonItemMore)
@@ -63,6 +68,11 @@ class ShoppingItemAdapter(
                 totalPrice.text = "Sem preço"
                 unitPrice.text = "Toque para informar"
             }
+
+            val product = catalogByName[com.listamercado.app.data.ProductCatalogRepository.normalizeName(item.name)]
+            val targetText = PriceTargetHelper.statusText(item, product, currency)
+            priceTargetStatus.text = targetText.orEmpty()
+            priceTargetStatus.visibility = if (targetText.isNullOrBlank()) View.GONE else View.VISIBLE
 
             note.text = item.note
             note.visibility = if (item.note.isBlank()) View.GONE else View.VISIBLE

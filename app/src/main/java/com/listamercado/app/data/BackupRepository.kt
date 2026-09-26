@@ -68,13 +68,14 @@ class BackupRepository(
         val lines = mutableListOf<String>()
         lines += listOf(
             "tipo", "lista", "produto", "quantidade", "unidade", "preco_unitario",
-            "categoria", "comprado", "orcamento_lista", "codigo_barras", "favorito", "recorrencia", "atualizado_em"
+            "categoria", "comprado", "orcamento_lista", "codigo_barras", "favorito", "recorrencia",
+            "preco_alvo", "unidade_preco_alvo", "atualizado_em"
         ).joinToString(",", transform = ::csv)
 
         lists.forEach { list ->
             if (list.items.isEmpty()) {
                 lines += listOf(
-                    "LISTA", list.name, "", "", "", "", "", "", number(list.budget), "", "", "", instant(list.updatedAt)
+                    "LISTA", list.name, "", "", "", "", "", "", number(list.budget), "", "", "", "", "", instant(list.updatedAt)
                 ).joinToString(",", transform = ::csv)
             } else {
                 list.items.forEach { item ->
@@ -91,6 +92,8 @@ class BackupRepository(
                         catalogByName[ProductCatalogRepository.normalizeName(item.name)]?.barcode.orEmpty(),
                         "",
                         "",
+                        catalogByName[ProductCatalogRepository.normalizeName(item.name)]?.priceTarget?.let(::number).orEmpty(),
+                        catalogByName[ProductCatalogRepository.normalizeName(item.name)]?.priceTargetUnit.orEmpty(),
                         instant(list.updatedAt)
                     ).joinToString(",", transform = ::csv)
                 }
@@ -111,6 +114,8 @@ class BackupRepository(
                 product.barcode.orEmpty(),
                 product.favorite.toString(),
                 product.recurringFrequency.orEmpty(),
+                product.priceTarget?.let(::number).orEmpty(),
+                product.priceTargetUnit.orEmpty(),
                 instant(product.updatedAt)
             ).joinToString(",", transform = ::csv)
         }
@@ -179,7 +184,7 @@ class BackupRepository(
 
     fun replaceWith(snapshot: BackupSnapshot) {
         shoppingRepository.saveLists(snapshot.lists)
-        val products = if (snapshot.schemaVersion >= 2) snapshot.products else preserveNewCatalogFields(snapshot.products)
+        val products = prepareImportedProducts(snapshot.products, snapshot.schemaVersion)
         catalogRepository.replaceProducts(products)
         if (snapshot.schemaVersion >= 2) {
             templateRepository.replaceUserTemplates(snapshot.templates)
@@ -197,7 +202,7 @@ class BackupRepository(
             preserveMarketAssociation = snapshot.schemaVersion < 3
         )
         shoppingRepository.saveLists(mergedLists)
-        val products = if (snapshot.schemaVersion >= 2) snapshot.products else preserveNewCatalogFields(snapshot.products)
+        val products = prepareImportedProducts(snapshot.products, snapshot.schemaVersion)
         catalogRepository.mergeProducts(products)
         if (snapshot.schemaVersion >= 2) {
             templateRepository.mergeUserTemplates(snapshot.templates)
@@ -208,16 +213,26 @@ class BackupRepository(
         catalogRepository.seedFromLists(mergedLists)
     }
 
-    private fun preserveNewCatalogFields(imported: MutableList<CatalogProduct>): MutableList<CatalogProduct> {
+    private fun prepareImportedProducts(
+        imported: MutableList<CatalogProduct>,
+        schemaVersion: Int
+    ): MutableList<CatalogProduct> {
+        if (schemaVersion >= SCHEMA_VERSION) return imported.map { it.copy() }.toMutableList()
         val current = catalogRepository.loadProducts().associateBy { ProductCatalogRepository.normalizeName(it.name) }
         return imported.map { incoming ->
             val existing = current[ProductCatalogRepository.normalizeName(incoming.name)]
-            if (existing == null) incoming.copy() else incoming.copy(
-                favorite = existing.favorite,
-                recurringFrequency = existing.recurringFrequency,
-                lastQuantity = existing.lastQuantity,
-                lastRecurringAddedAt = existing.lastRecurringAddedAt
-            )
+            if (existing == null) {
+                incoming.copy()
+            } else {
+                incoming.copy(
+                    favorite = if (schemaVersion < 2) existing.favorite else incoming.favorite,
+                    recurringFrequency = if (schemaVersion < 2) existing.recurringFrequency else incoming.recurringFrequency,
+                    lastQuantity = if (schemaVersion < 2) existing.lastQuantity else incoming.lastQuantity,
+                    lastRecurringAddedAt = if (schemaVersion < 2) existing.lastRecurringAddedAt else incoming.lastRecurringAddedAt,
+                    priceTarget = if (schemaVersion < 4) existing.priceTarget else incoming.priceTarget,
+                    priceTargetUnit = if (schemaVersion < 4) existing.priceTargetUnit else incoming.priceTargetUnit
+                )
+            }
         }.toMutableList()
     }
 
@@ -303,9 +318,11 @@ class BackupRepository(
         val id = json.optLong("id", 0L)
         val name = json.optString("name", "").trim()
         val lastPrice = json.optDouble("lastUnitPrice", 0.0)
+        val priceTarget = if (json.isNull("priceTarget")) null else json.optDouble("priceTarget", Double.NaN)
         if (id <= 0L) throw IllegalArgumentException("Produto ${index + 1}: identificador inválido.")
         if (name.isBlank()) throw IllegalArgumentException("Produto ${index + 1}: nome vazio.")
         if (!lastPrice.isFinite() || lastPrice < 0.0) throw IllegalArgumentException("Produto '$name': último preço inválido.")
+        if (priceTarget != null && (!priceTarget.isFinite() || priceTarget <= 0.0)) throw IllegalArgumentException("Produto '$name': preço-alvo inválido.")
         return CatalogProduct(
             id = id,
             name = name,
@@ -313,6 +330,8 @@ class BackupRepository(
             category = json.optString("category", "Outros").ifBlank { "Outros" },
             unit = json.optString("unit", "un").ifBlank { "un" },
             lastUnitPrice = lastPrice,
+            priceTarget = priceTarget,
+            priceTargetUnit = if (json.isNull("priceTargetUnit")) null else json.optString("priceTargetUnit").takeIf { it.isNotBlank() },
             barcode = ProductCatalogRepository.sanitizeBarcode(
                 if (json.isNull("barcode")) null else json.optString("barcode")
             ),
@@ -353,6 +372,8 @@ class BackupRepository(
         put("category", category)
         put("unit", unit)
         put("lastUnitPrice", lastUnitPrice)
+        put("priceTarget", priceTarget ?: JSONObject.NULL)
+        put("priceTargetUnit", priceTargetUnit ?: JSONObject.NULL)
         put("barcode", barcode ?: JSONObject.NULL)
         put("favorite", favorite)
         put("recurringFrequency", recurringFrequency ?: JSONObject.NULL)
@@ -414,7 +435,7 @@ class BackupRepository(
     private fun instant(epochMillis: Long): String = runCatching { Instant.ofEpochMilli(epochMillis).toString() }.getOrDefault("")
 
     companion object {
-        const val SCHEMA_VERSION = 3
+        const val SCHEMA_VERSION = 4
         private const val BACKUP_FORMAT = "meu-supermercado-backup"
     }
 }

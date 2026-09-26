@@ -51,7 +51,8 @@ class CatalogActivity : AppCompatActivity() {
                 catalogRepository.setFavorite(product.id, !product.favorite)
                 render()
             },
-            onRecurring = { product -> chooseRecurrence(product) }
+            onRecurring = { product -> chooseRecurrence(product) },
+            onPriceTarget = { product -> editPriceTarget(product) }
         )
         findViewById<RecyclerView>(R.id.recyclerCatalog).apply {
             layoutManager = LinearLayoutManager(this@CatalogActivity)
@@ -63,6 +64,13 @@ class CatalogActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = render()
             override fun afterTextChanged(s: Editable?) = Unit
         })
+    }
+
+    private fun editPriceTarget(product: CatalogProduct) {
+        PriceTargetDialog.show(this, product) { value ->
+            catalogRepository.setPriceTarget(product.id, value, product.unit)
+            render()
+        }
     }
 
     private fun chooseRecurrence(product: CatalogProduct) {

@@ -121,7 +121,7 @@ class PurchaseModeActivity : AppCompatActivity() {
             .filter { !it.purchased }
             .sortedWith(compareBy<ShoppingItem> { it.category }.thenBy { it.name.lowercase() })
             .toList()
-        adapter.submitList(pending)
+        adapter.submitList(pending, catalogRepository.loadProducts())
         empty.visibility = if (pending.isEmpty()) View.VISIBLE else View.GONE
         renderSummary()
     }

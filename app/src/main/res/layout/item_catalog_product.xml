@@ -37,6 +37,14 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/textCatalogProductTarget"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+            android:textColor="?attr/colorOnSurfaceVariant" />
+
+        <TextView
             android:id="@+id/textCatalogProductBarcode"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -69,5 +77,13 @@
                 android:text="Definir recorrência"
                 android:textSize="12sp" />
         </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonCatalogPriceTarget"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:text="Definir preço-alvo" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

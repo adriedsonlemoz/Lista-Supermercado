@@ -4,7 +4,7 @@ Aplicativo Android nativo, leve e offline para organizar compras em listas separ
 
 ## Versão
 
-`1.0.21.1+25`
+`1.0.22+26`
 
 ## Identidade técnica
 
@@ -28,6 +28,7 @@ Aplicativo Android nativo, leve e offline para organizar compras em listas separ
 - modo de compra rápida por lista, mostrando apenas pendentes, checkbox grande, preço total direto no item, carrinho/orçamento em tempo real e ação para desfazer;
 - catálogo local/offline com sugestões ao adicionar itens, último preço, unidade/categoria padrão e código de barras opcional;
 - produtos favoritos e recorrentes com frequência semanal, quinzenal ou mensal;
+- preço-alvo opcional por produto, com status abaixo/dentro/acima do alvo na lista e no Modo compra;
 - modelos de lista iniciais e modelos personalizados criados a partir de qualquer lista;
 - leitor de código de barras pela câmera, com catálogo local offline e consulta opcional na internet apenas quando o código ainda não for conhecido;
 - busca por lista, supermercado, produto ou categoria;
@@ -191,4 +192,13 @@ O editor ganhou leitura de código de barras pela câmera. A leitura usa o model
 - A vibração de sucesso é não crítica e possui a permissão Android necessária.
 - O editor mostra sempre o código reconhecido, mesmo quando o produto ainda não existe no catálogo ou na consulta opcional online.
 - Retornos inválidos do scanner deixam de ser silenciosos e exibem orientação para tentar novamente.
+
+
+## Preço-alvo por produto — 1.0.22+26
+
+- Cada produto do catálogo pode guardar um preço-alvo opcional e a unidade à qual esse alvo se refere.
+- O alvo pode ser definido/removido no catálogo ou durante a edição de um item.
+- A lista normal e o Modo compra mostram o resultado com símbolo e texto: abaixo, dentro ou acima do alvo.
+- O histórico compara o preço atual com o alvo, o registro anterior e a média histórica.
+- O backup usa schema 4 e o CSV inclui os campos do preço-alvo.
 

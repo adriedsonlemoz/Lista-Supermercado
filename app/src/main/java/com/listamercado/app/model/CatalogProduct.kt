@@ -7,6 +7,8 @@ data class CatalogProduct(
     var category: String,
     var unit: String,
     var lastUnitPrice: Double = 0.0,
+    var priceTarget: Double? = null,
+    var priceTargetUnit: String? = null,
     var barcode: String? = null,
     var favorite: Boolean = false,
     var recurringFrequency: String? = null,

@@ -11,10 +11,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.listamercado.app.R
+import com.listamercado.app.data.ProductCatalogRepository
 import com.listamercado.app.data.ShoppingRepository
 import com.listamercado.app.model.ComparisonRow
 import com.listamercado.app.model.ShoppingItem
 import com.listamercado.app.model.ShoppingList
+import com.listamercado.app.util.PriceTargetHelper
 import com.listamercado.app.util.PriceUnitHelper
 import com.listamercado.app.util.InsetsHelper
 import com.listamercado.app.util.ThemeController
@@ -26,6 +28,7 @@ import kotlin.math.abs
 
 class CompareActivity : AppCompatActivity() {
     private val lists = mutableListOf<ShoppingList>()
+    private lateinit var catalogRepository: ProductCatalogRepository
     private lateinit var adapter: ComparisonAdapter
     private lateinit var listSection: View
     private lateinit var productSection: View
@@ -44,6 +47,8 @@ class CompareActivity : AppCompatActivity() {
         setContentView(R.layout.activity_compare)
         InsetsHelper.applyScaffold(this, findViewById(R.id.rootCompare), findViewById(R.id.recyclerComparison))
         lists += ShoppingRepository(this).loadLists().sortedByDescending { it.createdAt }
+        catalogRepository = ProductCatalogRepository(this)
+        catalogRepository.seedFromLists(lists)
         bindViews()
         populateSelectors()
         renderMode()
@@ -159,11 +164,17 @@ class CompareActivity : AppCompatActivity() {
             list to item
         }
 
+        val catalogProduct = catalogRepository.findByName(selected)
         val rows = occurrences.map { (list, item) ->
+            val targetStatus = PriceTargetHelper.statusText(item, catalogProduct, currency)
             ComparisonRow(
                 title = list.name,
                 subtitle = "${date.format(Date(list.createdAt))} • ${if (item.unitPrice > 0) PriceUnitHelper.formattedUnitPrice(item, currency) else "sem preço"}",
-                detail = "${formatQuantity(item.quantity)} ${item.unit} • subtotal ${currency.format(item.subtotal)}"
+                detail = buildString {
+                    append("${formatQuantity(item.quantity)} ${item.unit} • subtotal ${currency.format(item.subtotal)}")
+                    if (!targetStatus.isNullOrBlank()) append("
+$targetStatus")
+                }
             )
         }
 
@@ -191,6 +202,20 @@ class CompareActivity : AppCompatActivity() {
         val minimum = values.minOrNull() ?: 0.0
         val maximum = values.maxOrNull() ?: 0.0
         val average = values.average()
+        val currentPrice = PriceUnitHelper.normalizedPrice(latest.second)
+        val previousPrice = compatible.getOrNull(1)?.let { PriceUnitHelper.normalizedPrice(it.second) }
+        val catalogProduct = catalogRepository.findByName(productName)
+        val target = catalogProduct?.let { product ->
+            product.priceTarget?.takeIf { it > 0.0 && product.priceTargetUnit == unit }
+        }
+        val targetComparison = target?.let { goal ->
+            val difference = currentPrice - goal
+            when {
+                abs(difference) < 0.005 -> "✓ Atual dentro do alvo"
+                difference < 0.0 -> "↓ Atual ${currency.format(abs(difference))} abaixo do alvo"
+                else -> "↑ Atual ${currency.format(difference)} acima do alvo"
+            }
+        }
         val trend = compatible.getOrNull(1)?.let { previous ->
             val difference = PriceUnitHelper.normalizedPrice(latest.second) - PriceUnitHelper.normalizedPrice(previous.second)
             when {
@@ -208,8 +233,11 @@ class CompareActivity : AppCompatActivity() {
             append(occurrenceCount)
             append(if (occurrenceCount == 1) " registro" else " registros")
             append(unitNote)
-            append("\nÚltimo: ${currency.format(PriceUnitHelper.normalizedPrice(latest.second))} • menor: ${currency.format(minimum)}")
-            append("\nMédia: ${currency.format(average)} • maior: ${currency.format(maximum)}")
+            append("\nAtual: ${currency.format(currentPrice)}")
+            append(target?.let { " • Alvo: ${currency.format(it)}" } ?: " • Alvo: não definido")
+            append("\nÚltimo anterior: ${previousPrice?.let(currency::format) ?: "—"} • Média: ${currency.format(average)}")
+            append("\nMenor: ${currency.format(minimum)} • Maior: ${currency.format(maximum)}")
+            targetComparison?.let { append("\n$it") }
             append("\n$trend")
         }
     }

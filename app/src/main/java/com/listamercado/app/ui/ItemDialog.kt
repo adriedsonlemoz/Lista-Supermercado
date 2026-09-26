@@ -39,7 +39,7 @@ object ItemDialog {
         existing: ShoppingItem? = null,
         initialBarcode: String? = null,
         onRequestBarcode: (((String) -> Unit) -> Unit)? = null,
-        onSave: (ShoppingItem, String?) -> Unit
+        onSave: (ShoppingItem, String?, Double?, String) -> Unit
     ) {
         val view = LayoutInflater.from(context).inflate(R.layout.dialog_item, null)
         val lookupRepository = BarcodeLookupRepository(context)
@@ -53,9 +53,11 @@ object ItemDialog {
         val nameLayout = view.findViewById<TextInputLayout>(R.id.layoutName)
         val quantityLayout = view.findViewById<TextInputLayout>(R.id.layoutQuantity)
         val priceLayout = view.findViewById<TextInputLayout>(R.id.layoutPrice)
+        val targetLayout = view.findViewById<TextInputLayout>(R.id.layoutPriceTarget)
         val name = view.findViewById<MaterialAutoCompleteTextView>(R.id.inputName)
         val quantity = view.findViewById<TextInputEditText>(R.id.inputQuantity)
         val price = view.findViewById<TextInputEditText>(R.id.inputPrice)
+        val targetPrice = view.findViewById<TextInputEditText>(R.id.inputPriceTarget)
         val note = view.findViewById<TextInputEditText>(R.id.inputNote)
         val category = view.findViewById<MaterialAutoCompleteTextView>(R.id.spinnerCategory)
         val unit = view.findViewById<MaterialAutoCompleteTextView>(R.id.spinnerUnit)
@@ -64,7 +66,9 @@ object ItemDialog {
         val buttonSave = view.findViewById<MaterialButton>(R.id.buttonSave)
         val buttonClose = view.findViewById<android.widget.ImageButton>(R.id.buttonCloseSheet)
         val priceWatcher = CurrencyTextWatcher(price)
+        val targetWatcher = CurrencyTextWatcher(targetPrice)
         price.addTextChangedListener(priceWatcher)
+        targetPrice.addTextChangedListener(targetWatcher)
 
         val knownProducts = catalogRepository.suggestions()
         val productByDisplayedName = knownProducts.associateBy { it.name }
@@ -131,6 +135,8 @@ object ItemDialog {
             if (product.lastUnitPrice > 0.0) {
                 priceWatcher.setAmount(PriceUnitHelper.editorAmount(product.lastUnitPrice, product.unit))
             }
+            targetWatcher.setAmount(product.priceTarget ?: 0.0)
+            targetLayout.hint = "Preço-alvo por ${product.priceTargetUnit ?: PriceUnitHelper.priceUnit(product.unit)}"
             selectedBarcode = scannedUnknownBarcode ?: product.barcode
             renderBarcodeStatus(isNew = scannedUnknownBarcode != null, fromCatalog = scannedUnknownBarcode == null)
             nameHelper.text = "Produto conhecido. Toque numa sugestão para preencher automaticamente."
@@ -189,10 +195,15 @@ object ItemDialog {
             category.setText(it.category, false)
             unit.setText(it.unit, false)
             priceLayout.hint = PriceUnitHelper.inputHint(it.unit)
+            catalogRepository.findByName(it.name)?.let { product ->
+                targetWatcher.setAmount(product.priceTarget ?: 0.0)
+                targetLayout.hint = "Preço-alvo por ${product.priceTargetUnit ?: PriceUnitHelper.priceUnit(it.unit)}"
+            }
         } ?: run {
             quantity.setText("1")
             quantity.setSelection(quantity.text?.length ?: 0)
             priceLayout.hint = PriceUnitHelper.inputHint(units.first())
+            targetLayout.hint = "Preço-alvo por ${PriceUnitHelper.priceUnit(units.first())}"
         }
         renderBarcodeStatus()
 
@@ -220,7 +231,9 @@ object ItemDialog {
         }
 
         unit.setOnItemClickListener { _, _, _, _ ->
-            priceLayout.hint = PriceUnitHelper.inputHint(unit.text?.toString().orEmpty())
+            val unitValue = unit.text?.toString().orEmpty()
+            priceLayout.hint = PriceUnitHelper.inputHint(unitValue)
+            targetLayout.hint = "Preço-alvo por ${PriceUnitHelper.priceUnit(unitValue)}"
         }
 
         fun handleBarcode(rawBarcode: String) {
@@ -264,6 +277,7 @@ object ItemDialog {
             nameLayout.error = null
             quantityLayout.error = null
             priceLayout.error = null
+            targetLayout.error = null
 
             val itemName = name.text?.toString()?.trim().orEmpty()
             if (itemName.isBlank()) {
@@ -293,7 +307,12 @@ object ItemDialog {
                 this.unit = unitValue
                 this.note = note.text?.toString()?.trim().orEmpty()
             }
-            onSave(item, selectedBarcode)
+            onSave(
+                item,
+                selectedBarcode,
+                targetWatcher.amount().takeIf { it > 0.0 },
+                unitValue
+            )
             dialog.dismiss()
         }
         dialog.show()

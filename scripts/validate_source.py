@@ -11,6 +11,7 @@ required = [
     "app/src/main/AndroidManifest.xml",
     "app/src/main/java/com/listamercado/app/model/ShoppingList.kt",
     "app/src/main/java/com/listamercado/app/model/CatalogProduct.kt",
+    "app/src/main/java/com/listamercado/app/util/PriceTargetHelper.kt",
     "app/src/main/java/com/listamercado/app/model/BarcodeLookupResult.kt",
     "app/src/main/java/com/listamercado/app/model/ListTemplate.kt",
     "app/src/main/java/com/listamercado/app/model/Recurrence.kt",
@@ -24,6 +25,7 @@ required = [
     "app/src/main/java/com/listamercado/app/ui/PurchaseModeAdapter.kt",
     "app/src/main/java/com/listamercado/app/ui/CatalogActivity.kt",
     "app/src/main/java/com/listamercado/app/ui/CatalogProductAdapter.kt",
+    "app/src/main/java/com/listamercado/app/ui/PriceTargetDialog.kt",
     "app/src/main/java/com/listamercado/app/ui/BarcodeScannerActivity.kt",
     "app/src/main/java/com/listamercado/app/ui/TemplatesActivity.kt",
     "app/src/main/java/com/listamercado/app/ui/TemplateAdapter.kt",
@@ -34,6 +36,7 @@ required = [
     "app/src/main/res/layout/item_purchase_mode.xml",
     "app/src/main/res/layout/activity_catalog.xml",
     "app/src/main/res/layout/item_catalog_product.xml",
+    "app/src/main/res/layout/dialog_price_target.xml",
     "app/src/main/res/layout/activity_barcode_scanner.xml",
     "app/src/main/res/layout/activity_templates.xml",
     "app/src/main/res/layout/item_list_template.xml",
@@ -268,6 +271,21 @@ if "var favorite: Boolean" not in catalog_model or "var recurringFrequency: Stri
     raise SystemExit("Catalog favorite/recurrence fields are missing")
 if "setFavorite" not in catalog_source or "setRecurringFrequency" not in catalog_source or "recurringProducts" not in catalog_source:
     raise SystemExit("Catalog favorite/recurrence persistence is missing")
+if "var priceTarget: Double?" not in catalog_model or "var priceTargetUnit: String?" not in catalog_model:
+    raise SystemExit("Catalog price-target fields are missing")
+price_target_source = (root / "app/src/main/java/com/listamercado/app/util/PriceTargetHelper.kt").read_text(encoding="utf-8")
+shopping_adapter_source = (root / "app/src/main/java/com/listamercado/app/ui/ShoppingItemAdapter.kt").read_text(encoding="utf-8")
+compare_source = (root / "app/src/main/java/com/listamercado/app/ui/CompareActivity.kt").read_text(encoding="utf-8")
+if "setPriceTarget" not in catalog_source or "setPriceTargetByName" not in catalog_source:
+    raise SystemExit("Price-target persistence/editing is missing")
+if "BELOW" not in price_target_source or "WITHIN" not in price_target_source or "ABOVE" not in price_target_source:
+    raise SystemExit("Price-target below/within/above evaluation is missing")
+if "textPriceTargetStatus" not in shopping_adapter_source or "PriceTargetHelper.statusText" not in shopping_adapter_source:
+    raise SystemExit("List price-target status is missing")
+if "textPurchaseTargetStatus" not in purchase_adapter_source or "PriceTargetHelper.statusText" not in purchase_adapter_source:
+    raise SystemExit("Purchase mode price-target status is missing")
+if "Último anterior" not in compare_source or "Alvo:" not in compare_source or "Média:" not in compare_source:
+    raise SystemExit("Price history target/last/average comparison is missing")
 recurrence_source = (root / "app/src/main/java/com/listamercado/app/model/Recurrence.kt").read_text(encoding="utf-8")
 if 'const val WEEKLY = "weekly"' not in recurrence_source or 'const val BIWEEKLY = "biweekly"' not in recurrence_source or 'const val MONTHLY = "monthly"' not in recurrence_source:
     raise SystemExit("Weekly/biweekly/monthly recurrence options are missing")
@@ -292,12 +310,14 @@ if "Sua localização foi obtida normalmente" not in map_source or "temporariame
     raise SystemExit("Market empty/error messaging must distinguish location from Overpass availability")
 
 backup_source = (root / "app/src/main/java/com/listamercado/app/data/BackupRepository.kt").read_text(encoding="utf-8")
-if 'const val SCHEMA_VERSION = 3' not in backup_source or '"meu-supermercado-backup"' not in backup_source:
+if 'const val SCHEMA_VERSION = 4' not in backup_source or '"meu-supermercado-backup"' not in backup_source:
     raise SystemExit("Versioned JSON backup format is missing")
 if 'put("templates",' not in backup_source or 'put("favorite", favorite)' not in backup_source or 'put("recurringFrequency", recurringFrequency' not in backup_source:
     raise SystemExit("Backup must preserve templates, product favorites and recurrence")
 if 'put("marketPreferences",' not in backup_source or 'put("marketKey", marketKey' not in backup_source:
     raise SystemExit("Schema 3 backup must preserve market favorites/radius and list associations")
+if 'put("priceTarget", priceTarget' not in backup_source or 'put("priceTargetUnit", priceTargetUnit' not in backup_source:
+    raise SystemExit("Schema 4 backup must preserve product price targets")
 if "parseAndValidate" not in backup_source or "mergeWith" not in backup_source or "replaceWith" not in backup_source:
     raise SystemExit("Backup validation/import modes are missing")
 if 'put("priceHistory", history)' not in backup_source or "createCsvExport" not in backup_source:
@@ -315,6 +335,8 @@ if "Widget.Material3.TextInputLayout.FilledBox" not in item_layout:
     raise SystemExit("Item editor must use the reduced-outline filled field style")
 if 'placeholderText="Ex.: Arroz, café, sabão em pó"' not in item_layout or "textLookupStatus" not in item_layout:
     raise SystemExit("Item editor refinements for product-name entry and lookup feedback are missing")
+if "layoutPriceTarget" not in item_layout or "inputPriceTarget" not in item_layout:
+    raise SystemExit("Item editor price-target field is missing")
 
 # Keep source packages clean: APKs are release outputs and must not be committed/zipped.
 apks = [p.relative_to(root).as_posix() for p in root.rglob("*.apk")]

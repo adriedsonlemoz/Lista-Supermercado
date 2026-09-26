@@ -1,19 +1,19 @@
-# Release — Meu Supermercado 1.0.21.1+25
+# Release — Meu Supermercado 1.0.22+26
 
 ## Destaques
 
-- Scanner de código de barras mais estável, com confirmação em três frames.
-- Validação de checksum para EAN/UPC quando aplicável.
-- Feedback háptico protegido para não interromper a leitura.
-- Código reconhecido fica visível no editor mesmo quando não há nome automático.
-- Mensagens explícitas quando o scanner volta sem resultado válido.
-- Recuperação do resultado quando a tela da lista é recriada durante o uso da câmera.
-- Consulta opcional de produto com mais campos de fallback.
+- Preço-alvo opcional por produto.
+- Status abaixo/dentro/acima do alvo na lista normal e no Modo compra.
+- Edição e remoção do alvo pelo catálogo ou pelo editor do item.
+- Histórico compara preço atual, alvo, último registro anterior e média histórica.
+- Backup atualizado para schema 4 com preço-alvo e unidade do alvo.
 
-## Compatibilidade
+## Comportamento
 
-A base técnica permanece em compileSdk 35, targetSdk 35, minSdk 26, Android Gradle Plugin 8.7.3, Kotlin 2.0.21, Java/JVM 17, CameraX 1.5.3 e ML Kit embarcado.
+O preço-alvo pertence ao produto do catálogo, não a uma lista específica. Assim, o mesmo produto usa o mesmo objetivo de preço em listas diferentes sem duplicar dados. O preço atual de cada lista e o histórico continuam independentes.
+
+Quando o preço atual é igual ao alvo na precisão de centavos, o status é **Dentro do alvo**; abaixo ou acima disso, o aplicativo informa explicitamente a direção.
 
 ## Build
 
-O workflow principal continua sendo `.github/workflows/android-release.yml`, gerando APK Release assinado e publicando o `.apk` diretamente na GitHub Release. O APK permanece fora do ZIP do código-fonte.
+O workflow principal continua sendo `.github/workflows/android-release.yml`, com APK Release assinado publicado diretamente na GitHub Release, sem `actions/upload-artifact` e sem `source.zip`.
