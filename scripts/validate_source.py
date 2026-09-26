@@ -107,6 +107,8 @@ for permission in (
 
 if "android.permission.CAMERA" not in manifest:
     raise SystemExit("Missing CAMERA permission for local barcode scanning")
+if "android.permission.VIBRATE" not in manifest:
+    raise SystemExit("Missing VIBRATE permission for safe barcode-scan feedback")
 
 map_source = (root / "app/src/main/java/com/listamercado/app/ui/NearbyMarketsActivity.kt").read_text(encoding="utf-8")
 market_repo_source = (root / "app/src/main/java/com/listamercado/app/data/MarketPreferencesRepository.kt").read_text(encoding="utf-8")
@@ -223,6 +225,18 @@ if "BarcodeScanning.getClient" not in scanner_source or "InputImage.fromMediaIma
     raise SystemExit("On-device barcode scanner implementation is missing")
 if "buttonTorch" not in scanner_source or "chooseBestBarcode" not in scanner_source or "lastCandidateHits" not in scanner_source:
     raise SystemExit("Scanner quality-of-life improvements (torch/selection/stability) are missing")
+if "vibrateSuccessSafely" not in scanner_source or "REQUIRED_STABLE_FRAMES = 3" not in scanner_source:
+    raise SystemExit("Scanner must use non-fatal haptics and three-frame confirmation")
+if "hasValidGtinChecksum" not in scanner_source or "clearAnalyzer" not in scanner_source:
+    raise SystemExit("Scanner GTIN validation / analyzer shutdown protection is missing")
+if "EXTRA_ERROR" not in scanner_source or "A câmera voltou sem um código confirmado" not in detail_source:
+    raise SystemExit("Scanner return-path error feedback is missing")
+if "recoverBarcodeResult" not in detail_source or "STATE_BARCODE_TARGET" not in detail_source or "onSaveInstanceState" not in detail_source:
+    raise SystemExit("Barcode result must survive ListDetailActivity recreation")
+if "initialBarcode" not in item_dialog_source or "handleBarcode" not in item_dialog_source:
+    raise SystemExit("Item editor cannot restore/apply a recovered barcode result")
+if "Código $code • novo produto" not in item_dialog_source:
+    raise SystemExit("Item editor must visibly show the scanned code even when product lookup has no match")
 if 'implementation("com.google.mlkit:barcode-scanning:17.3.0")' not in app_gradle:
     raise SystemExit("Bundled ML Kit barcode-scanning dependency is missing")
 if "play-services-mlkit-barcode-scanning" in app_gradle:

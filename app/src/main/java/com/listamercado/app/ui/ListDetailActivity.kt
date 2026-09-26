@@ -11,6 +11,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -53,6 +54,8 @@ class ListDetailActivity : AppCompatActivity() {
     private var filter = Filter.ALL
     private val currency = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
     private var pendingBarcodeConsumer: ((String) -> Unit)? = null
+    private var pendingBarcodeTarget: String = BARCODE_TARGET_NONE
+    private var pendingBarcodeItemId: Long = -1L
     private val purchaseModeLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
@@ -66,16 +69,39 @@ class ListDetailActivity : AppCompatActivity() {
     private val barcodeScannerLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        val barcode = result.data?.getStringExtra(BarcodeScannerActivity.EXTRA_BARCODE)
+        val barcode = result.data?.getStringExtra(BarcodeScannerActivity.EXTRA_BARCODE)?.trim()
+        val scannerError = result.data?.getStringExtra(BarcodeScannerActivity.EXTRA_ERROR)?.trim()
         val consumer = pendingBarcodeConsumer
-        pendingBarcodeConsumer = null
-        if (result.resultCode == RESULT_OK && !barcode.isNullOrBlank()) {
-            consumer?.invoke(barcode)
+        val target = pendingBarcodeTarget
+        val itemId = pendingBarcodeItemId
+        clearPendingBarcodeRequest()
+
+        when {
+            result.resultCode == RESULT_OK && !barcode.isNullOrBlank() && consumer != null -> {
+                runCatching { consumer.invoke(barcode) }
+                    .onFailure { recoverBarcodeResult(barcode, target, itemId) }
+            }
+            result.resultCode == RESULT_OK && !barcode.isNullOrBlank() -> {
+                recoverBarcodeResult(barcode, target, itemId)
+            }
+            result.resultCode == RESULT_OK -> {
+                Toast.makeText(
+                    this,
+                    "A câmera voltou sem um código confirmado. Tente novamente mantendo o código dentro da moldura.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            !scannerError.isNullOrBlank() -> {
+                Toast.makeText(this, scannerError, Toast.LENGTH_LONG).show()
+            }
         }
     }
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        pendingBarcodeTarget = savedInstanceState?.getString(STATE_BARCODE_TARGET) ?: BARCODE_TARGET_NONE
+        pendingBarcodeItemId = savedInstanceState?.getLong(STATE_BARCODE_ITEM_ID, -1L) ?: -1L
         ThemeController.applySavedMode(this)
         setContentView(R.layout.activity_list_detail)
 
@@ -241,21 +267,23 @@ class ListDetailActivity : AppCompatActivity() {
         }
     }
 
-    private fun addItem() = ItemDialog.show(
+    private fun addItem(initialBarcode: String? = null) = ItemDialog.show(
         context = this,
         catalogRepository = catalogRepository,
-        onRequestBarcode = { consumer -> requestBarcode(consumer) }
+        initialBarcode = initialBarcode,
+        onRequestBarcode = { consumer -> requestBarcode(BARCODE_TARGET_ADD, -1L, consumer) }
     ) { newItem, barcode ->
         current.items += newItem
         catalogRepository.recordItem(newItem, barcode)
         persistAndRender()
     }
 
-    private fun editItem(item: ShoppingItem) = ItemDialog.show(
+    private fun editItem(item: ShoppingItem, initialBarcode: String? = null) = ItemDialog.show(
         context = this,
         catalogRepository = catalogRepository,
         existing = item,
-        onRequestBarcode = { consumer -> requestBarcode(consumer) }
+        initialBarcode = initialBarcode,
+        onRequestBarcode = { consumer -> requestBarcode(BARCODE_TARGET_EDIT, item.id, consumer) }
     ) { edited, barcode ->
         val index = current.items.indexOfFirst { it.id == item.id }
         if (index >= 0) current.items[index] = edited
@@ -263,9 +291,51 @@ class ListDetailActivity : AppCompatActivity() {
         persistAndRender()
     }
 
-    private fun requestBarcode(consumer: (String) -> Unit) {
+    private fun requestBarcode(target: String, itemId: Long, consumer: (String) -> Unit) {
+        pendingBarcodeTarget = target
+        pendingBarcodeItemId = itemId
         pendingBarcodeConsumer = consumer
-        barcodeScannerLauncher.launch(Intent(this, BarcodeScannerActivity::class.java))
+        runCatching {
+            barcodeScannerLauncher.launch(Intent(this, BarcodeScannerActivity::class.java))
+        }.onFailure {
+            clearPendingBarcodeRequest()
+            Toast.makeText(this, "Não foi possível abrir o leitor de código de barras.", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun recoverBarcodeResult(barcode: String, target: String, itemId: Long) {
+        when (target) {
+            BARCODE_TARGET_ADD -> addItem(initialBarcode = barcode)
+            BARCODE_TARGET_EDIT -> {
+                val item = current.items.firstOrNull { it.id == itemId }
+                if (item != null) {
+                    editItem(item, initialBarcode = barcode)
+                } else {
+                    Toast.makeText(
+                        this,
+                        "Código $barcode lido, mas o item em edição não está mais disponível.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+            else -> Toast.makeText(
+                this,
+                "Código $barcode lido. Toque em Adicionar item e leia novamente para associá-lo.",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    private fun clearPendingBarcodeRequest() {
+        pendingBarcodeConsumer = null
+        pendingBarcodeTarget = BARCODE_TARGET_NONE
+        pendingBarcodeItemId = -1L
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putString(STATE_BARCODE_TARGET, pendingBarcodeTarget)
+        outState.putLong(STATE_BARCODE_ITEM_ID, pendingBarcodeItemId)
+        super.onSaveInstanceState(outState)
     }
 
     private fun confirmDelete(item: ShoppingItem) {
@@ -362,6 +432,11 @@ class ListDetailActivity : AppCompatActivity() {
     private enum class Filter { ALL, PENDING, PURCHASED }
 
     companion object {
+        private const val STATE_BARCODE_TARGET = "barcode_target"
+        private const val STATE_BARCODE_ITEM_ID = "barcode_item_id"
+        private const val BARCODE_TARGET_NONE = "none"
+        private const val BARCODE_TARGET_ADD = "add"
+        private const val BARCODE_TARGET_EDIT = "edit"
         const val EXTRA_LIST_ID = "list_id"
     }
 }

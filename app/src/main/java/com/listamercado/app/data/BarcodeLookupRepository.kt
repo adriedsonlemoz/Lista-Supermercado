@@ -38,6 +38,8 @@ class BarcodeLookupRepository(context: Context) {
         val fields = listOf(
             "product_name",
             "product_name_pt",
+            "generic_name",
+            "generic_name_pt",
             "brands",
             "quantity",
             "categories",
@@ -50,7 +52,9 @@ class BarcodeLookupRepository(context: Context) {
             connectTimeout = 4000
             readTimeout = 5000
             setRequestProperty("Accept", "application/json")
+            setRequestProperty("Accept-Language", "pt-BR,pt;q=0.9,en;q=0.7")
             setRequestProperty("User-Agent", "MeuSupermercado/1.0 (Android)")
+            instanceFollowRedirects = true
         }
         return try {
             val status = connection.responseCode
@@ -59,12 +63,16 @@ class BarcodeLookupRepository(context: Context) {
             val root = JSONObject(body)
             if (root.optInt("status", 0) != 1) return null
             val product = root.optJSONObject("product") ?: return null
-            val rawName = product.optString("product_name_pt").ifBlank {
-                product.optString("product_name")
-            }.trim()
-            if (rawName.isBlank()) return null
             val brand = product.optString("brands").trim().takeIf { it.isNotBlank() }
             val quantity = product.optString("quantity").trim().takeIf { it.isNotBlank() }
+            val rawName = sequenceOf(
+                product.optString("product_name_pt"),
+                product.optString("product_name"),
+                product.optString("generic_name_pt"),
+                product.optString("generic_name")
+            ).map { it.trim() }.firstOrNull { it.isNotBlank() }
+                ?: listOfNotNull(brand, quantity).joinToString(" ").trim().takeIf { it.isNotBlank() }
+                ?: return null
             val mappedCategory = mapCategory(
                 product.optJSONArray("categories_tags")?.let { array ->
                     List(array.length()) { index -> array.optString(index) }

@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.21.1+25 — 2026-09-26
+
+- Leitor de código passou a exigir três confirmações consecutivas antes de retornar ao editor.
+- Códigos EAN-13, EAN-8 e UPC-A recebem validação de checksum antes de serem aceitos.
+- Adicionada permissão `VIBRATE` e proteção para que falha no feedback háptico nunca encerre o aplicativo.
+- O analisador da câmera é encerrado antes do retorno do resultado, reduzindo corridas durante o fechamento da Activity.
+- Retornos sem código confirmado agora exibem mensagem clara em vez de falhar silenciosamente.
+- O alvo da leitura (novo item ou item em edição) é salvo durante recriações da Activity; se o callback em memória for perdido, o editor é reaberto com o código já aplicado.
+- O editor sempre mostra o número do código reconhecido, inclusive quando não encontra o nome do produto.
+- A consulta opcional de produtos foi ampliada para considerar nomes genéricos e fallback por marca/quantidade.
+- Tela de novidades atualizada exclusivamente com as mudanças desta versão.
+
 ## 1.0.21+24 — 2026-09-26
 
 - Adicionada seleção manual do raio de mercados em **5 km, 10 km, 20 km, 30 km e 50 km**.

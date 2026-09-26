@@ -1,30 +1,30 @@
 package com.listamercado.app.ui
 
 object WhatsNewContent {
-    const val CONTENT_VERSION_CODE = 24
+    const val CONTENT_VERSION_CODE = 25
     const val TITLE = "O que mudou nesta atualização"
-    const val SUBTITLE = "Mercados próximos ficaram mais fáceis de filtrar, favoritar e reutilizar."
+    const val SUBTITLE = "Leitura de código de barras mais estável, segura e clara."
 
     val changes = listOf(
         Change(
-            "Raio de busca manual",
-            "Agora é possível escolher 5, 10, 20, 30 ou 50 km. Se houver poucas opções, o app continua ampliando o raio automaticamente como fallback."
+            "Leitura mais confiável",
+            "O scanner agora confirma o mesmo código em três leituras consecutivas antes de voltar ao produto, reduzindo reconhecimentos acidentais."
         ),
         Change(
-            "Mercados favoritos",
-            "Supermercados podem ser favoritados e passam a aparecer primeiro nos resultados, com destaque também nos marcadores do mapa."
+            "Validação de códigos",
+            "EAN e UPC passam por validação do dígito verificador antes de serem aceitos quando o formato permite essa conferência."
         ),
         Change(
-            "Resultados mais completos",
-            "A tela mostra nome, distância, endereço quando disponível e a origem do dado, além do mapa e de uma lista de resultados."
+            "Resultado não se perde",
+            "O código lido continua sendo aplicado mesmo se a tela da lista for recriada enquanto a câmera está aberta; quando não há produto automático, o número aparece claramente no editor."
         ),
         Change(
-            "Lista vinculada ao mercado",
-            "Ao criar uma lista a partir de um mercado, a associação é salva. Nas próximas buscas aparece Abrir lista deste mercado em vez de criar outra."
+            "Feedback da câmera protegido",
+            "A vibração de confirmação agora é tratada como feedback opcional e não interfere na leitura caso o aparelho não consiga executá-la."
         ),
         Change(
-            "Cache e mensagens melhores",
-            "Resultados recentes podem ser usados quando a internet ou o Overpass estiverem indisponíveis, sem tratar ausência de mercados como erro de localização."
+            "Busca de produto ampliada",
+            "Para códigos novos, a consulta opcional também considera nomes genéricos, marca e quantidade quando o nome principal não estiver disponível."
         )
     )
 

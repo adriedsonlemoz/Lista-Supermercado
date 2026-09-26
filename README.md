@@ -4,7 +4,7 @@ Aplicativo Android nativo, leve e offline para organizar compras em listas separ
 
 ## Versão
 
-`1.0.21+24`
+`1.0.21.1+25`
 
 ## Identidade técnica
 
@@ -182,3 +182,13 @@ O editor ganhou leitura de código de barras pela câmera. A leitura usa o model
 - Arquivos são escolhidos pelo Storage Access Framework do Android; não existe pasta fixa obrigatória.
 - O tema escuro recebeu superfícies mais claramente grafite/azuladas, sem preto puro, mantendo violeta/lilás como destaque.
 - A tela **Adicionar item** foi reorganizada em blocos de Produto, Compra e Detalhes, com campos preenchidos, menos bordas e ação de leitura de código integrada.
+
+
+## Estabilidade do leitor de código — 1.0.21.1+25
+
+- O reconhecimento só retorna após três leituras consecutivas do mesmo código.
+- EAN/UPC são validados quando possuem dígito verificador compatível.
+- A vibração de sucesso é não crítica e possui a permissão Android necessária.
+- O editor mostra sempre o código reconhecido, mesmo quando o produto ainda não existe no catálogo ou na consulta opcional online.
+- Retornos inválidos do scanner deixam de ser silenciosos e exibem orientação para tentar novamente.
+

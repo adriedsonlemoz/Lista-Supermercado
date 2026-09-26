@@ -1,25 +1,25 @@
-# Validação — 1.0.21+24
+# Validação — 1.0.21.1+25
 
-- [x] versionName `1.0.21`
-- [x] versionCode `24`
-- [x] VERSION `1.0.21+24`
+- [x] versionName `1.0.21.1`
+- [x] versionCode `25`
+- [x] VERSION `1.0.21.1+25`
 - [x] app_identity.json e github-manager.json sincronizados
-- [x] WhatsNewContent sincronizado com versionCode 24 e somente mudanças desta versão
-- [x] Raio manual 5/10/20/30/50 km
-- [x] Expansão automática preservada como fallback até 50 km
-- [x] Mercados favoritos persistidos e ordenados primeiro
-- [x] Lista de resultados mostra nome, distância, endereço quando disponível e origem
-- [x] Popup do mapa oferece favoritar e criar/abrir lista
-- [x] Associação mercado/lista persistida no ShoppingList
-- [x] Cache simples de resultados recentes implementado
-- [x] Mensagens distinguem falha do Overpass, falta de internet, localização e ausência de resultados
-- [x] Backup atualizado para schema 3 com favoritos de mercados, raio preferido e associação lista/mercado
-- [x] Compatibilidade de importação com schemas 1 e 2 preservada
+- [x] WhatsNewContent sincronizado com versionCode 25 e somente mudanças desta versão
+- [x] Permissão Android `VIBRATE` declarada
+- [x] Feedback háptico encapsulado para nunca derrubar o scanner
+- [x] Scanner exige três confirmações consecutivas do mesmo código
+- [x] EAN-13, EAN-8 e UPC-A validam checksum
+- [x] Analisador CameraX é encerrado antes do retorno confirmado
+- [x] Retorno sem código válido deixa de ser silencioso
+- [x] Alvo da leitura é persistido em `onSaveInstanceState` e recuperado se a Activity for recriada
+- [x] Editor mostra explicitamente o número do código lido mesmo sem produto encontrado
+- [x] Consulta opcional online ampliada com nomes genéricos e fallback por marca/quantidade
+- [x] Mercados favoritos, cache, raio manual e associações da versão anterior preservados
+- [x] Backup schema 3 preservado
 - [x] compileSdk 35, targetSdk 35, minSdk 26, AGP 8.7.3, Kotlin 2.0.21 e Java/JVM 17 preservados
 - [x] CameraX 1.5.3 e ML Kit embarcado preservados
 - [x] Workflow principal permanece Build and Release Android APK
 - [x] Workflow não usa actions/upload-artifact e não gera source.zip
 - [x] scripts/validate_version.py, scripts/validate_source.py e scripts/validate_workflow.py executados com sucesso
 - [x] 49 XMLs analisados e bem formados
-- [x] Modelos Kotlin puros compilados com kotlinc
 - [ ] Build Gradle completo depende do GitHub Actions, pois este ambiente não possui Android SDK/Gradle configurado.

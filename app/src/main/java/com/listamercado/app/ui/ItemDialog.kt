@@ -37,6 +37,7 @@ object ItemDialog {
         context: Context,
         catalogRepository: ProductCatalogRepository,
         existing: ShoppingItem? = null,
+        initialBarcode: String? = null,
         onRequestBarcode: (((String) -> Unit) -> Unit)? = null,
         onSave: (ShoppingItem, String?) -> Unit
     ) {
@@ -109,11 +110,12 @@ object ItemDialog {
         }
 
         fun renderBarcodeStatus(isNew: Boolean = false, fromCatalog: Boolean = false) {
+            val code = selectedBarcode.orEmpty()
             barcodeStatus.text = when {
-                selectedBarcode.isNullOrBlank() -> "Sem código associado"
-                fromCatalog -> "Código reconhecido no catálogo"
-                isNew -> "Código lido • será associado ao salvar"
-                else -> "Código associado • $selectedBarcode"
+                code.isBlank() -> "Sem código associado"
+                fromCatalog -> "Código $code • catálogo local"
+                isNew -> "Código $code • novo produto"
+                else -> "Código associado • $code"
             }
         }
 
@@ -166,13 +168,13 @@ object ItemDialog {
                 result
                     .onSuccess { lookup ->
                         if (lookup == null) {
-                            setLookupStatus("Código novo. Você pode preencher manualmente e salvar no catálogo local.")
+                            setLookupStatus("Código $barcode lido. Nome não encontrado automaticamente; preencha o produto e salve para reconhecê-lo nas próximas vezes.")
                         } else {
                             applyOnlineLookup(lookup)
                         }
                     }
                     .onFailure {
-                        setLookupStatus("Não foi possível consultar a internet agora. Você ainda pode cadastrar manualmente.")
+                        setLookupStatus("Código $barcode lido. A consulta online falhou, mas você pode preencher e salvar normalmente.")
                     }
             }
         }
@@ -221,27 +223,31 @@ object ItemDialog {
             priceLayout.hint = PriceUnitHelper.inputHint(unit.text?.toString().orEmpty())
         }
 
+        fun handleBarcode(rawBarcode: String) {
+            val barcode = ProductCatalogRepository.sanitizeBarcode(rawBarcode)
+            if (barcode == null) {
+                setLookupStatus("A leitura não retornou um código válido. Tente novamente.", visibleWhenEmpty = true)
+                return
+            }
+            val product = catalogRepository.findByBarcode(barcode)
+            selectedBarcode = barcode
+            if (product != null) {
+                scannedUnknownBarcode = null
+                pendingLookupBarcode = null
+                applyCatalogProduct(product)
+            } else {
+                scannedUnknownBarcode = barcode
+                renderBarcodeStatus(isNew = true)
+                setLookupStatus("Código $barcode reconhecido. Tentando identificar o produto online...", visibleWhenEmpty = true)
+                lookupBarcodeOnline(barcode)
+            }
+        }
+
         buttonScan.isEnabled = onRequestBarcode != null
         buttonScan.alpha = if (buttonScan.isEnabled) 1f else 0.5f
         buttonScan.setOnClickListener {
             val request = onRequestBarcode ?: return@setOnClickListener
-            request { rawBarcode ->
-                val barcode = ProductCatalogRepository.sanitizeBarcode(rawBarcode)
-                if (barcode != null) {
-                    val product = catalogRepository.findByBarcode(barcode)
-                    selectedBarcode = barcode
-                    if (product != null) {
-                        scannedUnknownBarcode = null
-                        pendingLookupBarcode = null
-                        applyCatalogProduct(product)
-                    } else {
-                        scannedUnknownBarcode = barcode
-                        renderBarcodeStatus(isNew = true)
-                        setLookupStatus("Código novo detectado. Tentando identificar o produto online...", visibleWhenEmpty = true)
-                        lookupBarcodeOnline(barcode)
-                    }
-                }
-            }
+            request { rawBarcode -> handleBarcode(rawBarcode) }
         }
 
         val dialog = BottomSheetDialog(context)
@@ -291,6 +297,9 @@ object ItemDialog {
             dialog.dismiss()
         }
         dialog.show()
+        initialBarcode?.let { barcode ->
+            view.post { handleBarcode(barcode) }
+        }
     }
 
     private fun Double.toInput(): String {
