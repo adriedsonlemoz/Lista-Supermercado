@@ -19,7 +19,7 @@
             android:paddingStart="10dp"
             android:paddingTop="8dp"
             android:paddingEnd="10dp"
-            android:paddingBottom="8dp">
+            android:paddingBottom="6dp">
 
             <ImageButton
                 android:id="@+id/buttonBackMarkets"
@@ -50,7 +50,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:text="Obtendo sua localização…"
-                    android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
+                    android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
             </LinearLayout>
 
             <ImageButton
@@ -64,14 +65,80 @@
                 android:tint="?attr/colorOnSurface" />
         </LinearLayout>
 
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:fillViewport="false"
+            android:overScrollMode="never"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp">
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/groupMarketRadius"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:selectionRequired="true"
+                app:singleSelection="true">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipRadius5"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checkable="true"
+                    android:text="5 km" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipRadius10"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checkable="true"
+                    android:text="10 km" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipRadius20"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checkable="true"
+                    android:text="20 km" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipRadius30"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checkable="true"
+                    android:text="30 km" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipRadius50"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checkable="true"
+                    android:text="50 km" />
+            </com.google.android.material.chip.ChipGroup>
+        </HorizontalScrollView>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="16dp"
+            android:text="Se houver poucas opções, a busca amplia o raio automaticamente."
+            android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+            android:textColor="?attr/colorOnSurfaceVariant" />
+
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="220dp"
             android:layout_marginStart="14dp"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="10dp"
             android:layout_marginEnd="14dp"
-            android:layout_marginBottom="14dp"
             app:cardCornerRadius="24dp"
             app:cardElevation="0dp"
             app:strokeColor="?attr/colorOutlineVariant"
@@ -93,5 +160,41 @@
                     android:layout_gravity="center" />
             </FrameLayout>
         </com.google.android.material.card.MaterialCardView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="16dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/textMarketResultsTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Resultados"
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textMarketFavoriteHint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="★ favoritos primeiro"
+                android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
+                android:textColor="?attr/colorPrimary" />
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerMarkets"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:paddingTop="4dp"
+            android:paddingBottom="16dp" />
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

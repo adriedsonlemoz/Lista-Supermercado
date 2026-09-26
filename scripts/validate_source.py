@@ -14,9 +14,11 @@ required = [
     "app/src/main/java/com/listamercado/app/model/BarcodeLookupResult.kt",
     "app/src/main/java/com/listamercado/app/model/ListTemplate.kt",
     "app/src/main/java/com/listamercado/app/model/Recurrence.kt",
+    "app/src/main/java/com/listamercado/app/model/NearbyMarket.kt",
     "app/src/main/java/com/listamercado/app/data/ProductCatalogRepository.kt",
     "app/src/main/java/com/listamercado/app/data/BarcodeLookupRepository.kt",
     "app/src/main/java/com/listamercado/app/data/TemplateRepository.kt",
+    "app/src/main/java/com/listamercado/app/data/MarketPreferencesRepository.kt",
     "app/src/main/java/com/listamercado/app/ui/ListDetailActivity.kt",
     "app/src/main/java/com/listamercado/app/ui/PurchaseModeActivity.kt",
     "app/src/main/java/com/listamercado/app/ui/PurchaseModeAdapter.kt",
@@ -27,6 +29,7 @@ required = [
     "app/src/main/java/com/listamercado/app/ui/TemplateAdapter.kt",
     "app/src/main/java/com/listamercado/app/ui/RecurringProductsActivity.kt",
     "app/src/main/java/com/listamercado/app/ui/RecurringProductAdapter.kt",
+    "app/src/main/java/com/listamercado/app/ui/NearbyMarketAdapter.kt",
     "app/src/main/res/layout/activity_purchase_mode.xml",
     "app/src/main/res/layout/item_purchase_mode.xml",
     "app/src/main/res/layout/activity_catalog.xml",
@@ -36,6 +39,7 @@ required = [
     "app/src/main/res/layout/item_list_template.xml",
     "app/src/main/res/layout/activity_recurring_products.xml",
     "app/src/main/res/layout/item_recurring_product.xml",
+    "app/src/main/res/layout/item_nearby_market.xml",
     "app/src/main/java/com/listamercado/app/ui/SettingsActivity.kt",
     "app/src/main/java/com/listamercado/app/ui/CompareActivity.kt",
     "app/src/main/java/com/listamercado/app/ui/NearbyMarketsActivity.kt",
@@ -105,8 +109,19 @@ if "android.permission.CAMERA" not in manifest:
     raise SystemExit("Missing CAMERA permission for local barcode scanning")
 
 map_source = (root / "app/src/main/java/com/listamercado/app/ui/NearbyMarketsActivity.kt").read_text(encoding="utf-8")
+market_repo_source = (root / "app/src/main/java/com/listamercado/app/data/MarketPreferencesRepository.kt").read_text(encoding="utf-8")
+market_layout = (root / "app/src/main/res/layout/activity_nearby_markets.xml").read_text(encoding="utf-8")
+market_item_layout = (root / "app/src/main/res/layout/item_nearby_market.xml").read_text(encoding="utf-8")
+map_html = (root / "app/src/main/assets/nearby_markets_map.html").read_text(encoding="utf-8")
 if "overpass-api.de" not in map_source or 'shop"="supermarket' not in map_source:
     raise SystemExit("Nearby supermarket map/Overpass query is missing or incomplete")
+for radius in ("5_000", "10_000", "20_000", "30_000", "50_000"):
+    if radius not in map_source:
+        raise SystemExit(f"Manual/adaptive market radius missing: {radius}")
+if "toggleFavorite" not in map_source or "favoriteKeys" not in market_repo_source or "★ favoritos primeiro" not in market_layout:
+    raise SystemExit("Favorite-market persistence/sorting UI is missing")
+if "saveCache" not in market_repo_source or "loadCache" not in market_repo_source or "cache recente" not in map_source:
+    raise SystemExit("Recent-market cache/fallback is missing")
 
 settings_source = (root / "app/src/main/java/com/listamercado/app/data/SettingsRepository.kt").read_text(encoding="utf-8")
 main_source = (root / "app/src/main/java/com/listamercado/app/ui/MainActivity.kt").read_text(encoding="utf-8")
@@ -145,6 +160,8 @@ repo_source = (root / "app/src/main/java/com/listamercado/app/data/ShoppingRepos
 compare_source = (root / "app/src/main/java/com/listamercado/app/ui/CompareActivity.kt").read_text(encoding="utf-8")
 if "var budget: Double" not in list_model or 'put("budget", budget)' not in repo_source:
     raise SystemExit("Per-list budget feature is missing or not persisted")
+if "var marketKey: String?" not in list_model or 'put("marketKey", marketKey' not in repo_source:
+    raise SystemExit("Market-to-list association is missing or not persisted")
 if "buildPriceInsight" not in compare_source or "Média:" not in compare_source or "Histórico de preço" not in kotlin_sources:
     raise SystemExit("Smart product price history is missing")
 
@@ -252,11 +269,21 @@ if "saveFromList" not in template_source or "createListFromTemplate" not in temp
 if "TemplatesActivity" not in manifest or "Usar modelo" not in main_source or "templateRepository.createListFromTemplate" not in templates_activity:
     raise SystemExit("Create-list-from-template flow is missing")
 
+
+if "buttonMarketList" not in market_item_layout or "textMarketSource" not in market_item_layout or "Abrir lista deste mercado" not in map_source:
+    raise SystemExit("Market cards must expose source and create/open-list actions")
+if "AndroidMarket.toggleFavorite" not in map_html or "AndroidMarket.listAction" not in map_html:
+    raise SystemExit("Map popup favorite/list actions are missing")
+if "Sua localização foi obtida normalmente" not in map_source or "temporariamente indisponível" not in map_source:
+    raise SystemExit("Market empty/error messaging must distinguish location from Overpass availability")
+
 backup_source = (root / "app/src/main/java/com/listamercado/app/data/BackupRepository.kt").read_text(encoding="utf-8")
-if 'const val SCHEMA_VERSION = 2' not in backup_source or '"meu-supermercado-backup"' not in backup_source:
+if 'const val SCHEMA_VERSION = 3' not in backup_source or '"meu-supermercado-backup"' not in backup_source:
     raise SystemExit("Versioned JSON backup format is missing")
 if 'put("templates",' not in backup_source or 'put("favorite", favorite)' not in backup_source or 'put("recurringFrequency", recurringFrequency' not in backup_source:
-    raise SystemExit("Schema 2 backup must preserve templates, favorites and recurrence")
+    raise SystemExit("Backup must preserve templates, product favorites and recurrence")
+if 'put("marketPreferences",' not in backup_source or 'put("marketKey", marketKey' not in backup_source:
+    raise SystemExit("Schema 3 backup must preserve market favorites/radius and list associations")
 if "parseAndValidate" not in backup_source or "mergeWith" not in backup_source or "replaceWith" not in backup_source:
     raise SystemExit("Backup validation/import modes are missing")
 if 'put("priceHistory", history)' not in backup_source or "createCsvExport" not in backup_source:

@@ -14,14 +14,16 @@ import java.util.Locale
 class BackupRepository(
     private val shoppingRepository: ShoppingRepository,
     private val catalogRepository: ProductCatalogRepository,
-    private val templateRepository: TemplateRepository
+    private val templateRepository: TemplateRepository,
+    private val marketRepository: MarketPreferencesRepository
 ) {
     data class BackupSummary(
         val listCount: Int,
         val productCount: Int,
         val priceRecordCount: Int,
         val itemCount: Int,
-        val templateCount: Int
+        val templateCount: Int,
+        val favoriteMarketCount: Int
     )
 
     data class BackupSnapshot(
@@ -29,6 +31,8 @@ class BackupRepository(
         val lists: MutableList<ShoppingList>,
         val products: MutableList<CatalogProduct>,
         val templates: MutableList<ListTemplate>,
+        val favoriteMarketKeys: Set<String>,
+        val marketRadiusMeters: Int,
         val summary: BackupSummary
     )
 
@@ -38,6 +42,7 @@ class BackupRepository(
         val products = catalogRepository.loadProducts()
         val history = buildPriceHistory(lists)
         val templates = templateRepository.loadUserTemplates()
+        val favoriteMarketKeys = marketRepository.favoriteKeys()
 
         return JSONObject().apply {
             put("format", BACKUP_FORMAT)
@@ -47,6 +52,10 @@ class BackupRepository(
             put("lists", JSONArray().apply { lists.forEach { put(it.toBackupJson()) } })
             put("catalog", JSONArray().apply { products.forEach { put(it.toBackupJson()) } })
             put("templates", JSONArray().apply { templates.forEach { put(it.toBackupJson()) } })
+            put("marketPreferences", JSONObject().apply {
+                put("radiusMeters", marketRepository.selectedRadiusMeters())
+                put("favoriteKeys", JSONArray().apply { favoriteMarketKeys.sorted().forEach { put(it) } })
+            })
             put("priceHistory", history)
         }.toString(2)
     }
@@ -141,6 +150,14 @@ class BackupRepository(
         val templates = MutableList(templateArray.length()) { index ->
             parseTemplate(templateArray.getJSONObject(index), index)
         }
+        val marketPrefs = root.optJSONObject("marketPreferences")
+        val favoriteMarketKeys = mutableSetOf<String>()
+        marketPrefs?.optJSONArray("favoriteKeys")?.let { array ->
+            for (i in 0 until array.length()) array.optString(i).trim().takeIf { it.isNotBlank() }?.let(favoriteMarketKeys::add)
+        }
+        val marketRadiusMeters = marketPrefs?.optInt("radiusMeters", MarketPreferencesRepository.DEFAULT_RADIUS_METERS)
+            ?.takeIf { it in MarketPreferencesRepository.ALLOWED_RADIUS_METERS }
+            ?: MarketPreferencesRepository.DEFAULT_RADIUS_METERS
 
         val duplicateListIds = lists.groupingBy { it.id }.eachCount().filterValues { it > 1 }
         if (duplicateListIds.isNotEmpty()) throw IllegalArgumentException("O backup contém listas duplicadas pelo identificador.")
@@ -154,9 +171,10 @@ class BackupRepository(
             productCount = products.size,
             priceRecordCount = lists.sumOf { list -> list.items.count { it.unitPrice > 0.0 } },
             itemCount = lists.sumOf { it.items.size },
-            templateCount = templates.size
+            templateCount = templates.size,
+            favoriteMarketCount = favoriteMarketKeys.size
         )
-        return BackupSnapshot(schema, lists, products, templates, summary)
+        return BackupSnapshot(schema, lists, products, templates, favoriteMarketKeys, marketRadiusMeters, summary)
     }
 
     fun replaceWith(snapshot: BackupSnapshot) {
@@ -166,15 +184,26 @@ class BackupRepository(
         if (snapshot.schemaVersion >= 2) {
             templateRepository.replaceUserTemplates(snapshot.templates)
         }
+        if (snapshot.schemaVersion >= 3) {
+            marketRepository.replaceFavorites(snapshot.favoriteMarketKeys)
+            marketRepository.setSelectedRadiusMeters(snapshot.marketRadiusMeters)
+        }
     }
 
     fun mergeWith(snapshot: BackupSnapshot) {
-        val mergedLists = mergeLists(shoppingRepository.loadLists(), snapshot.lists)
+        val mergedLists = mergeLists(
+            shoppingRepository.loadLists(),
+            snapshot.lists,
+            preserveMarketAssociation = snapshot.schemaVersion < 3
+        )
         shoppingRepository.saveLists(mergedLists)
         val products = if (snapshot.schemaVersion >= 2) snapshot.products else preserveNewCatalogFields(snapshot.products)
         catalogRepository.mergeProducts(products)
         if (snapshot.schemaVersion >= 2) {
             templateRepository.mergeUserTemplates(snapshot.templates)
+        }
+        if (snapshot.schemaVersion >= 3) {
+            marketRepository.mergeFavorites(snapshot.favoriteMarketKeys)
         }
         catalogRepository.seedFromLists(mergedLists)
     }
@@ -194,7 +223,8 @@ class BackupRepository(
 
     private fun mergeLists(
         current: MutableList<ShoppingList>,
-        imported: MutableList<ShoppingList>
+        imported: MutableList<ShoppingList>,
+        preserveMarketAssociation: Boolean
     ): MutableList<ShoppingList> {
         val byId = current.associateBy { it.id }.toMutableMap()
         imported.forEach { incoming ->
@@ -214,6 +244,8 @@ class BackupRepository(
                     createdAt = minOf(existing.createdAt, incoming.createdAt),
                     updatedAt = maxOf(existing.updatedAt, incoming.updatedAt),
                     budget = if (incomingIsNewer) incoming.budget else existing.budget,
+                    marketKey = if (preserveMarketAssociation) existing.marketKey else if (incomingIsNewer) incoming.marketKey else existing.marketKey,
+                    marketName = if (preserveMarketAssociation) existing.marketName else if (incomingIsNewer) incoming.marketName else existing.marketName,
                     items = items.values.toMutableList()
                 )
             }
@@ -240,6 +272,8 @@ class BackupRepository(
             createdAt = json.optLong("createdAt", id).coerceAtLeast(1L),
             updatedAt = json.optLong("updatedAt", id).coerceAtLeast(1L),
             budget = json.optDouble("budget", 0.0).validMoney("Lista '$name': orçamento inválido."),
+            marketKey = if (json.isNull("marketKey")) null else json.optString("marketKey").takeIf { it.isNotBlank() },
+            marketName = if (json.isNull("marketName")) null else json.optString("marketName").takeIf { it.isNotBlank() },
             items = items
         )
     }
@@ -296,6 +330,8 @@ class BackupRepository(
         put("createdAt", createdAt)
         put("updatedAt", updatedAt)
         put("budget", budget)
+        put("marketKey", marketKey ?: JSONObject.NULL)
+        put("marketName", marketName ?: JSONObject.NULL)
         put("items", JSONArray().apply { items.forEach { put(it.toBackupJson()) } })
     }
 
@@ -378,7 +414,7 @@ class BackupRepository(
     private fun instant(epochMillis: Long): String = runCatching { Instant.ofEpochMilli(epochMillis).toString() }.getOrDefault("")
 
     companion object {
-        const val SCHEMA_VERSION = 2
+        const val SCHEMA_VERSION = 3
         private const val BACKUP_FORMAT = "meu-supermercado-backup"
     }
 }

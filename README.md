@@ -4,7 +4,7 @@ Aplicativo Android nativo, leve e offline para organizar compras em listas separ
 
 ## Versão
 
-`1.0.20+23`
+`1.0.21+24`
 
 ## Identidade técnica
 
@@ -135,7 +135,7 @@ Cada lista possui agora um **Modo compra** dedicado ao uso dentro do supermercad
 
 O aplicativo mantém agora um catálogo local/offline formado pelos produtos já usados nas listas. Nomes equivalentes são consolidados por forma normalizada para evitar duplicações no catálogo. Ao adicionar um item, o campo de nome sugere produtos conhecidos e pode preencher categoria, unidade e último preço registrado.
 
-O editor ganhou leitura de código de barras pela câmera. A leitura usa o modelo embarcado do ML Kit, disponível sem conexão após a instalação: códigos conhecidos preenchem o produto; códigos desconhecidos apenas ficam associados aos dados que o usuário informar, sem consultar serviços externos nem inventar nome ou preço. O catálogo pode ser consultado em **Configurações > Catálogo de produtos**.
+O editor ganhou leitura de código de barras pela câmera. A leitura usa o modelo embarcado do ML Kit, disponível sem conexão após a instalação: códigos conhecidos preenchem o produto pelo catálogo local; códigos ainda desconhecidos podem consultar opcionalmente o Open Food Facts quando houver internet, sem inventar preço e mantendo todos os campos editáveis. O catálogo pode ser consultado em **Configurações > Catálogo de produtos**.
 
 ## Correção de build — 1.0.18.1+20
 
@@ -144,6 +144,18 @@ O editor ganhou leitura de código de barras pela câmera. A leitura usa o model
 - O leitor de código de barras e o catálogo offline permanecem inalterados funcionalmente.
 - `scripts/validate_source.py` passa a bloquear CameraX 1.6.x enquanto a base técnica permanecer em compileSdk 35 / AGP 8.7.3.
 
+
+
+## Mercados favoritos e mapa — 1.0.21+24
+
+- **Mercados próximos** permite escolher manualmente raios de **5, 10, 20, 30 ou 50 km**.
+- A busca parte do raio escolhido e continua expandindo automaticamente quando encontra poucas opções.
+- Supermercados podem ser **favoritados** e aparecem primeiro na lista de resultados, com destaque também no mapa.
+- Cada resultado mostra **nome, distância, endereço quando disponível e origem do dado**.
+- Ao criar uma lista por um mercado, a associação é persistida e a próxima busca oferece **Abrir lista deste mercado**.
+- Um cache simples mantém resultados recentes para contingência quando internet ou Overpass estiverem indisponíveis.
+- Ausência de resultados não é apresentada como falha de localização: o aplicativo informa separadamente localização, conectividade e disponibilidade do serviço.
+- O backup JSON passa ao **schema 3**, preservando favoritos de mercados, raio preferido e associação entre mercado e lista.
 
 ## Favoritos, recorrentes e modelos — 1.0.20+23
 

@@ -1,23 +1,26 @@
-# Release — Meu Supermercado 1.0.20+23
+# Release — Meu Supermercado 1.0.21+24
 
 ## Destaques
 
-- Produtos favoritos e recorrentes no catálogo.
-- Frequência recorrente semanal, quinzenal ou mensal.
-- Nova tela **Adicionar recorrentes** em cada lista.
-- Modelos iniciais e modelos criados pelo próprio usuário.
-- Criação de nova lista vazia ou a partir de modelo.
-- Backup JSON atualizado para schema 2 com os novos dados.
+- Raio manual de mercados: **5, 10, 20, 30 e 50 km**.
+- Expansão automática preservada como fallback.
+- Mercados favoritos ordenados primeiro e destacados no mapa.
+- Lista de resultados com nome, distância, endereço e origem.
+- Associação entre mercado e lista, permitindo **Abrir lista deste mercado**.
+- Cache recente para contingência de internet/Overpass.
+- Backup JSON atualizado para schema 3 com os novos dados.
 
-## Modelos iniciais
+## Mercados próximos
 
-O modelo **Cicloviagem** reutiliza os 18 itens predefinidos já existentes no projeto. **Compra do mês**, **Churrasco**, **Camping** e **Limpeza** são disponibilizados sem itens, evitando inventar produtos que o usuário não definiu.
+A busca continua usando OpenStreetMap/Overpass. O raio escolhido pelo usuário é o ponto de partida; se houver poucas opções, o aplicativo amplia progressivamente até 50 km. Resultados favoritos aparecem primeiro.
 
-Qualquer lista existente pode ser salva como modelo. Ao criar uma nova lista a partir dele, os itens são copiados com novos identificadores e com `purchased=false`.
+A tela combina mapa e lista para não depender somente dos marcadores. Endereço é exibido apenas quando o OpenStreetMap fornece esse dado. A origem também é indicada e resultados vindos do cache são identificados como cache recente.
 
-## Recorrentes
+Ao criar uma lista para um mercado, o identificador do estabelecimento é persistido na lista. Depois disso, o mesmo resultado oferece abertura direta da lista existente.
 
-A recorrência é configurada no catálogo como semanal, quinzenal ou mensal. A tela **Adicionar recorrentes** permite escolher quais produtos recorrentes entram na lista atual e evita duplicação por nome normalizado.
+## Disponibilidade e cache
+
+Falhas do Overpass e ausência de internet são tratadas separadamente de erros de localização. Quando existe cache recente e compatível com a região/raio, ele pode ser mostrado como fallback. Ausência de mercados cadastrados não é considerada automaticamente uma falha da localização do aparelho.
 
 ## Build
 

@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.21+24 — 2026-09-26
+
+- Adicionada seleção manual do raio de mercados em **5 km, 10 km, 20 km, 30 km e 50 km**.
+- Mantida a expansão automática para raios maiores quando a opção escolhida encontra poucos resultados.
+- Supermercados agora podem ser **favoritados** e são ordenados antes dos demais resultados.
+- A tela Mercados próximos ganhou lista de resultados com nome, distância, endereço quando disponível e origem do dado.
+- Marcadores favoritos recebem destaque no mapa e o popup permite favoritar/desfavoritar.
+- Listas criadas a partir de um mercado ficam associadas a ele; buscas futuras mostram **Abrir lista deste mercado**.
+- Adicionado cache simples de resultados recentes para uso quando internet/Overpass estiverem indisponíveis.
+- Mensagens de erro diferenciam falha do Overpass, falta de internet e ausência de resultados, sem atribuir automaticamente o problema à localização.
+- Backup atualizado para **schema 3**, preservando associação lista/mercado, mercados favoritos e raio preferido.
+- Tela de novidades atualizada exclusivamente com as mudanças desta versão.
+
 ## 1.0.20+23 — 2026-09-26
 
 - Adicionado suporte a **produtos favoritos** no catálogo, com favoritos priorizados nas sugestões.

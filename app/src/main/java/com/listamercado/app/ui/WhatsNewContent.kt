@@ -1,30 +1,30 @@
 package com.listamercado.app.ui
 
 object WhatsNewContent {
-    const val CONTENT_VERSION_CODE = 23
+    const val CONTENT_VERSION_CODE = 24
     const val TITLE = "O que mudou nesta atualização"
-    const val SUBTITLE = "Favoritos, produtos recorrentes e modelos deixam as próximas compras mais rápidas."
+    const val SUBTITLE = "Mercados próximos ficaram mais fáceis de filtrar, favoritar e reutilizar."
 
     val changes = listOf(
         Change(
-            "Produtos favoritos",
-            "O catálogo agora permite marcar produtos como favoritos, mantendo-os em destaque nas sugestões e na organização do catálogo."
+            "Raio de busca manual",
+            "Agora é possível escolher 5, 10, 20, 30 ou 50 km. Se houver poucas opções, o app continua ampliando o raio automaticamente como fallback."
         ),
         Change(
-            "Produtos recorrentes",
-            "Produtos podem ser configurados como semanais, quinzenais ou mensais e adicionados rapidamente a qualquer lista pela nova tela Adicionar recorrentes."
+            "Mercados favoritos",
+            "Supermercados podem ser favoritados e passam a aparecer primeiro nos resultados, com destaque também nos marcadores do mapa."
         ),
         Change(
-            "Modelos de lista",
-            "Nova lista agora pode começar vazia ou a partir de um modelo. Cicloviagem mantém seus itens predefinidos; Compra do mês, Churrasco, Camping e Limpeza começam vazios."
+            "Resultados mais completos",
+            "A tela mostra nome, distância, endereço quando disponível e a origem do dado, além do mapa e de uma lista de resultados."
         ),
         Change(
-            "Crie seus próprios modelos",
-            "Qualquer lista existente pode ser salva como modelo pelo menu de ações e reutilizada em novas compras sem carregar o estado de itens já comprados."
+            "Lista vinculada ao mercado",
+            "Ao criar uma lista a partir de um mercado, a associação é salva. Nas próximas buscas aparece Abrir lista deste mercado em vez de criar outra."
         ),
         Change(
-            "Backup ampliado",
-            "Favoritos, recorrência e modelos personalizados passam a fazer parte do backup JSON versionado."
+            "Cache e mensagens melhores",
+            "Resultados recentes podem ser usados quando a internet ou o Overpass estiverem indisponíveis, sem tratar ausência de mercados como erro de localização."
         )
     )
 

@@ -1,27 +1,25 @@
-# Validação — 1.0.20+23
+# Validação — 1.0.21+24
 
-- [x] versionName `1.0.20`
-- [x] versionCode `23`
-- [x] VERSION `1.0.20+23`
+- [x] versionName `1.0.21`
+- [x] versionCode `24`
+- [x] VERSION `1.0.21+24`
 - [x] app_identity.json e github-manager.json sincronizados
-- [x] WhatsNewContent sincronizado com versionCode 23 e somente mudanças desta versão
-- [x] Produto favorito persistido no catálogo local
-- [x] Favoritos priorizados nas sugestões do catálogo
-- [x] Produto recorrente com semanal, quinzenal e mensal
-- [x] Tela Adicionar recorrentes criada e integrada à lista
-- [x] Itens recorrentes usam quantidade/unidade/último preço conhecidos e não duplicam produto já presente
-- [x] Modelos iniciais Cicloviagem, Compra do mês, Churrasco, Camping e Limpeza
-- [x] Somente Cicloviagem possui itens predefinidos
-- [x] Qualquer lista pode ser salva como modelo
-- [x] Nova lista pode ser criada vazia ou a partir de modelo
-- [x] Modelos personalizados podem ser excluídos sem alterar listas existentes
-- [x] Backup JSON atualizado para schema 2 e inclui favoritos, recorrência e modelos personalizados
-- [x] Compatibilidade de importação com backup schema 1 preservada
+- [x] WhatsNewContent sincronizado com versionCode 24 e somente mudanças desta versão
+- [x] Raio manual 5/10/20/30/50 km
+- [x] Expansão automática preservada como fallback até 50 km
+- [x] Mercados favoritos persistidos e ordenados primeiro
+- [x] Lista de resultados mostra nome, distância, endereço quando disponível e origem
+- [x] Popup do mapa oferece favoritar e criar/abrir lista
+- [x] Associação mercado/lista persistida no ShoppingList
+- [x] Cache simples de resultados recentes implementado
+- [x] Mensagens distinguem falha do Overpass, falta de internet, localização e ausência de resultados
+- [x] Backup atualizado para schema 3 com favoritos de mercados, raio preferido e associação lista/mercado
+- [x] Compatibilidade de importação com schemas 1 e 2 preservada
 - [x] compileSdk 35, targetSdk 35, minSdk 26, AGP 8.7.3, Kotlin 2.0.21 e Java/JVM 17 preservados
 - [x] CameraX 1.5.3 e ML Kit embarcado preservados
 - [x] Workflow principal permanece Build and Release Android APK
 - [x] Workflow não usa actions/upload-artifact e não gera source.zip
 - [x] scripts/validate_version.py, scripts/validate_source.py e scripts/validate_workflow.py executados com sucesso
-- [x] 49 XMLs do projeto analisados e bem formados
-- [x] Modelos Kotlin puros (ShoppingItem, ShoppingList, CatalogProduct, ListTemplate e Recurrence) compilados com kotlinc
+- [x] 49 XMLs analisados e bem formados
+- [x] Modelos Kotlin puros compilados com kotlinc
 - [ ] Build Gradle completo depende do GitHub Actions, pois este ambiente não possui Android SDK/Gradle configurado.

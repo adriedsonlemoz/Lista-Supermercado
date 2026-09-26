@@ -6,6 +6,8 @@ data class ShoppingList(
     val createdAt: Long = System.currentTimeMillis(),
     var updatedAt: Long = System.currentTimeMillis(),
     var budget: Double = 0.0,
+    var marketKey: String? = null,
+    var marketName: String? = null,
     val items: MutableList<ShoppingItem> = mutableListOf()
 ) {
     val estimatedTotal: Double

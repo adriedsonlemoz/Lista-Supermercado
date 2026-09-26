@@ -126,6 +126,8 @@ class ShoppingRepository(context: Context) {
         put("createdAt", createdAt)
         put("updatedAt", updatedAt)
         put("budget", budget)
+        put("marketKey", marketKey ?: JSONObject.NULL)
+        put("marketName", marketName ?: JSONObject.NULL)
         put("items", JSONArray().apply { items.forEach { put(it.toJson()) } })
     }
 
@@ -148,6 +150,8 @@ class ShoppingRepository(context: Context) {
             createdAt = optLong("createdAt", System.currentTimeMillis()),
             updatedAt = optLong("updatedAt", System.currentTimeMillis()),
             budget = optDouble("budget", 0.0),
+            marketKey = if (isNull("marketKey")) null else optString("marketKey").takeIf { it.isNotBlank() },
+            marketName = if (isNull("marketName")) null else optString("marketName").takeIf { it.isNotBlank() },
             items = MutableList(itemArray.length()) { index -> itemArray.getJSONObject(index).toItem() }
         )
     }

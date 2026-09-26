@@ -5,15 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
-    html, body, #map { width:100%; height:100%; margin:0; padding:0; background:#101820; }
+    html, body, #map { width:100%; height:100%; margin:0; padding:0; background:#111F2B; }
     .leaflet-control-attribution { font-size:10px; }
-    .market-popup { min-width:190px; font-family:sans-serif; }
-    .market-popup h3 { margin:0 0 4px; font-size:15px; }
-    .market-popup p { margin:2px 0 10px; font-size:12px; color:#555; }
+    .market-popup { min-width:210px; font-family:sans-serif; }
+    .market-popup h3 { margin:0 0 5px; font-size:15px; }
+    .market-popup p { margin:3px 0; font-size:12px; color:#555; }
+    .market-popup .origin { margin-bottom:10px; color:#6c6c6c; }
     .market-popup button {
       width:100%; border:0; border-radius:12px; padding:10px 12px;
-      background:#6D4FD3; color:white; font-weight:700;
+      font-weight:700; margin-top:7px;
     }
+    .primary { background:#6D4FD3; color:white; }
+    .secondary { background:#EEE9FF; color:#4D369F; }
   </style>
 </head>
 <body>
@@ -48,11 +51,11 @@
 
     markets.forEach(function(m) {
       const marker = L.circleMarker([m.lat, m.lon], {
-        radius: 7,
-        color: '#6D4FD3',
-        fillColor: '#8B6CF6',
+        radius: m.favorite ? 9 : 7,
+        color: m.favorite ? '#A66A00' : '#6D4FD3',
+        fillColor: m.favorite ? '#FFC857' : '#8B6CF6',
         fillOpacity: 1,
-        weight: 2
+        weight: m.favorite ? 3 : 2
       }).addTo(marketLayer);
 
       const distance = m.distanceMeters < 1000
@@ -63,26 +66,36 @@
       popup.className = 'market-popup';
 
       const title = document.createElement('h3');
-      title.textContent = m.name || 'Mercado';
+      title.textContent = (m.favorite ? '★ ' : '') + (m.name || 'Mercado');
       popup.appendChild(title);
 
       const detail = document.createElement('p');
       detail.textContent = (m.address ? m.address + ' • ' : '') + distance;
       popup.appendChild(detail);
 
-      const button = document.createElement('button');
-      button.textContent = 'Criar lista';
-      button.onclick = function() {
-        AndroidMarket.createList(m.name || 'Mercado', m.lat, m.lon);
-      };
-      popup.appendChild(button);
+      const origin = document.createElement('p');
+      origin.className = 'origin';
+      origin.textContent = 'Origem: ' + (m.source || 'OpenStreetMap') + (m.fromCache ? ' • cache recente' : ' • Overpass');
+      popup.appendChild(origin);
+
+      const listButton = document.createElement('button');
+      listButton.className = 'primary';
+      listButton.textContent = m.hasList ? 'Abrir lista deste mercado' : 'Criar lista';
+      listButton.onclick = function() { AndroidMarket.listAction(m.key); };
+      popup.appendChild(listButton);
+
+      const favoriteButton = document.createElement('button');
+      favoriteButton.className = 'secondary';
+      favoriteButton.textContent = m.favorite ? 'Remover dos favoritos' : 'Favoritar mercado';
+      favoriteButton.onclick = function() { AndroidMarket.toggleFavorite(m.key); };
+      popup.appendChild(favoriteButton);
 
       marker.bindPopup(popup);
       bounds.push([m.lat, m.lon]);
     });
 
     if (bounds.length > 1) {
-      map.fitBounds(bounds, { padding:[28,28], maxZoom:14 });
+      map.fitBounds(bounds, { padding:[24,24], maxZoom:14 });
     }
   }
 </script>
