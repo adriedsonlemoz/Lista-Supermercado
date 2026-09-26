@@ -1,12 +1,11 @@
-# Validação — 1.0.14+15
+# Validação — 1.0.15+16
 
-- [x] versionName `1.0.14`
-- [x] versionCode `15`
-- [x] VERSION `1.0.14+15`
+- [x] versionName `1.0.15`
+- [x] versionCode `16`
+- [x] VERSION `1.0.15+16`
 - [x] app_identity.json sincronizado
 - [x] github-manager.json sincronizado
-- [x] 12 cores do `values-night/colors.xml` possuem declarações padrão em `values/colors.xml`
-- [x] tema grafite azulado preservado
-- [x] `validate_source.py` verifica recursos noturnos sem default
-- [x] `WhatsNewContent.kt` atualizado para versionCode 15
-- [x] workflow de APK Release assinado preservado
+- [x] Busca acessível pela lupa no topo
+- [x] Campo de busca recolhido por padrão
+- [x] Resumo de compras compactado
+- [x] WhatsNewContent sincronizado com versionCode 16

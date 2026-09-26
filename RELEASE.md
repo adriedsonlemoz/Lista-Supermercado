@@ -1,8 +1,8 @@
-# Release 1.0.14+15
+# Release 1.0.15+16
 
-Correção do build Release.
+Ajuste compacto da tela inicial.
 
-- Resolve 12 erros `MissingDefaultResource` em `lintVitalRelease`.
-- Mantém a paleta grafite azulada do modo escuro.
-- Adiciona validação preventiva dos recursos `values-night`.
-- Mantém geração de APK Release assinado e publicação direta na GitHub Release.
+- Busca movida para a lupa no cabeçalho.
+- Campo de busca exibido somente quando solicitado.
+- Resumo de compras mais baixo e com estatísticas na linha superior.
+- Tela de novidades sincronizada com a versão.

@@ -4,7 +4,7 @@ Aplicativo Android nativo, leve e offline para organizar compras em listas separ
 
 ## Versão
 
-`1.0.14+15`
+`1.0.15+16`
 
 ## Identidade técnica
 
@@ -99,6 +99,11 @@ A tela de novidades agora é protegida contra abertura duplicada durante recria�
 A lista inicial Cicloviagem recebe os preços de referência que já tinham sido definidos nas conversas de planejamento. Em instalações existentes, apenas itens ainda sem preço são preenchidos. O tema escuro usa agora um grafite azulado (`#101820`/`#121B24`) em vez de preto puro, mantendo o violeta como destaque.
 
 
-## Correção de build 1.0.14+15
+## Correção de build 1.0.15+16
 
 O Android Lint exige que recursos definidos em `values-night` tenham uma declaração padrão em `values`. A versão anterior introduziu 12 cores exclusivas do tema escuro sem esses defaults. Esta versão adiciona os equivalentes padrão e uma validação automática para impedir regressão.
+
+
+## Interface da tela inicial — 1.0.15+16
+
+A busca agora é aberta pela lupa no cabeçalho, ao lado das Configurações. O resumo de compras foi compactado e mostra listas, itens e comprados junto ao título, deixando mais espaço para as listas cadastradas.

@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.15+16 — 2026-09-25
+
+- Busca da tela inicial movida para um ícone de lupa ao lado da engrenagem.
+- Campo de busca agora abre somente quando solicitado e pode ser fechado novamente pelo mesmo botão ou pelo Voltar.
+- Resumo de compras compactado: listas, itens e comprados ficam na linha superior do card.
+- Removida a fileira grande de estatísticas na parte inferior do card de resumo.
+- Mais espaço vertical disponível para os cards das listas.
+- Tela de novidades atualizada para esta versão.
+
 ## 1.0.14+15 — 2026-09-25
 
 - Corrigido o erro de `lintVitalRelease` que impedia a geração do APK.
