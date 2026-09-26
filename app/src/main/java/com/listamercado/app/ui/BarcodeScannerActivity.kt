@@ -3,17 +3,23 @@ package com.listamercado.app.ui
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.widget.ImageButton
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
+import com.google.android.material.button.MaterialButton
 import com.google.mlkit.vision.barcode.BarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
@@ -24,12 +30,19 @@ import com.listamercado.app.util.InsetsHelper
 import com.listamercado.app.util.ThemeController
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import kotlin.math.hypot
 
 class BarcodeScannerActivity : AppCompatActivity() {
     private lateinit var previewView: PreviewView
+    private lateinit var buttonTorch: MaterialButton
     private lateinit var cameraExecutor: ExecutorService
     private var scanner: BarcodeScanner? = null
+    private var cameraProvider: ProcessCameraProvider? = null
+    private var boundCamera: Camera? = null
     @Volatile private var resultDelivered = false
+    private var torchEnabled = false
+    private var lastCandidateValue: String? = null
+    private var lastCandidateHits = 0
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -49,8 +62,11 @@ class BarcodeScannerActivity : AppCompatActivity() {
         InsetsHelper.applyScaffold(this, findViewById(R.id.rootBarcodeScanner))
 
         previewView = findViewById(R.id.previewBarcode)
+        buttonTorch = findViewById(R.id.buttonTorch)
         cameraExecutor = Executors.newSingleThreadExecutor()
         findViewById<ImageButton>(R.id.buttonCloseScanner).setOnClickListener { finish() }
+        buttonTorch.setOnClickListener { toggleTorch() }
+        updateTorchUi(enabled = false, supported = false)
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             startCamera()
@@ -62,11 +78,12 @@ class BarcodeScannerActivity : AppCompatActivity() {
     private fun startCamera() {
         val providerFuture = ProcessCameraProvider.getInstance(this)
         providerFuture.addListener({
-            val cameraProvider = runCatching { providerFuture.get() }.getOrElse {
+            val provider = runCatching { providerFuture.get() }.getOrElse {
                 Toast.makeText(this, "Não foi possível iniciar a câmera.", Toast.LENGTH_LONG).show()
                 finish()
                 return@addListener
             }
+            cameraProvider = provider
 
             val preview = Preview.Builder().build().also {
                 it.surfaceProvider = previewView.surfaceProvider
@@ -100,11 +117,19 @@ class BarcodeScannerActivity : AppCompatActivity() {
                 val input = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
                 scanner?.process(input)
                     ?.addOnSuccessListener { barcodes ->
-                        val value = barcodes.firstNotNullOfOrNull { it.rawValue?.trim()?.takeIf { value -> value.isNotEmpty() } }
-                        if (value != null) deliverResult(value)
+                        val candidate = chooseBestBarcode(barcodes)
+                        if (candidate != null) {
+                            if (candidate == lastCandidateValue) {
+                                lastCandidateHits += 1
+                            } else {
+                                lastCandidateValue = candidate
+                                lastCandidateHits = 1
+                            }
+                            if (lastCandidateHits >= 2) deliverResult(candidate)
+                        }
                     }
                     ?.addOnFailureListener {
-                        // A frame inválido é ignorado; a análise continua no próximo frame.
+                        // Frames inválidos são ignorados; a análise continua no próximo frame.
                     }
                     ?.addOnCompleteListener { imageProxy.close() }
                     ?: imageProxy.close()
@@ -112,12 +137,14 @@ class BarcodeScannerActivity : AppCompatActivity() {
 
             runCatching {
                 val selector = when {
-                    cameraProvider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA) -> CameraSelector.DEFAULT_BACK_CAMERA
-                    cameraProvider.hasCamera(CameraSelector.DEFAULT_FRONT_CAMERA) -> CameraSelector.DEFAULT_FRONT_CAMERA
+                    provider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA) -> CameraSelector.DEFAULT_BACK_CAMERA
+                    provider.hasCamera(CameraSelector.DEFAULT_FRONT_CAMERA) -> CameraSelector.DEFAULT_FRONT_CAMERA
                     else -> error("Nenhuma câmera disponível")
                 }
-                cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(this, selector, preview, analysis)
+                provider.unbindAll()
+                boundCamera = provider.bindToLifecycle(this, selector, preview, analysis)
+                val hasFlash = boundCamera?.cameraInfo?.hasFlashUnit() == true
+                updateTorchUi(enabled = false, supported = hasFlash)
             }.onFailure {
                 Toast.makeText(this, "Nenhuma câmera disponível para leitura.", Toast.LENGTH_LONG).show()
                 finish()
@@ -125,16 +152,72 @@ class BarcodeScannerActivity : AppCompatActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
+    private fun chooseBestBarcode(barcodes: List<Barcode>): String? {
+        if (barcodes.isEmpty()) return null
+        val centerX = previewView.width / 2f
+        val centerY = previewView.height / 2f
+        return barcodes
+            .mapNotNull { barcode ->
+                val value = barcode.rawValue?.trim()?.takeIf { it.isNotEmpty() } ?: return@mapNotNull null
+                val box = barcode.boundingBox
+                val score = if (box == null) {
+                    Float.MAX_VALUE
+                } else {
+                    val distance = hypot(box.exactCenterX() - centerX, box.exactCenterY() - centerY)
+                    val areaBoost = (box.width() * box.height()) * 0.0001f
+                    distance - areaBoost
+                }
+                score to value
+            }
+            .minByOrNull { it.first }
+            ?.second
+    }
+
+    private fun toggleTorch() {
+        val camera = boundCamera ?: return
+        if (camera.cameraInfo.hasFlashUnit() != true) {
+            Toast.makeText(this, "Esta câmera não possui flash.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        torchEnabled = !torchEnabled
+        camera.cameraControl.enableTorch(torchEnabled)
+        updateTorchUi(enabled = torchEnabled, supported = true)
+    }
+
+    private fun updateTorchUi(enabled: Boolean, supported: Boolean) {
+        buttonTorch.isEnabled = supported
+        buttonTorch.alpha = if (supported) 1f else 0.5f
+        buttonTorch.text = when {
+            !supported -> "Sem flash"
+            enabled -> "Luz ligada"
+            else -> "Luz"
+        }
+    }
+
     private fun deliverResult(value: String) {
         if (resultDelivered) return
         resultDelivered = true
+        vibrateSuccess()
         runOnUiThread {
             setResult(RESULT_OK, Intent().putExtra(EXTRA_BARCODE, value))
             finish()
         }
     }
 
+    private fun vibrateSuccess() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val vibrator = getSystemService(VibratorManager::class.java)?.defaultVibrator
+            vibrator?.vibrate(VibrationEffect.createOneShot(60, VibrationEffect.DEFAULT_AMPLITUDE))
+        } else {
+            @Suppress("DEPRECATION")
+            val vibrator = getSystemService(VIBRATOR_SERVICE) as? Vibrator
+            @Suppress("DEPRECATION")
+            vibrator?.vibrate(VibrationEffect.createOneShot(60, VibrationEffect.DEFAULT_AMPLITUDE))
+        }
+    }
+
     override fun onDestroy() {
+        cameraProvider?.unbindAll()
         scanner?.close()
         if (::cameraExecutor.isInitialized) cameraExecutor.shutdown()
         super.onDestroy()

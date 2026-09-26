@@ -2,16 +2,21 @@ package com.listamercado.app.ui
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.TextView
+import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.listamercado.app.R
+import com.listamercado.app.data.BarcodeLookupRepository
 import com.listamercado.app.data.ProductCatalogRepository
+import com.listamercado.app.model.BarcodeLookupResult
 import com.listamercado.app.model.CatalogProduct
 import com.listamercado.app.model.ShoppingItem
 import com.listamercado.app.util.CurrencyTextWatcher
@@ -36,10 +41,14 @@ object ItemDialog {
         onSave: (ShoppingItem, String?) -> Unit
     ) {
         val view = LayoutInflater.from(context).inflate(R.layout.dialog_item, null)
-        val sheet = view.findViewById<android.view.View>(R.id.sheetItemRoot)
+        val lookupRepository = BarcodeLookupRepository(context)
+        val sheet = view.findViewById<View>(R.id.sheetItemRoot)
         val title = view.findViewById<TextView>(R.id.textSheetTitle)
         val subtitle = view.findViewById<TextView>(R.id.textSheetSubtitle)
+        val nameHelper = view.findViewById<TextView>(R.id.textNameHelper)
         val barcodeStatus = view.findViewById<TextView>(R.id.textBarcodeStatus)
+        val lookupStatus = view.findViewById<TextView>(R.id.textLookupStatus)
+        val lookupProgress = view.findViewById<LinearProgressIndicator>(R.id.progressLookup)
         val nameLayout = view.findViewById<TextInputLayout>(R.id.layoutName)
         val quantityLayout = view.findViewById<TextInputLayout>(R.id.layoutQuantity)
         val priceLayout = view.findViewById<TextInputLayout>(R.id.layoutPrice)
@@ -68,7 +77,7 @@ object ItemDialog {
 
         title.text = if (existing == null) "Adicionar item" else "Editar item"
         subtitle.text = if (existing == null) {
-            "Escolha do catálogo ou cadastre um produto novo."
+            "Escolha do catálogo, escaneie o código ou cadastre um produto novo."
         } else {
             "Altere os dados sem perder o histórico da lista."
         }
@@ -81,17 +90,39 @@ object ItemDialog {
         var selectedBarcode: String? = existing
             ?.let { catalogRepository.findByName(it.name)?.barcode }
         var scannedUnknownBarcode: String? = null
+        var dialogOpen = true
+        var pendingLookupBarcode: String? = null
+        var suppressNameWatcher = false
+        var statusMessage: String? = null
 
-        fun renderBarcodeStatus(isNew: Boolean = false) {
+        fun setLookupStatus(message: String?, visibleWhenEmpty: Boolean = false) {
+            statusMessage = message
+            lookupStatus.text = message.orEmpty()
+            lookupStatus.visibility = if (message.isNullOrBlank() && !visibleWhenEmpty) View.GONE else View.VISIBLE
+        }
+
+        fun setLookupLoading(isLoading: Boolean) {
+            lookupProgress.visibility = if (isLoading) View.VISIBLE else View.GONE
+            if (isLoading) {
+                setLookupStatus("Consultando nome do produto...", visibleWhenEmpty = true)
+            }
+        }
+
+        fun renderBarcodeStatus(isNew: Boolean = false, fromCatalog: Boolean = false) {
             barcodeStatus.text = when {
                 selectedBarcode.isNullOrBlank() -> "Sem código associado"
-                isNew -> "Novo código • será associado ao salvar"
+                fromCatalog -> "Código reconhecido no catálogo"
+                isNew -> "Código lido • será associado ao salvar"
                 else -> "Código associado • $selectedBarcode"
             }
         }
 
         fun applyCatalogProduct(product: CatalogProduct) {
+            pendingLookupBarcode = null
+            setLookupLoading(false)
+            suppressNameWatcher = true
             name.setText(product.name, false)
+            suppressNameWatcher = false
             category.setText(product.category.ifBlank { categories.first() }, false)
             unit.setText(product.unit.ifBlank { units.first() }, false)
             priceLayout.hint = PriceUnitHelper.inputHint(product.unit)
@@ -99,11 +130,57 @@ object ItemDialog {
                 priceWatcher.setAmount(PriceUnitHelper.editorAmount(product.lastUnitPrice, product.unit))
             }
             selectedBarcode = scannedUnknownBarcode ?: product.barcode
-            renderBarcodeStatus(isNew = scannedUnknownBarcode != null)
+            renderBarcodeStatus(isNew = scannedUnknownBarcode != null, fromCatalog = scannedUnknownBarcode == null)
+            nameHelper.text = "Produto conhecido. Toque numa sugestão para preencher automaticamente."
+            setLookupStatus("Preenchido pelo catálogo local.")
+        }
+
+        fun applyOnlineLookup(result: BarcodeLookupResult) {
+            val currentName = name.text?.toString()?.trim().orEmpty()
+            if (currentName.isBlank()) {
+                suppressNameWatcher = true
+                name.setText(result.name, false)
+                suppressNameWatcher = false
+            }
+            val currentCategory = category.text?.toString()?.trim().orEmpty()
+            if ((currentCategory.isBlank() || currentCategory == categories.first() || currentCategory == "Outros")
+                && !result.category.isNullOrBlank()
+            ) {
+                category.setText(result.category, false)
+            }
+            nameHelper.text = "Dados externos são opcionais: revise o nome antes de salvar."
+            val extras = buildList {
+                result.brand?.takeIf { it.isNotBlank() }?.let { add(it) }
+                result.quantityDescription?.takeIf { it.isNotBlank() }?.let { add(it) }
+            }.joinToString(" • ")
+            val suffix = if (extras.isNotBlank()) ": $extras" else ""
+            setLookupStatus("Encontrado online em ${result.source}. Revise antes de salvar$suffix")
+        }
+
+        fun lookupBarcodeOnline(barcode: String) {
+            pendingLookupBarcode = barcode
+            setLookupLoading(true)
+            lookupRepository.lookup(barcode) { result ->
+                if (!dialogOpen || pendingLookupBarcode != barcode) return@lookup
+                setLookupLoading(false)
+                result
+                    .onSuccess { lookup ->
+                        if (lookup == null) {
+                            setLookupStatus("Código novo. Você pode preencher manualmente e salvar no catálogo local.")
+                        } else {
+                            applyOnlineLookup(lookup)
+                        }
+                    }
+                    .onFailure {
+                        setLookupStatus("Não foi possível consultar a internet agora. Você ainda pode cadastrar manualmente.")
+                    }
+            }
         }
 
         existing?.let {
+            suppressNameWatcher = true
             name.setText(it.name, false)
+            suppressNameWatcher = false
             quantity.setText(it.quantity.toInput())
             priceWatcher.setAmount(PriceUnitHelper.editorAmount(it.unitPrice, it.unit))
             note.setText(it.note)
@@ -116,6 +193,15 @@ object ItemDialog {
             priceLayout.hint = PriceUnitHelper.inputHint(units.first())
         }
         renderBarcodeStatus()
+
+        name.doAfterTextChanged {
+            if (!suppressNameWatcher) {
+                nameLayout.error = null
+                if (pendingLookupBarcode != null && statusMessage?.contains("Consultando") == true) {
+                    setLookupStatus("Lendo código... você pode ajustar o nome manualmente se quiser.", visibleWhenEmpty = true)
+                }
+            }
+        }
 
         name.setOnItemClickListener { _, _, position, _ ->
             val selectedName = name.adapter.getItem(position)?.toString().orEmpty()
@@ -143,13 +229,16 @@ object ItemDialog {
                 val barcode = ProductCatalogRepository.sanitizeBarcode(rawBarcode)
                 if (barcode != null) {
                     val product = catalogRepository.findByBarcode(barcode)
+                    selectedBarcode = barcode
                     if (product != null) {
                         scannedUnknownBarcode = null
+                        pendingLookupBarcode = null
                         applyCatalogProduct(product)
                     } else {
                         scannedUnknownBarcode = barcode
-                        selectedBarcode = barcode
                         renderBarcodeStatus(isNew = true)
+                        setLookupStatus("Código novo detectado. Tentando identificar o produto online...", visibleWhenEmpty = true)
+                        lookupBarcodeOnline(barcode)
                     }
                 }
             }
@@ -161,6 +250,7 @@ object ItemDialog {
         dialog.behavior.skipCollapsed = true
         dialog.behavior.isDraggable = true
         InsetsHelper.applyBottomSheetInsets(sheet)
+        dialog.setOnDismissListener { dialogOpen = false }
 
         buttonClose.setOnClickListener { dialog.dismiss() }
         buttonCancel.setOnClickListener { dialog.dismiss() }

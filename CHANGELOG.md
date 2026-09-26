@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.19.1+22 — 2026-09-26
+
+- Refinada a tela **Adicionar item**, com foco especial no campo principal **Nome do produto**, que deixou de usar a apresentação comprimida e passou a ter entrada mais alta, placeholder e ajuda visual.
+- O editor agora exibe melhor o estado do código de barras: sem código, reconhecido no catálogo local, código novo e identificado online para revisão.
+- Quando um código não existe no catálogo local, o app tenta opcionalmente consultar a internet para preencher nome, categoria e detalhes básicos sem inventar preço.
+- A leitura continua priorizando o catálogo offline; após salvar, o produto passa a abrir diretamente do banco local nas próximas leituras.
+- O leitor de código ganhou botão de luz, vibração ao reconhecer e uma seleção mais estável do código central para reduzir leituras erradas.
+- Tela de novidades atualizada para versionCode 22.
+
 ## 1.0.19+21 — 2026-09-26
 
 - Implementado backup completo em JSON com `schemaVersion = 1`.

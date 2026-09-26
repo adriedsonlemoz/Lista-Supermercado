@@ -4,7 +4,7 @@ Aplicativo Android nativo, leve e offline para organizar compras em listas separ
 
 ## Versão
 
-`1.0.19+21`
+`1.0.19.1+22`
 
 ## Identidade técnica
 
@@ -27,7 +27,7 @@ Aplicativo Android nativo, leve e offline para organizar compras em listas separ
 - marcação de comprado e totais estimado/no carrinho;
 - modo de compra rápida por lista, mostrando apenas pendentes, checkbox grande, preço total direto no item, carrinho/orçamento em tempo real e ação para desfazer;
 - catálogo local/offline com sugestões ao adicionar itens, último preço, unidade/categoria padrão e código de barras opcional;
-- leitor de código de barras pela câmera, com modelo embarcado e sem consulta externa de nomes ou preços;
+- leitor de código de barras pela câmera, com catálogo local offline e consulta opcional na internet apenas quando o código ainda não for conhecido;
 - busca por lista, supermercado, produto ou categoria;
 - filtros Todos/Pendentes/Comprados adaptados à largura da tela;
 - preço com formatação automática em real;
@@ -142,6 +142,13 @@ O editor ganhou leitura de código de barras pela câmera. A leitura usa o model
 - O leitor de código de barras e o catálogo offline permanecem inalterados funcionalmente.
 - `scripts/validate_source.py` passa a bloquear CameraX 1.6.x enquanto a base técnica permanecer em compileSdk 35 / AGP 8.7.3.
 
+
+## Refinos no cadastro e leitura de código — 1.0.19.1+22
+
+- O campo **Nome do produto** da tela **Adicionar item** foi refeito para ficar mais legível e não parecer cortado no topo.
+- O editor mostra melhor as mensagens do fluxo de código de barras e diferencia produto conhecido localmente, código novo e dado online sugerido.
+- Se o código lido ainda não existir no catálogo local e houver internet, o aplicativo pode consultar o **Open Food Facts** para tentar preencher nome e categoria sem inventar preço.
+- O leitor ganhou botão de luz, vibração ao sucesso e uma seleção mais estável do código central, reduzindo leituras erradas.
 
 ## Backup, restauração e refinamento visual — 1.0.19+21
 

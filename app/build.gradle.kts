@@ -11,8 +11,8 @@ android {
         applicationId = "com.listamercado.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 21
-        versionName = "1.0.19"
+        versionCode = 22
+        versionName = "1.0.19.1"
     }
 
     buildFeatures {

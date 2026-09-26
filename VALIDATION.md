@@ -1,26 +1,21 @@
-# Validação — 1.0.19+21
+# Validação — 1.0.19.1+22
 
-- [x] versionName `1.0.19`
-- [x] versionCode `21`
-- [x] VERSION `1.0.19+21`
+- [x] versionName `1.0.19.1`
+- [x] versionCode `22`
+- [x] VERSION `1.0.19.1+22`
 - [x] app_identity.json sincronizado e JSON válido
 - [x] github-manager.json sincronizado e JSON válido
-- [x] WhatsNewContent sincronizado com versionCode 21
-- [x] Tema escuro alterado para superfícies grafite azuladas, sem fundo preto puro
-- [x] Tela Adicionar/Editar item reorganizada em Produto, Compra e Detalhes
-- [x] Campos do editor usam superfícies preenchidas e menos contornos
-- [x] Leitor de código de barras e catálogo offline preservados
-- [x] Backup JSON com schema versionado (`schemaVersion = 1`)
-- [x] Backup inclui listas, itens, quantidades, unidades, preços, orçamento, estado comprado, observações e catálogo
-- [x] Histórico de preços é incluído no backup e continua restaurável pelas ocorrências de produtos nas listas
-- [x] Exportação usa o seletor de arquivos do Android, sem pasta fixa obrigatória
-- [x] Importação usa o seletor de arquivos do Android e valida formato/schema antes de alterar dados
-- [x] Resumo pré-importação mostra listas, itens, produtos do catálogo e registros de preço
-- [x] Importação oferece Mesclar, Substituir e Cancelar
-- [x] Substituição exige confirmação destrutiva adicional
-- [x] Exportação CSV disponível para itens e catálogo
+- [x] WhatsNewContent sincronizado com versionCode 22
+- [x] Tela Adicionar/Editar item refinada visualmente, com campo de nome mais legível e placeholder
+- [x] Editor mostra feedback de consulta/identificação do código de barras
+- [x] Consulta online opcional para códigos desconhecidos implementada sem inventar preço
+- [x] Catálogo local/offline continua sendo a fonte primária de preenchimento
+- [x] Leitor de código ganhou botão de luz, vibração ao reconhecer e seleção mais estável do código central
+- [x] Backup JSON, importação validada e exportação CSV preservados
 - [x] compileSdk 35, targetSdk 35, minSdk 26, AGP 8.7.3, Kotlin 2.0.21 e Java/JVM 17 preservados
-- [x] CameraX 1.5.3 preservado
+- [x] CameraX 1.5.3 e ML Kit embarcado preservados
 - [x] Workflow principal permanece `Build and Release Android APK`
 - [x] Workflow não usa `actions/upload-artifact` e não gera `source.zip`
+- [x] scripts/validate_version.py, scripts/validate_source.py e scripts/validate_workflow.py executados com sucesso
+- [x] XMLs analisados e bem formados
 - [ ] Build Gradle completo precisa ser confirmado pelo GitHub Actions, pois este ambiente não possui Android SDK/Gradle configurado.

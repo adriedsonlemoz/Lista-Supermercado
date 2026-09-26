@@ -1,18 +1,17 @@
-# Release — Meu Supermercado 1.0.19+21
+# Release — Meu Supermercado 1.0.19.1+22
 
 ## Destaques
 
-- Backup completo em JSON usando o seletor de arquivos do Android.
-- Importação validada com resumo e opções **Mesclar** ou **Substituir**.
-- Exportação CSV de itens e catálogo para uso em planilhas.
-- Tema escuro atualizado para uma base grafite/azulada, evitando preto puro.
-- Tela **Adicionar item** redesenhada com hierarquia mais clara e menos contornos.
+- Tela **Adicionar item** refinada, com campo **Nome do produto** mais legível e sem aparência de texto cortado.
+- Fluxo de código de barras com feedback melhor no editor.
+- Consulta online opcional para códigos ainda desconhecidos, sem inventar preço.
+- Leitor com botão de luz, vibração ao sucesso e seleção mais estável do código central.
 
-## Backup
+## Leitura de código
 
-O schema inicial é `1`. O JSON contém listas, itens, orçamento, preços, estado de compra, catálogo e uma visão derivada do histórico de preços. O histórico usado pelo aplicativo continua tendo como fonte as ocorrências dos produtos nas próprias listas, portanto a restauração das listas preserva esse histórico sem manter um segundo banco paralelo.
+O catálogo local/offline continua sendo a fonte principal. Quando um código já foi salvo antes, o produto preenche instantaneamente sem internet.
 
-A importação sempre valida o arquivo antes de gravar dados. **Mesclar** conserva os dados locais e incorpora o backup; **Substituir** troca listas e catálogo após uma confirmação adicional.
+Se o código ainda não estiver no catálogo local e houver conexão, o aplicativo pode tentar consultar o **Open Food Facts** para sugerir nome, categoria e detalhes básicos do produto. Esses dados continuam editáveis pelo usuário antes de salvar. O preço não é buscado online; o app preserva apenas o último preço pago pelo próprio usuário.
 
 ## Build
 

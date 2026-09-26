@@ -11,7 +11,9 @@ required = [
     "app/src/main/AndroidManifest.xml",
     "app/src/main/java/com/listamercado/app/model/ShoppingList.kt",
     "app/src/main/java/com/listamercado/app/model/CatalogProduct.kt",
+    "app/src/main/java/com/listamercado/app/model/BarcodeLookupResult.kt",
     "app/src/main/java/com/listamercado/app/data/ProductCatalogRepository.kt",
+    "app/src/main/java/com/listamercado/app/data/BarcodeLookupRepository.kt",
     "app/src/main/java/com/listamercado/app/ui/ListDetailActivity.kt",
     "app/src/main/java/com/listamercado/app/ui/PurchaseModeActivity.kt",
     "app/src/main/java/com/listamercado/app/ui/PurchaseModeAdapter.kt",
@@ -173,6 +175,8 @@ if "totalPrice / item.quantity" not in purchase_mode_source or "inputQuickPrice"
     raise SystemExit("Quick total-price editing is missing or does not preserve internal unit-price semantics")
 
 catalog_source = (root / "app/src/main/java/com/listamercado/app/data/ProductCatalogRepository.kt").read_text(encoding="utf-8")
+barcode_lookup_source = (root / "app/src/main/java/com/listamercado/app/data/BarcodeLookupRepository.kt").read_text(encoding="utf-8")
+barcode_lookup_model = (root / "app/src/main/java/com/listamercado/app/model/BarcodeLookupResult.kt").read_text(encoding="utf-8")
 item_dialog_source = (root / "app/src/main/java/com/listamercado/app/ui/ItemDialog.kt").read_text(encoding="utf-8")
 scanner_source = (root / "app/src/main/java/com/listamercado/app/ui/BarcodeScannerActivity.kt").read_text(encoding="utf-8")
 settings_activity_source = (root / "app/src/main/java/com/listamercado/app/ui/SettingsActivity.kt").read_text(encoding="utf-8")
@@ -183,8 +187,14 @@ if "seedFromLists" not in catalog_source or "lastUnitPrice" not in catalog_sourc
     raise SystemExit("Catalog must seed existing items and persist last price/barcode")
 if "MaterialAutoCompleteTextView" not in item_dialog_source or "findByBarcode" not in item_dialog_source or "buttonScanBarcode" not in item_dialog_source:
     raise SystemExit("Known-product suggestions or barcode fill flow is missing from item editor")
+if "lookupBarcodeOnline" not in item_dialog_source or "BarcodeLookupRepository" not in item_dialog_source:
+    raise SystemExit("Automatic optional online barcode lookup is missing from item editor")
+if "Open Food Facts" not in barcode_lookup_source or "product_name" not in barcode_lookup_source or "BarcodeLookupResult" not in barcode_lookup_model:
+    raise SystemExit("Online barcode lookup mapping is incomplete")
 if "BarcodeScanning.getClient" not in scanner_source or "InputImage.fromMediaImage" not in scanner_source:
     raise SystemExit("On-device barcode scanner implementation is missing")
+if "buttonTorch" not in scanner_source or "chooseBestBarcode" not in scanner_source or "lastCandidateHits" not in scanner_source:
+    raise SystemExit("Scanner quality-of-life improvements (torch/selection/stability) are missing")
 if 'implementation("com.google.mlkit:barcode-scanning:17.3.0")' not in app_gradle:
     raise SystemExit("Bundled ML Kit barcode-scanning dependency is missing")
 if "play-services-mlkit-barcode-scanning" in app_gradle:
@@ -224,6 +234,8 @@ if "PRODUTO" not in item_layout or "COMPRA" not in item_layout or "DETALHES" not
     raise SystemExit("Redesigned item editor sections are missing")
 if "Widget.Material3.TextInputLayout.FilledBox" not in item_layout:
     raise SystemExit("Item editor must use the reduced-outline filled field style")
+if 'placeholderText="Ex.: Arroz, café, sabão em pó"' not in item_layout or "textLookupStatus" not in item_layout:
+    raise SystemExit("Item editor refinements for product-name entry and lookup feedback are missing")
 
 # Keep source packages clean: APKs are release outputs and must not be committed/zipped.
 apks = [p.relative_to(root).as_posix() for p in root.rglob("*.apk")]
