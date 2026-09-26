@@ -5,11 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.checkbox.MaterialCheckBox
-import com.google.android.material.chip.Chip
 import com.listamercado.app.R
 import com.listamercado.app.model.ShoppingItem
 import java.text.DecimalFormat
@@ -43,28 +42,24 @@ class ShoppingItemAdapter(
     inner class Holder(view: View) : RecyclerView.ViewHolder(view) {
         private val check: MaterialCheckBox = view.findViewById(R.id.checkPurchased)
         private val name: TextView = view.findViewById(R.id.textName)
+        private val meta: TextView = view.findViewById(R.id.textMeta)
+        private val note: TextView = view.findViewById(R.id.textNote)
         private val unitPrice: TextView = view.findViewById(R.id.textUnitPrice)
         private val totalPrice: TextView = view.findViewById(R.id.textPrice)
-        private val quantity: Chip = view.findViewById(R.id.chipQuantity)
-        private val category: Chip = view.findViewById(R.id.chipCategory)
-        private val note: TextView = view.findViewById(R.id.textNote)
-        private val edit: MaterialButton = view.findViewById(R.id.buttonEdit)
-        private val delete: ImageButton = view.findViewById(R.id.buttonDelete)
+        private val more: ImageButton = view.findViewById(R.id.buttonItemMore)
 
         fun bind(item: ShoppingItem) {
             check.setOnCheckedChangeListener(null)
             check.isChecked = item.purchased
             name.text = item.name
-            quantity.text = "${quantityFormat.format(item.quantity)} ${item.unit}"
-            category.text = item.category
+            meta.text = "${quantityFormat.format(item.quantity)} ${item.unit} • ${item.category}"
 
             if (item.unitPrice > 0.0) {
                 totalPrice.text = currency.format(item.subtotal)
-                unitPrice.text = "${currency.format(item.unitPrice)} por ${item.unit}"
-                unitPrice.visibility = View.VISIBLE
+                unitPrice.text = "${currency.format(item.unitPrice)}/${item.unit}"
             } else {
                 totalPrice.text = "Sem preço"
-                unitPrice.visibility = View.GONE
+                unitPrice.text = "Toque para informar"
             }
 
             note.text = item.note
@@ -75,12 +70,24 @@ class ShoppingItemAdapter(
             } else {
                 name.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
             }
-            itemView.alpha = if (item.purchased) 0.72f else 1f
+            itemView.alpha = if (item.purchased) 0.68f else 1f
 
             check.setOnCheckedChangeListener { _, checked -> onChecked(item, checked) }
             itemView.setOnClickListener { onEdit(item) }
-            edit.setOnClickListener { onEdit(item) }
-            delete.setOnClickListener { onDelete(item) }
+            more.setOnClickListener { anchor ->
+                PopupMenu(anchor.context, anchor).apply {
+                    menu.add("Editar")
+                    menu.add("Excluir")
+                    setOnMenuItemClickListener { menuItem ->
+                        when (menuItem.title.toString()) {
+                            "Editar" -> onEdit(item)
+                            "Excluir" -> onDelete(item)
+                        }
+                        true
+                    }
+                    show()
+                }
+            }
         }
     }
 }

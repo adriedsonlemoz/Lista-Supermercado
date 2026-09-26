@@ -4,7 +4,7 @@ Aplicativo Android nativo, leve e offline para organizar compras em listas separ
 
 ## Versão
 
-`1.0.9+10`
+`1.0.10+11`
 
 ## Identidade técnica
 
@@ -67,3 +67,14 @@ Os nomes de Secrets aceitos estão documentados em `SIGNING-SECRETS.txt`.
 ## Lista inicial Cicloviagem — 1.0.9+10
 
 O aplicativo cria uma única vez a lista padrão **Cicloviagem**, com 18 itens iniciais de alimentação para facilitar o preparo de uma viagem de bicicleta. A lista é totalmente editável e pode ser excluída; se for removida pelo usuário, não é recriada automaticamente. Em instalações já existentes, ela é adicionada uma única vez sem alterar as listas atuais.
+
+
+## Mapa e tela de novidades — 1.0.10+11
+
+- Novo **Supermercados próximos** com OpenStreetMap e consulta Overpass sem chave de API.
+- Usa a localização do Android, mostra mercados em até 5 km e distância até cada estabelecimento.
+- Cada marcador permite criar uma lista já nomeada com o supermercado e a data.
+- Tela de detalhes da lista foi compactada para mostrar mais produtos, com resumo, busca e filtros mais limpos.
+- Cards dos produtos foram redesenhados: tocar no card edita e o menu de três pontos concentra editar/excluir.
+- Nova tela **O que mudou nesta atualização**, exibida somente na primeira abertura após cada versão.
+- `WhatsNewContent.kt` centraliza as novidades e deve ser atualizado em todas as próximas versões.

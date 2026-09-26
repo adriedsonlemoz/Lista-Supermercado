@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.listamercado.app.R
 import com.listamercado.app.data.ShoppingRepository
 import com.listamercado.app.model.ShoppingItem
@@ -28,10 +28,13 @@ class ListDetailActivity : AppCompatActivity() {
     private lateinit var current: ShoppingList
     private lateinit var adapter: ShoppingItemAdapter
     private lateinit var search: EditText
-    private lateinit var summary: TextView
     private lateinit var title: TextView
     private lateinit var empty: TextView
     private lateinit var clearPurchased: MaterialButton
+    private lateinit var pendingCount: TextView
+    private lateinit var purchasedCount: TextView
+    private lateinit var estimatedTotal: TextView
+    private lateinit var cartTotal: TextView
     private var filter = Filter.ALL
     private val currency = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
 
@@ -61,10 +64,13 @@ class ListDetailActivity : AppCompatActivity() {
 
     private fun bindViews() {
         title = findViewById(R.id.textListTitle)
-        summary = findViewById(R.id.textListSummary)
         search = findViewById(R.id.inputSearchItems)
         empty = findViewById(R.id.textEmptyItems)
         clearPurchased = findViewById(R.id.buttonClearPurchased)
+        pendingCount = findViewById(R.id.textPendingCount)
+        purchasedCount = findViewById(R.id.textPurchasedCount)
+        estimatedTotal = findViewById(R.id.textEstimatedTotal)
+        cartTotal = findViewById(R.id.textCartTotal)
         val recycler = findViewById<RecyclerView>(R.id.recyclerItems)
 
         adapter = ShoppingItemAdapter(
@@ -80,7 +86,7 @@ class ListDetailActivity : AppCompatActivity() {
 
         findViewById<ImageButton>(R.id.buttonBack).setOnClickListener { finish() }
         findViewById<ImageButton>(R.id.buttonRenameList).setOnClickListener { renameList() }
-        findViewById<ExtendedFloatingActionButton>(R.id.fabAddItem).setOnClickListener { addItem() }
+        findViewById<FloatingActionButton>(R.id.fabAddItem).setOnClickListener { addItem() }
         findViewById<MaterialButton>(R.id.buttonAll).setOnClickListener { setFilter(Filter.ALL) }
         findViewById<MaterialButton>(R.id.buttonPending).setOnClickListener { setFilter(Filter.PENDING) }
         findViewById<MaterialButton>(R.id.buttonPurchased).setOnClickListener { setFilter(Filter.PURCHASED) }
@@ -167,8 +173,11 @@ class ListDetailActivity : AppCompatActivity() {
 
         val pending = current.items.count { !it.purchased }
         val purchased = current.items.count { it.purchased }
-        summary.text = "$pending pendentes • $purchased comprados\nEstimado: ${currency.format(current.estimatedTotal)} • No carrinho: ${currency.format(current.purchasedTotal)}"
-        clearPurchased.visibility = if (purchased > 0) View.VISIBLE else View.INVISIBLE
+        pendingCount.text = pending.toString()
+        purchasedCount.text = purchased.toString()
+        estimatedTotal.text = currency.format(current.estimatedTotal)
+        cartTotal.text = "Carrinho ${currency.format(current.purchasedTotal)}"
+        clearPurchased.visibility = if (purchased > 0) View.VISIBLE else View.GONE
     }
 
     private enum class Filter { ALL, PENDING, PURCHASED }

@@ -14,6 +14,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.listamercado.app.R
+import com.listamercado.app.BuildConfig
+import com.listamercado.app.data.SettingsRepository
 import com.listamercado.app.data.ShoppingRepository
 import com.listamercado.app.model.ShoppingList
 import com.listamercado.app.util.InsetsHelper
@@ -43,6 +45,7 @@ class MainActivity : AppCompatActivity() {
             scrollable = findViewById(R.id.recyclerLists),
             fab = findViewById(R.id.fabNewList)
         )
+        showWhatsNewIfNeeded()
     }
 
     override fun onResume() {
@@ -74,12 +77,22 @@ class MainActivity : AppCompatActivity() {
         findViewById<com.google.android.material.button.MaterialButton>(R.id.buttonCompare).setOnClickListener {
             startActivity(Intent(this, CompareActivity::class.java))
         }
+        findViewById<com.google.android.material.button.MaterialButton>(R.id.buttonNearbyMarkets).setOnClickListener {
+            startActivity(Intent(this, NearbyMarketsActivity::class.java))
+        }
 
         search.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = render()
             override fun afterTextChanged(s: Editable?) = Unit
         })
+    }
+
+    private fun showWhatsNewIfNeeded() {
+        val settings = SettingsRepository(this)
+        if (settings.lastSeenWhatsNewVersionCode() < BuildConfig.VERSION_CODE) {
+            startActivity(Intent(this, WhatsNewActivity::class.java))
+        }
     }
 
     private fun reload() {

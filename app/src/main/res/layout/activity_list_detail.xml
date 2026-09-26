@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout android:id="@+id/rootDetail" xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootDetail"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/colorSurface">
@@ -10,7 +11,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:paddingStart="14dp"
-        android:paddingTop="8dp"
+        android:paddingTop="6dp"
         android:paddingEnd="14dp">
 
         <LinearLayout
@@ -33,9 +34,9 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:maxLines="1"
                 android:ellipsize="end"
-                android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
+                android:maxLines="1"
+                android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
                 android:textStyle="bold" />
 
             <ImageButton
@@ -48,25 +49,79 @@
                 android:src="@drawable/ic_edit" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/textListSummary"
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="2dp"
-            android:layout_marginEnd="8dp"
-            android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
+            android:layout_marginTop="4dp"
+            app:cardBackgroundColor="?attr/colorPrimaryContainer"
+            app:cardCornerRadius="22dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/textListSummary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Resumo da lista"
+                    android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+                    android:textColor="?attr/colorOnPrimaryContainer" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView android:id="@+id/textPendingCount" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textAppearance="@style/TextAppearance.Material3.TitleLarge" android:textColor="?attr/colorOnPrimaryContainer" android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="pendentes" android:textAppearance="@style/TextAppearance.Material3.BodySmall" android:textColor="?attr/colorOnPrimaryContainer" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView android:id="@+id/textPurchasedCount" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textAppearance="@style/TextAppearance.Material3.TitleLarge" android:textColor="?attr/colorOnPrimaryContainer" android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="comprados" android:textAppearance="@style/TextAppearance.Material3.BodySmall" android:textColor="?attr/colorOnPrimaryContainer" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1.35"
+                        android:gravity="end"
+                        android:orientation="vertical">
+                        <TextView android:id="@+id/textEstimatedTotal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="end" android:text="R$ 0,00" android:textAppearance="@style/TextAppearance.Material3.TitleMedium" android:textColor="?attr/colorOnPrimaryContainer" android:textStyle="bold" />
+                        <TextView android:id="@+id/textCartTotal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="end" android:layout_marginTop="2dp" android:text="Carrinho R$ 0,00" android:textAppearance="@style/TextAppearance.Material3.BodySmall" android:textColor="?attr/colorOnPrimaryContainer" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            style="@style/Widget.Material3.TextInputLayout.FilledBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
+            android:layout_marginTop="12dp"
             android:hint="Buscar item ou categoria"
+            app:boxBackgroundColor="?attr/colorSurfaceVariant"
             app:boxCornerRadiusBottomEnd="18dp"
             app:boxCornerRadiusBottomStart="18dp"
             app:boxCornerRadiusTopEnd="18dp"
-            app:boxCornerRadiusTopStart="18dp">
+            app:boxCornerRadiusTopStart="18dp"
+            app:boxStrokeWidth="0dp"
+            app:boxStrokeWidthFocused="0dp"
+            app:startIconDrawable="@drawable/ic_search">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/inputSearchItems"
@@ -80,7 +135,7 @@
         <com.google.android.material.button.MaterialButtonToggleGroup
             android:id="@+id/groupFilters"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="44dp"
             android:layout_marginTop="10dp"
             app:checkedButton="@id/buttonAll"
             app:selectionRequired="true"
@@ -88,26 +143,35 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonAll"
-                style="@style/Widget.Material3.Button.TonalButton"
+                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="44dp"
                 android:layout_weight="1"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:minHeight="0dp"
                 android:text="Todos" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonPending"
-                style="@style/Widget.Material3.Button.TonalButton"
+                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="44dp"
                 android:layout_weight="1"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:minHeight="0dp"
                 android:text="Pendentes" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonPurchased"
-                style="@style/Widget.Material3.Button.TonalButton"
+                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="44dp"
                 android:layout_weight="1"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:minHeight="0dp"
                 android:text="Comprados" />
         </com.google.android.material.button.MaterialButtonToggleGroup>
 
@@ -115,9 +179,11 @@
             android:id="@+id/buttonClearPurchased"
             style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="36dp"
             android:layout_gravity="end"
-            android:minHeight="40dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:minHeight="0dp"
             android:text="Limpar comprados" />
 
         <FrameLayout
@@ -130,7 +196,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
-                android:paddingBottom="96dp" />
+                android:paddingBottom="88dp" />
 
             <TextView
                 android:id="@+id/textEmptyItems"
@@ -139,18 +205,17 @@
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:padding="32dp"
-                android:text="Nenhum item para mostrar.\nToque em Adicionar item para começar."
+                android:text="Nenhum item para mostrar.\nToque em + para adicionar um produto."
                 android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
         </FrameLayout>
     </LinearLayout>
 
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAddItem"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="22dp"
+        android:layout_margin="20dp"
         android:contentDescription="Adicionar item"
-        android:text="Adicionar item"
-        app:icon="@drawable/ic_add" />
+        app:srcCompat="@drawable/ic_add" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -13,6 +13,10 @@ required = [
     "app/src/main/java/com/listamercado/app/ui/ListDetailActivity.kt",
     "app/src/main/java/com/listamercado/app/ui/SettingsActivity.kt",
     "app/src/main/java/com/listamercado/app/ui/CompareActivity.kt",
+    "app/src/main/java/com/listamercado/app/ui/NearbyMarketsActivity.kt",
+    "app/src/main/java/com/listamercado/app/ui/WhatsNewActivity.kt",
+    "app/src/main/java/com/listamercado/app/ui/WhatsNewContent.kt",
+    "app/src/main/assets/nearby_markets_map.html",
     "app_identity.json",
     "github-manager.json",
     "scripts/validate_workflow.py",
@@ -59,6 +63,38 @@ for workflow in workflow_dir.glob("*.yml"):
             f"{workflow.relative_to(root)} contains Flutter commands in a native Kotlin project: "
             + ", ".join(bad)
         )
+
+manifest = (root / "app/src/main/AndroidManifest.xml").read_text(encoding="utf-8")
+for permission in (
+    "android.permission.INTERNET",
+    "android.permission.ACCESS_COARSE_LOCATION",
+    "android.permission.ACCESS_FINE_LOCATION",
+):
+    if permission not in manifest:
+        raise SystemExit(f"Missing map permission in AndroidManifest.xml: {permission}")
+
+map_source = (root / "app/src/main/java/com/listamercado/app/ui/NearbyMarketsActivity.kt").read_text(encoding="utf-8")
+if "overpass-api.de" not in map_source or 'shop"="supermarket' not in map_source:
+    raise SystemExit("Nearby supermarket map/Overpass query is missing or incomplete")
+
+settings_source = (root / "app/src/main/java/com/listamercado/app/data/SettingsRepository.kt").read_text(encoding="utf-8")
+main_source = (root / "app/src/main/java/com/listamercado/app/ui/MainActivity.kt").read_text(encoding="utf-8")
+if "lastSeenWhatsNewVersionCode" not in settings_source or "WhatsNewActivity" not in main_source:
+    raise SystemExit("Per-version What's New flow is missing")
+
+current_version = (root / "VERSION").read_text(encoding="utf-8").strip()
+changelog = (root / "CHANGELOG.md").read_text(encoding="utf-8")
+if f"## {current_version}" not in changelog:
+    raise SystemExit(f"CHANGELOG.md does not contain the current version {current_version}")
+
+whats_new_source = (root / "app/src/main/java/com/listamercado/app/ui/WhatsNewContent.kt").read_text(encoding="utf-8")
+current_code = int(current_version.split("+")[1])
+match = re.search(r"CONTENT_VERSION_CODE\s*=\s*(\d+)", whats_new_source)
+if not match or int(match.group(1)) != current_code:
+    raise SystemExit(
+        f"WhatsNewContent.kt must be updated for versionCode {current_code}; "
+        "set CONTENT_VERSION_CODE to the current version and refresh the change list"
+    )
 
 # Keep source packages clean: APKs are release outputs and must not be committed/zipped.
 apks = [p.relative_to(root).as_posix() for p in root.rglob("*.apk")]

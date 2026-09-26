@@ -1,5 +1,14 @@
-# Release 1.0.9+10
+# Release 1.0.10+11
 
-Adicionada a sugestão inicial **Cicloviagem**.
+## Principais novidades
 
-A lista contém arroz, óleo, sal, tempero, macarrão instantâneo, ovos, farinha, hortifruti, sardinha e suco em pó nas quantidades predefinidas. Ela pode ser editada, duplicada, comparada ou excluída normalmente.
+- Supermercados próximos no mapa usando OpenStreetMap.
+- Pesquisa de supermercados em até 5 km com distância e criação de lista pelo mapa.
+- Tela de lista redesenhada para exibir mais itens e reduzir poluição visual.
+- Nova tela de novidades exibida uma única vez após cada atualização.
+
+## Entrega
+
+- APK Release assinado pelo workflow principal.
+- APK fora do ZIP do código-fonte.
+- Sem `actions/upload-artifact` e sem `source.zip` no workflow.

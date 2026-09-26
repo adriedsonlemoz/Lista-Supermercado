@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.10+11 — 2026-09-25
+
+- Adicionado mapa de supermercados próximos com OpenStreetMap, localização do aparelho e consulta Overpass sem chave de API.
+- Adicionada distância até cada supermercado e ação para criar uma nova lista diretamente pelo marcador.
+- Reformulada a tela de detalhes da lista para ficar mais compacta e visualmente limpa.
+- Cards de produtos compactados; edição por toque e ações agrupadas em menu de três pontos.
+- Adicionada tela de novidades pós-atualização, exibida apenas uma vez por `versionCode`.
+- `Últimas alterações` nas Configurações passa a usar a mesma fonte da tela de novidades.
+- Adicionadas permissões de Internet e localização necessárias ao mapa.
+
 ## 1.0.9+10 — 2026-09-25
 
 - Adicionada a lista inicial pronta **Cicloviagem** com 18 produtos e quantidades predefinidas.

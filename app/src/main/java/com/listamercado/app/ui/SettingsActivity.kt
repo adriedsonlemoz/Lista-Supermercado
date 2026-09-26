@@ -54,15 +54,12 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun showChanges() {
+        val details = WhatsNewContent.changes.joinToString("\n\n") { change ->
+            "• ${change.title}\n${change.description}"
+        }
         MaterialAlertDialogBuilder(this)
             .setTitle("Últimas alterações")
-            .setMessage(
-                "Versão ${BuildConfig.VERSION_NAME}+${BuildConfig.VERSION_CODE}\n\n" +
-                    "• Nova lista inicial Cicloviagem com 18 itens prontos.\n" +
-                    "• A sugestão é criada uma única vez e pode ser editada ou excluída normalmente.\n" +
-                    "• Adicionadas unidades pacote e lata ao editor de produtos.\n" +
-                    "• Mantidas comparação de listas, histórico de preços, cartões renovados e modo escuro."
-            )
+            .setMessage("Versão ${BuildConfig.VERSION_NAME}+${BuildConfig.VERSION_CODE}\n\n$details")
             .setPositiveButton("Fechar", null)
             .show()
     }
