@@ -11,13 +11,15 @@ class ShoppingRepository(context: Context) {
 
     fun loadLists(): MutableList<ShoppingList> {
         val raw = prefs.getString(KEY_LISTS, null)
-        if (!raw.isNullOrBlank()) {
-            return runCatching {
+        val lists = if (!raw.isNullOrBlank()) {
+            runCatching {
                 val array = JSONArray(raw)
                 MutableList(array.length()) { index -> array.getJSONObject(index).toList() }
             }.getOrElse { mutableListOf() }
+        } else {
+            migrateLegacyItems()
         }
-        return migrateLegacyItems()
+        return ensureCyclingTripStarterList(lists)
     }
 
     fun saveLists(lists: List<ShoppingList>) {
@@ -25,6 +27,69 @@ class ShoppingRepository(context: Context) {
         lists.forEach { list -> array.put(list.toJson()) }
         prefs.edit().putString(KEY_LISTS, array.toString()).apply()
     }
+
+    private fun ensureCyclingTripStarterList(lists: MutableList<ShoppingList>): MutableList<ShoppingList> {
+        if (prefs.getBoolean(KEY_CICLOVIAGEM_CREATED, false)) return lists
+
+        val alreadyExists = lists.any { it.name.equals(CICLOVIAGEM_NAME, ignoreCase = true) }
+        if (!alreadyExists) {
+            lists.add(0, createCyclingTripList())
+            saveLists(lists)
+        }
+
+        prefs.edit().putBoolean(KEY_CICLOVIAGEM_CREATED, true).apply()
+        return lists
+    }
+
+    private fun createCyclingTripList(): ShoppingList {
+        val now = System.currentTimeMillis()
+        val items = listOf(
+            starterItem(now, 1, "Arroz branco", 5.0, "kg", "Mercearia"),
+            starterItem(now, 2, "Óleo de soja", 900.0, "mL", "Mercearia"),
+            starterItem(now, 3, "Sal", 1.0, "kg", "Mercearia"),
+            starterItem(now, 4, "Tempero pronto", 300.0, "g", "Mercearia"),
+            starterItem(now, 5, "Macarrão instantâneo", 20.0, "pacote", "Mercearia"),
+            starterItem(now, 6, "Ovos", 30.0, "un", "Mercearia"),
+            starterItem(now, 7, "Farinha de mandioca", 1.0, "kg", "Mercearia"),
+            starterItem(now, 8, "Batata", 2.0, "kg", "Hortifruti"),
+            starterItem(now, 9, "Cenoura", 1.0, "kg", "Hortifruti"),
+            starterItem(now, 10, "Pepino", 1.0, "kg", "Hortifruti"),
+            starterItem(now, 11, "Repolho", 1.0, "un", "Hortifruti"),
+            starterItem(now, 12, "Cebola", 1.0, "kg", "Hortifruti"),
+            starterItem(now, 13, "Tomate", 1.0, "kg", "Hortifruti"),
+            starterItem(now, 14, "Abobrinha", 500.0, "g", "Hortifruti"),
+            starterItem(now, 15, "Beterraba", 500.0, "g", "Hortifruti"),
+            starterItem(now, 16, "Pimentão", 500.0, "g", "Hortifruti"),
+            starterItem(now, 17, "Sardinha", 5.0, "lata", "Mercearia"),
+            starterItem(now, 18, "Suco em pó", 20.0, "un", "Bebidas")
+        ).toMutableList()
+
+        return ShoppingList(
+            id = now,
+            name = CICLOVIAGEM_NAME,
+            createdAt = now,
+            updatedAt = now,
+            items = items
+        )
+    }
+
+    private fun starterItem(
+        baseId: Long,
+        offset: Int,
+        name: String,
+        quantity: Double,
+        unit: String,
+        category: String
+    ) = ShoppingItem(
+        id = baseId + offset,
+        name = name,
+        quantity = quantity,
+        unit = unit,
+        unitPrice = 0.0,
+        category = category,
+        note = "",
+        purchased = false
+    )
 
     private fun migrateLegacyItems(): MutableList<ShoppingList> {
         val raw = prefs.getString(KEY_LEGACY_ITEMS, null) ?: return mutableListOf()
@@ -95,5 +160,7 @@ class ShoppingRepository(context: Context) {
         private const val PREFS_NAME = "lista_mercado"
         private const val KEY_LISTS = "shopping_lists_v2"
         private const val KEY_LEGACY_ITEMS = "shopping_items"
+        private const val KEY_CICLOVIAGEM_CREATED = "starter_cicloviagem_created"
+        private const val CICLOVIAGEM_NAME = "Cicloviagem"
     }
 }

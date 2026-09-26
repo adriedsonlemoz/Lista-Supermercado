@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.9+10 — 2026-09-25
+
+- Adicionada a lista inicial pronta **Cicloviagem** com 18 produtos e quantidades predefinidas.
+- A sugestão é criada uma única vez e continua totalmente editável como qualquer outra lista.
+- Usuários existentes recebem a sugestão sem perder ou alterar listas já cadastradas.
+- Se a lista Cicloviagem for excluída, o aplicativo não a recria.
+- Adicionada unidade `lata` às opções do editor de produtos.
+
 ## 1.0.8+9 — 2026-09-25
 
 - Tela inicial redesenhada com resumo visual das compras.

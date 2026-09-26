@@ -1,13 +1,13 @@
-# Validação — 1.0.8+9
+# Validação — 1.0.9+10
 
-- [x] versionName `1.0.8`
-- [x] versionCode `9`
-- [x] VERSION `1.0.8+9`
-- [x] app_identity.json sincronizado
-- [x] github-manager.json sincronizado
-- [x] Tela inicial com resumo visual
-- [x] Cards das listas com progresso
-- [x] Cards dos itens com preço unitário/subtotal e chips
-- [x] Busca e estado vazio refinados
-- [x] Workflow único de Release preservado
-- [x] APK permanece fora do ZIP do código-fonte
+- [x] versionName `1.0.9`
+- [x] versionCode `10`
+- [x] VERSION `1.0.9+10`
+- [x] `app_identity.json` sincronizado
+- [x] `github-manager.json` sincronizado
+- [x] Lista inicial `Cicloviagem` criada uma única vez
+- [x] 18 itens iniciais conferidos
+- [x] Lista continua totalmente editável
+- [x] Exclusão pelo usuário não recria a lista
+- [x] Usuários existentes preservam listas anteriores
+- [x] Unidade `lata` disponível no editor

@@ -21,7 +21,7 @@ object ItemDialog {
         "Hortifruti", "Açougue", "Padaria", "Laticínios", "Mercearia",
         "Bebidas", "Congelados", "Limpeza", "Higiene", "Pet", "Outros"
     )
-    private val units = listOf("un", "kg", "g", "L", "mL", "pct", "cx")
+    private val units = listOf("un", "kg", "g", "L", "mL", "pct", "pacote", "lata", "cx")
 
     fun show(context: Context, existing: ShoppingItem? = null, onSave: (ShoppingItem) -> Unit) {
         val view = LayoutInflater.from(context).inflate(R.layout.dialog_item, null)

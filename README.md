@@ -4,7 +4,7 @@ Aplicativo Android nativo, leve e offline para organizar compras em listas separ
 
 ## Versão
 
-`1.0.8+9`
+`1.0.9+10`
 
 ## Identidade técnica
 
@@ -62,3 +62,8 @@ Os nomes de Secrets aceitos estão documentados em `SIGNING-SECRETS.txt`.
 - Cards das listas ganharam ícone, data de atualização, total e barra de progresso da compra.
 - Cards dos produtos foram reorganizados com preço total, preço unitário, chips de quantidade/categoria e ações mais limpas.
 - Estado vazio e busca da tela inicial foram refinados para seguir o mesmo padrão Material 3.
+
+
+## Lista inicial Cicloviagem — 1.0.9+10
+
+O aplicativo cria uma única vez a lista padrão **Cicloviagem**, com 18 itens iniciais de alimentação para facilitar o preparo de uma viagem de bicicleta. A lista é totalmente editável e pode ser excluída; se for removida pelo usuário, não é recriada automaticamente. Em instalações já existentes, ela é adicionada uma única vez sem alterar as listas atuais.

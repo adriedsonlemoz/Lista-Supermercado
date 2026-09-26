@@ -58,11 +58,10 @@ class SettingsActivity : AppCompatActivity() {
             .setTitle("Últimas alterações")
             .setMessage(
                 "Versão ${BuildConfig.VERSION_NAME}+${BuildConfig.VERSION_CODE}\n\n" +
-                    "• Tela inicial redesenhada com resumo geral das compras.\n" +
-                    "• Cards das listas com progresso, total e última atualização.\n" +
-                    "• Cards dos produtos mais limpos, com quantidade e categoria em destaque.\n" +
-                    "• Preço unitário e subtotal agora têm hierarquia visual melhor.\n" +
-                    "• Mantidas comparação de listas, histórico de preços e modo escuro."
+                    "• Nova lista inicial Cicloviagem com 18 itens prontos.\n" +
+                    "• A sugestão é criada uma única vez e pode ser editada ou excluída normalmente.\n" +
+                    "• Adicionadas unidades pacote e lata ao editor de produtos.\n" +
+                    "• Mantidas comparação de listas, histórico de preços, cartões renovados e modo escuro."
             )
             .setPositiveButton("Fechar", null)
             .show()
