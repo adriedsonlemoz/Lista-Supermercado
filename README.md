@@ -4,7 +4,7 @@ Aplicativo Android nativo, leve e offline para organizar compras em listas separ
 
 ## Versão
 
-`1.0.22+26`
+`1.0.23+27`
 
 ## Identidade técnica
 
@@ -23,8 +23,8 @@ Aplicativo Android nativo, leve e offline para organizar compras em listas separ
 - tela inicial com listas independentes, por exemplo `Supermercado do João`, `Compra do mês` ou `Viagem`;
 - criar, renomear, duplicar e excluir listas;
 - migração automática dos itens das versões antigas para `Minha lista`;
-- itens com quantidade, unidade, categoria, preço e observação;
-- marcação de comprado e totais estimado/no carrinho;
+- itens com quantidade planejada, quantidade comprada, unidade, categoria, preço e observação;
+- marcação de comprado com estimativa pela quantidade planejada e carrinho pela quantidade realmente comprada;
 - modo de compra rápida por lista, mostrando apenas pendentes, checkbox grande, preço total direto no item, carrinho/orçamento em tempo real e ação para desfazer;
 - catálogo local/offline com sugestões ao adicionar itens, último preço, unidade/categoria padrão e código de barras opcional;
 - produtos favoritos e recorrentes com frequência semanal, quinzenal ou mensal;
@@ -193,6 +193,16 @@ O editor ganhou leitura de código de barras pela câmera. A leitura usa o model
 - O editor mostra sempre o código reconhecido, mesmo quando o produto ainda não existe no catálogo ou na consulta opcional online.
 - Retornos inválidos do scanner deixam de ser silenciosos e exibem orientação para tentar novamente.
 
+
+
+## Quantidade planejada x comprada — 1.0.23+27
+
+- `quantity` continua representando a quantidade planejada para compatibilidade com os dados existentes.
+- `purchasedQuantity` registra separadamente quanto foi realmente comprado.
+- A estimativa usa quantidade planejada; o carrinho e o total pago usam quantidade comprada.
+- O Modo compra permite ajustar a quantidade real antes de concluir o item.
+- Compras antigas marcadas como concluídas são migradas assumindo que a quantidade comprada era igual à planejada.
+- O histórico e o backup passam a registrar a quantidade realmente comprada.
 
 ## Preço-alvo por produto — 1.0.22+26
 

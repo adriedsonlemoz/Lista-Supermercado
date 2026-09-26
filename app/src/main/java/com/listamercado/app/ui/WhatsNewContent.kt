@@ -1,30 +1,30 @@
 package com.listamercado.app.ui
 
 object WhatsNewContent {
-    const val CONTENT_VERSION_CODE = 26
+    const val CONTENT_VERSION_CODE = 27
     const val TITLE = "O que mudou nesta atualização"
-    const val SUBTITLE = "Preço-alvo por produto para saber rapidamente se vale a pena comprar."
+    const val SUBTITLE = "Agora a lista separa o que você planejou do que realmente comprou."
 
     val changes = listOf(
         Change(
-            "Preço-alvo por produto",
-            "Cada produto do catálogo pode ter um preço-alvo opcional, editável tanto no catálogo quanto ao adicionar ou editar um item."
+            "Planejado x comprado",
+            "Cada item mantém a quantidade planejada e uma quantidade comprada separada, sem perder compatibilidade com listas antigas."
         ),
         Change(
-            "Status direto na lista",
-            "Produtos com alvo mostram se o preço atual está abaixo, dentro ou acima do valor definido usando texto e símbolo, sem depender apenas de cor."
+            "Carrinho com valor real",
+            "A estimativa continua usando a quantidade planejada, enquanto o carrinho usa apenas a quantidade realmente comprada dos itens concluídos."
         ),
         Change(
-            "Modo compra mais útil",
-            "Ao informar o preço no supermercado, o status do preço-alvo é atualizado imediatamente no próprio card do produto."
+            "Modo compra atualizado",
+            "No supermercado você pode informar quanto realmente levou e o total pago antes de marcar o produto como comprado."
         ),
         Change(
-            "Histórico comparativo",
-            "O histórico passa a destacar preço atual, preço-alvo, último preço anterior, média, menor e maior valor registrados."
+            "Histórico mais fiel",
+            "O histórico passa a mostrar quantidade comprada e total pago, usando somente compras concluídas nos indicadores de preço."
         ),
         Change(
-            "Backup atualizado",
-            "O backup usa schema 4 e preserva preço-alvo e unidade do alvo, mantendo compatibilidade com backups anteriores."
+            "Backup schema 5",
+            "Backup e CSV agora preservam quantidades planejadas e compradas, mantendo importação de backups antigos."
         )
     )
 

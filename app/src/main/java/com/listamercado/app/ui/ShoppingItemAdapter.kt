@@ -59,10 +59,14 @@ class ShoppingItemAdapter(
             check.setOnCheckedChangeListener(null)
             check.isChecked = item.purchased
             name.text = item.name
-            meta.text = "${quantityFormat.format(item.quantity)} ${item.unit} • ${item.category}"
+            meta.text = if (item.purchased) {
+                "Planejado: ${quantityFormat.format(item.quantity)} ${item.unit} • Comprado: ${quantityFormat.format(item.purchasedQuantity)} ${item.unit} • ${item.category}"
+            } else {
+                "Planejado: ${quantityFormat.format(item.quantity)} ${item.unit} • ${item.category}"
+            }
 
             if (item.unitPrice > 0.0) {
-                totalPrice.text = currency.format(item.subtotal)
+                totalPrice.text = currency.format(if (item.purchased) item.purchasedSubtotal else item.subtotal)
                 unitPrice.text = PriceUnitHelper.formattedUnitPrice(item, currency)
             } else {
                 totalPrice.text = "Sem preço"

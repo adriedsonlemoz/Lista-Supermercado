@@ -87,6 +87,7 @@ class RecurringProductsActivity : AppCompatActivity() {
                     id = now + index + 1,
                     name = product.name,
                     quantity = product.lastQuantity.coerceAtLeast(0.01),
+                    purchasedQuantity = 0.0,
                     unit = product.unit,
                     unitPrice = product.lastUnitPrice.coerceAtLeast(0.0),
                     category = product.category,

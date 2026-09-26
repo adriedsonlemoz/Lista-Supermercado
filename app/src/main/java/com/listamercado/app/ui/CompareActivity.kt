@@ -171,15 +171,23 @@ class CompareActivity : AppCompatActivity() {
                 title = list.name,
                 subtitle = "${date.format(Date(list.createdAt))} • ${if (item.unitPrice > 0) PriceUnitHelper.formattedUnitPrice(item, currency) else "sem preço"}",
                 detail = buildString {
-                    append("${formatQuantity(item.quantity)} ${item.unit} • subtotal ${currency.format(item.subtotal)}")
-                    if (!targetStatus.isNullOrBlank()) append("
-$targetStatus")
+                    if (item.purchased) {
+                        append("Planejado: ${formatQuantity(item.quantity)} ${item.unit}")
+                        append(" • comprado: ${formatQuantity(item.purchasedQuantity)} ${item.unit}")
+                        append(" • total pago ${currency.format(item.purchasedSubtotal)}")
+                    } else {
+                        append("Planejado: ${formatQuantity(item.quantity)} ${item.unit}")
+                        append(" • estimado ${currency.format(item.subtotal)}")
+                    }
+                    if (!targetStatus.isNullOrBlank()) append("\n$targetStatus")
                 }
             )
         }
 
-        val priced = occurrences.filter { (_, item) -> item.unitPrice > 0.0 }
-        summary.text = buildPriceInsight(selected, priced, occurrences.size)
+        val purchasedPriced = occurrences.filter { (_, item) ->
+            item.purchased && item.purchasedQuantity > 0.0 && item.unitPrice > 0.0
+        }
+        summary.text = buildPriceInsight(selected, purchasedPriced, purchasedPriced.size)
         adapter.submitList(rows)
     }
 
@@ -189,7 +197,7 @@ $targetStatus")
         occurrenceCount: Int
     ): String {
         if (priced.isEmpty()) {
-            return "$productName • encontrado em $occurrenceCount ${if (occurrenceCount == 1) "lista" else "listas"}\nNenhum preço informado ainda."
+            return "$productName • nenhum registro de compra concluída com preço ainda."
         }
 
         val preferredGroup = priced.groupBy { PriceUnitHelper.normalizedUnit(it.second) }

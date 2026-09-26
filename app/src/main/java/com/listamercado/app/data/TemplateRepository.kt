@@ -27,7 +27,7 @@ class TemplateRepository(context: Context) {
         val now = System.currentTimeMillis()
         val existing = templates.firstOrNull { it.name.equals(name, ignoreCase = true) }
         val copiedItems = source.items.mapIndexed { index, item ->
-            item.copy(id = now + index + 1, purchased = false)
+            item.copy(id = now + index + 1, purchased = false, purchasedQuantity = 0.0)
         }.toMutableList()
         if (existing == null) {
             templates += ListTemplate(
@@ -56,7 +56,7 @@ class TemplateRepository(context: Context) {
     fun createListFromTemplate(template: ListTemplate, listName: String): ShoppingList {
         val now = System.currentTimeMillis()
         val copiedItems = template.items.mapIndexed { index, item ->
-            item.copy(id = now + index + 1, purchased = false)
+            item.copy(id = now + index + 1, purchased = false, purchasedQuantity = 0.0)
         }.toMutableList()
         return ShoppingList(
             id = now,
@@ -124,6 +124,7 @@ class TemplateRepository(context: Context) {
         put("id", id)
         put("name", name)
         put("quantity", quantity)
+        put("purchasedQuantity", 0.0)
         put("unit", unit)
         put("unitPrice", unitPrice)
         put("category", category)
@@ -147,6 +148,7 @@ class TemplateRepository(context: Context) {
         id = optLong("id", System.currentTimeMillis()),
         name = optString("name", "Item"),
         quantity = optDouble("quantity", 1.0).coerceAtLeast(0.01),
+        purchasedQuantity = 0.0,
         unit = optString("unit", "un").ifBlank { "un" },
         unitPrice = optDouble("unitPrice", 0.0).coerceAtLeast(0.0),
         category = optString("category", "Outros").ifBlank { "Outros" },

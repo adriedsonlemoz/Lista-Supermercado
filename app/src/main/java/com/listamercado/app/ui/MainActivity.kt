@@ -220,7 +220,7 @@ class MainActivity : AppCompatActivity() {
         ListDialog.show(this, "${source.name} - nova compra") { name ->
             val now = System.currentTimeMillis()
             val copiedItems = source.items.mapIndexed { index, item ->
-                item.copy(id = now + index + 1, purchased = false)
+                item.copy(id = now + index + 1, purchased = false, purchasedQuantity = 0.0)
             }.toMutableList()
             lists.add(0, ShoppingList(id = now, name = name, createdAt = now, updatedAt = now, budget = source.budget, items = copiedItems))
             repository.saveLists(lists)

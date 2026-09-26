@@ -135,6 +135,7 @@ class ShoppingRepository(context: Context) {
         put("id", id)
         put("name", name)
         put("quantity", quantity)
+        put("purchasedQuantity", purchasedQuantity)
         put("unit", unit)
         put("unitPrice", unitPrice)
         put("category", category)
@@ -156,16 +157,29 @@ class ShoppingRepository(context: Context) {
         )
     }
 
-    private fun JSONObject.toItem() = ShoppingItem(
-        id = optLong("id", System.currentTimeMillis()),
-        name = optString("name", "Item"),
-        quantity = optDouble("quantity", 1.0),
-        unit = optString("unit", "un"),
-        unitPrice = optDouble("unitPrice", 0.0),
-        category = optString("category", "Outros"),
-        note = optString("note", ""),
-        purchased = optBoolean("purchased", false)
-    )
+    private fun JSONObject.toItem(): ShoppingItem {
+        val plannedQuantity = optDouble("quantity", 1.0).coerceAtLeast(0.01)
+        val purchased = optBoolean("purchased", false)
+        val actualQuantity = if (has("purchasedQuantity")) {
+            optDouble("purchasedQuantity", 0.0).coerceAtLeast(0.0)
+        } else if (purchased) {
+            // Migração automática: nas versões antigas, comprado significava comprar toda a quantidade planejada.
+            plannedQuantity
+        } else {
+            0.0
+        }
+        return ShoppingItem(
+            id = optLong("id", System.currentTimeMillis()),
+            name = optString("name", "Item"),
+            quantity = plannedQuantity,
+            purchasedQuantity = actualQuantity,
+            unit = optString("unit", "un"),
+            unitPrice = optDouble("unitPrice", 0.0),
+            category = optString("category", "Outros"),
+            note = optString("note", ""),
+            purchased = purchased
+        )
+    }
 
     companion object {
         private const val PREFS_NAME = "lista_mercado"
@@ -208,6 +222,7 @@ class ShoppingRepository(context: Context) {
             id = baseId + offset,
             name = name,
             quantity = quantity,
+            purchasedQuantity = 0.0,
             unit = unit,
             unitPrice = unitPrice,
             category = category,

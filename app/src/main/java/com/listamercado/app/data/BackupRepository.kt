@@ -67,7 +67,7 @@ class BackupRepository(
         val catalogByName = products.associateBy { ProductCatalogRepository.normalizeName(it.name) }
         val lines = mutableListOf<String>()
         lines += listOf(
-            "tipo", "lista", "produto", "quantidade", "unidade", "preco_unitario",
+            "tipo", "lista", "produto", "quantidade_planejada", "quantidade_comprada", "unidade", "preco_unitario",
             "categoria", "comprado", "orcamento_lista", "codigo_barras", "favorito", "recorrencia",
             "preco_alvo", "unidade_preco_alvo", "atualizado_em"
         ).joinToString(",", transform = ::csv)
@@ -75,7 +75,7 @@ class BackupRepository(
         lists.forEach { list ->
             if (list.items.isEmpty()) {
                 lines += listOf(
-                    "LISTA", list.name, "", "", "", "", "", "", number(list.budget), "", "", "", "", "", instant(list.updatedAt)
+                    "LISTA", list.name, "", "", "", "", "", "", "", number(list.budget), "", "", "", "", "", instant(list.updatedAt)
                 ).joinToString(",", transform = ::csv)
             } else {
                 list.items.forEach { item ->
@@ -84,6 +84,7 @@ class BackupRepository(
                         list.name,
                         item.name,
                         number(item.quantity),
+                        number(item.purchasedQuantity),
                         item.unit,
                         number(item.unitPrice),
                         item.category,
@@ -105,6 +106,7 @@ class BackupRepository(
                 "CATALOGO",
                 "",
                 product.name,
+                "",
                 "",
                 product.unit,
                 number(product.lastUnitPrice),
@@ -174,7 +176,9 @@ class BackupRepository(
         val summary = BackupSummary(
             listCount = lists.size,
             productCount = products.size,
-            priceRecordCount = lists.sumOf { list -> list.items.count { it.unitPrice > 0.0 } },
+            priceRecordCount = lists.sumOf { list ->
+                list.items.count { it.purchased && it.purchasedQuantity > 0.0 && it.unitPrice > 0.0 }
+            },
             itemCount = lists.sumOf { it.items.size },
             templateCount = templates.size,
             favoriteMarketCount = favoriteMarketKeys.size
@@ -297,20 +301,32 @@ class BackupRepository(
         val id = json.optLong("id", 0L)
         val name = json.optString("name", "").trim()
         val quantity = json.optDouble("quantity", Double.NaN)
+        val purchased = json.optBoolean("purchased", false)
+        val purchasedQuantity = if (json.has("purchasedQuantity")) {
+            json.optDouble("purchasedQuantity", Double.NaN)
+        } else if (purchased) {
+            // Backups dos schemas 1-4 não separavam planejado/comprado.
+            quantity
+        } else {
+            0.0
+        }
         val price = json.optDouble("unitPrice", 0.0)
         if (id <= 0L) throw IllegalArgumentException("Lista '$listName', item ${index + 1}: identificador inválido.")
         if (name.isBlank()) throw IllegalArgumentException("Lista '$listName', item ${index + 1}: nome vazio.")
-        if (!quantity.isFinite() || quantity <= 0.0) throw IllegalArgumentException("Item '$name': quantidade inválida.")
+        if (!quantity.isFinite() || quantity <= 0.0) throw IllegalArgumentException("Item '$name': quantidade planejada inválida.")
+        if (!purchasedQuantity.isFinite() || purchasedQuantity < 0.0) throw IllegalArgumentException("Item '$name': quantidade comprada inválida.")
+        if (purchased && purchasedQuantity <= 0.0) throw IllegalArgumentException("Item '$name': item comprado sem quantidade comprada.")
         if (!price.isFinite() || price < 0.0) throw IllegalArgumentException("Item '$name': preço inválido.")
         return ShoppingItem(
             id = id,
             name = name,
             quantity = quantity,
+            purchasedQuantity = purchasedQuantity,
             unit = json.optString("unit", "un").ifBlank { "un" },
             unitPrice = price,
             category = json.optString("category", "Outros").ifBlank { "Outros" },
             note = json.optString("note", ""),
-            purchased = json.optBoolean("purchased", false)
+            purchased = purchased
         )
     }
 
@@ -358,6 +374,7 @@ class BackupRepository(
         put("id", id)
         put("name", name)
         put("quantity", quantity)
+        put("purchasedQuantity", purchasedQuantity)
         put("unit", unit)
         put("unitPrice", unitPrice)
         put("category", category)
@@ -397,7 +414,10 @@ class BackupRepository(
         if (name.isBlank()) throw IllegalArgumentException("Modelo ${index + 1}: nome vazio.")
         val itemArray = json.optJSONArray("items") ?: JSONArray()
         val items = MutableList(itemArray.length()) { itemIndex ->
-            parseItem(itemArray.getJSONObject(itemIndex), "modelo $name", itemIndex).apply { purchased = false }
+            parseItem(itemArray.getJSONObject(itemIndex), "modelo $name", itemIndex).apply {
+                purchased = false
+                purchasedQuantity = 0.0
+            }
         }
         return ListTemplate(
             id = id,
@@ -411,15 +431,18 @@ class BackupRepository(
 
     private fun buildPriceHistory(lists: List<ShoppingList>) = JSONArray().apply {
         lists.sortedBy { it.createdAt }.forEach { list ->
-            list.items.filter { it.unitPrice > 0.0 }.forEach { item ->
+            list.items.filter { it.purchased && it.purchasedQuantity > 0.0 && it.unitPrice > 0.0 }.forEach { item ->
                 put(JSONObject().apply {
                     put("listId", list.id)
                     put("listName", list.name)
                     put("itemId", item.id)
                     put("productName", item.name)
+                    put("plannedQuantity", item.quantity)
+                    put("purchasedQuantity", item.purchasedQuantity)
                     put("unitPrice", item.unitPrice)
+                    put("paidTotal", item.purchasedSubtotal)
                     put("unit", item.unit)
-                    put("recordedAt", list.createdAt)
+                    put("recordedAt", list.updatedAt)
                 })
             }
         }
@@ -435,7 +458,7 @@ class BackupRepository(
     private fun instant(epochMillis: Long): String = runCatching { Instant.ofEpochMilli(epochMillis).toString() }.getOrDefault("")
 
     companion object {
-        const val SCHEMA_VERSION = 4
+        const val SCHEMA_VERSION = 5
         private const val BACKUP_FORMAT = "meu-supermercado-backup"
     }
 }

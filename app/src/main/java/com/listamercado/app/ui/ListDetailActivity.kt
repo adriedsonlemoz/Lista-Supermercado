@@ -146,6 +146,7 @@ class ListDetailActivity : AppCompatActivity() {
         adapter = ShoppingItemAdapter(
             onChecked = { item, checked ->
                 item.purchased = checked
+                if (checked) item.ensurePurchasedQuantity()
                 persistAndRender()
             },
             onEdit = { editItem(it) },

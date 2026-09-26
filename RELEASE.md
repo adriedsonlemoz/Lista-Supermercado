@@ -1,19 +1,17 @@
-# Release — Meu Supermercado 1.0.22+26
+# Release — Meu Supermercado 1.0.23+27
 
 ## Destaques
 
-- Preço-alvo opcional por produto.
-- Status abaixo/dentro/acima do alvo na lista normal e no Modo compra.
-- Edição e remoção do alvo pelo catálogo ou pelo editor do item.
-- Histórico compara preço atual, alvo, último registro anterior e média histórica.
-- Backup atualizado para schema 4 com preço-alvo e unidade do alvo.
+- Quantidade planejada e quantidade comprada agora são independentes.
+- Estimativa usa o planejado; carrinho usa o que foi realmente comprado.
+- Modo compra permite informar a quantidade real e o total pago.
+- Histórico mostra quantidade comprada e total pago.
+- Backup atualizado para schema 5 com migração automática de dados antigos.
 
-## Comportamento
+## Compatibilidade
 
-O preço-alvo pertence ao produto do catálogo, não a uma lista específica. Assim, o mesmo produto usa o mesmo objetivo de preço em listas diferentes sem duplicar dados. O preço atual de cada lista e o histórico continuam independentes.
-
-Quando o preço atual é igual ao alvo na precisão de centavos, o status é **Dentro do alvo**; abaixo ou acima disso, o aplicativo informa explicitamente a direção.
+Listas de versões anteriores continuam funcionando. Para um item antigo já marcado como comprado, a migração considera a quantidade comprada igual à quantidade planejada, reproduzindo o comportamento que existia antes desta versão. Modelos, duplicações e recorrentes nunca carregam uma quantidade comprada antiga.
 
 ## Build
 
-O workflow principal continua sendo `.github/workflows/android-release.yml`, com APK Release assinado publicado diretamente na GitHub Release, sem `actions/upload-artifact` e sem `source.zip`.
+O workflow principal continua sendo `.github/workflows/android-release.yml`, gerando APK Release assinado e publicando o `.apk` diretamente na GitHub Release, sem `actions/upload-artifact` e sem `source.zip`.

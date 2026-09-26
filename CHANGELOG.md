@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.23+27 — 2026-09-26
+
+- Separada a **quantidade planejada** da **quantidade realmente comprada** em cada item.
+- A estimativa da lista continua usando a quantidade planejada; o valor do carrinho usa a quantidade comprada dos itens concluídos.
+- O **Modo compra** ganhou campo de quantidade comprada e o preço rápido passou a representar o **total pago** pela quantidade realmente levada.
+- Ao marcar um item como comprado sem informar a quantidade real, o aplicativo assume a quantidade planejada para manter o fluxo rápido e a compatibilidade com o comportamento anterior.
+- A lista normal mostra Planejado e Comprado nos itens concluídos e usa o total realmente pago no card.
+- O histórico de preço passa a considerar compras concluídas e exibe quantidade comprada e total pago.
+- Backup atualizado para **schema 5** e CSV ampliado com quantidade planejada e quantidade comprada; backups antigos migram automaticamente.
+- Modelos, duplicação de listas e recorrentes sempre começam com quantidade comprada zerada.
+- Tela de novidades atualizada para versionCode 27.
+
 ## 1.0.22+26 — 2026-09-26
 
 - Adicionado **preço-alvo opcional por produto** no catálogo.

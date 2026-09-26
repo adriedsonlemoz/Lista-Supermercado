@@ -52,10 +52,12 @@ object ItemDialog {
         val lookupProgress = view.findViewById<LinearProgressIndicator>(R.id.progressLookup)
         val nameLayout = view.findViewById<TextInputLayout>(R.id.layoutName)
         val quantityLayout = view.findViewById<TextInputLayout>(R.id.layoutQuantity)
+        val purchasedQuantityLayout = view.findViewById<TextInputLayout>(R.id.layoutPurchasedQuantity)
         val priceLayout = view.findViewById<TextInputLayout>(R.id.layoutPrice)
         val targetLayout = view.findViewById<TextInputLayout>(R.id.layoutPriceTarget)
         val name = view.findViewById<MaterialAutoCompleteTextView>(R.id.inputName)
         val quantity = view.findViewById<TextInputEditText>(R.id.inputQuantity)
+        val purchasedQuantity = view.findViewById<TextInputEditText>(R.id.inputPurchasedQuantity)
         val price = view.findViewById<TextInputEditText>(R.id.inputPrice)
         val targetPrice = view.findViewById<TextInputEditText>(R.id.inputPriceTarget)
         val note = view.findViewById<TextInputEditText>(R.id.inputNote)
@@ -190,6 +192,10 @@ object ItemDialog {
             name.setText(it.name, false)
             suppressNameWatcher = false
             quantity.setText(it.quantity.toInput())
+            if (it.purchased || it.purchasedQuantity > 0.0) {
+                purchasedQuantityLayout.visibility = View.VISIBLE
+                purchasedQuantity.setText((it.purchasedQuantity.takeIf { value -> value > 0.0 } ?: it.quantity).toInput())
+            }
             priceWatcher.setAmount(PriceUnitHelper.editorAmount(it.unitPrice, it.unit))
             note.setText(it.note)
             category.setText(it.category, false)
@@ -276,6 +282,7 @@ object ItemDialog {
         buttonSave.setOnClickListener {
             nameLayout.error = null
             quantityLayout.error = null
+            purchasedQuantityLayout.error = null
             priceLayout.error = null
             targetLayout.error = null
 
@@ -295,10 +302,21 @@ object ItemDialog {
 
             val unitValue = unit.text?.toString()?.ifBlank { units.first() } ?: units.first()
             val categoryValue = category.text?.toString()?.ifBlank { categories.first() } ?: categories.first()
+            val parsedPurchasedQuantity = if (purchasedQuantityLayout.visibility == View.VISIBLE) {
+                purchasedQuantity.text?.toString()?.replace(',', '.')?.toDoubleOrNull()
+            } else {
+                existing?.purchasedQuantity ?: 0.0
+            }
+            if (existing?.purchased == true && (parsedPurchasedQuantity == null || parsedPurchasedQuantity <= 0.0)) {
+                purchasedQuantityLayout.error = "Informe quanto foi realmente comprado"
+                purchasedQuantity.requestFocus()
+                return@setOnClickListener
+            }
 
             val item = (existing?.copy() ?: ShoppingItem(name = itemName)).apply {
                 this.name = itemName
                 this.quantity = parsedQuantity
+                this.purchasedQuantity = parsedPurchasedQuantity?.coerceAtLeast(0.0) ?: 0.0
                 this.unitPrice = PriceUnitHelper.internalAmount(
                     priceWatcher.amount().coerceAtLeast(0.0),
                     unitValue

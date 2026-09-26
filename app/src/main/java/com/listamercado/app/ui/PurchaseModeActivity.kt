@@ -76,7 +76,8 @@ class PurchaseModeActivity : AppCompatActivity() {
         val recycler = findViewById<RecyclerView>(R.id.recyclerPurchaseMode)
         adapter = PurchaseModeAdapter(
             onPurchased = { markPurchased(it) },
-            onPriceChanged = { item, total -> updateQuickPrice(item, total) }
+            onPriceChanged = { item, total -> updateQuickPrice(item, total) },
+            onPurchasedQuantityChanged = { item, quantity -> updatePurchasedQuantity(item, quantity) }
         )
         recycler.layoutManager = LinearLayoutManager(this)
         recycler.adapter = adapter
@@ -91,16 +92,28 @@ class PurchaseModeActivity : AppCompatActivity() {
         })
     }
 
+    private fun updatePurchasedQuantity(item: ShoppingItem, purchasedQuantity: Double) {
+        item.purchasedQuantity = purchasedQuantity.coerceAtLeast(0.0)
+        persist(renderItems = false)
+    }
+
     private fun updateQuickPrice(item: ShoppingItem, totalPrice: Double) {
-        item.unitPrice = if (item.quantity > 0.0) totalPrice / item.quantity else 0.0
+        val actualQuantity = item.purchasedQuantity.takeIf { it > 0.0 } ?: item.quantity
+        item.unitPrice = if (actualQuantity > 0.0) totalPrice / actualQuantity else 0.0
         catalogRepository.recordItem(item)
         persist(renderItems = false)
     }
 
     private fun markPurchased(item: ShoppingItem) {
+        item.ensurePurchasedQuantity()
         item.purchased = true
+        catalogRepository.recordItem(item)
         persist(renderItems = true)
-        Snackbar.make(root, "${item.name} marcado como comprado", Snackbar.LENGTH_LONG)
+        Snackbar.make(
+            root,
+            "${item.name}: ${formatQuantity(item.purchasedQuantity)} ${item.unit} comprado",
+            Snackbar.LENGTH_LONG
+        )
             .setAction("Desfazer") {
                 item.purchased = false
                 persist(renderItems = true)
@@ -148,6 +161,9 @@ class PurchaseModeActivity : AppCompatActivity() {
         budgetLabel.setTextColor(color)
         budgetValue.setTextColor(color)
     }
+
+    private fun formatQuantity(value: Double): String =
+        java.text.DecimalFormat("0.##", java.text.DecimalFormatSymbols(Locale("pt", "BR"))).format(value)
 
     private fun closeMode() {
         setResult(RESULT_OK)

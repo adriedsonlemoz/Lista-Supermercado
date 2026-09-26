@@ -204,8 +204,8 @@ if "PurchaseModeActivity" not in manifest or "buttonPurchaseMode" not in detail_
     raise SystemExit("Purchase mode entry point is missing")
 if "filter { !it.purchased }" not in purchase_mode_source or 'setAction("Desfazer")' not in purchase_mode_source:
     raise SystemExit("Purchase mode must focus pending items and support undo")
-if "totalPrice / item.quantity" not in purchase_mode_source or "inputQuickPrice" not in purchase_adapter_source:
-    raise SystemExit("Quick total-price editing is missing or does not preserve internal unit-price semantics")
+if "totalPrice / actualQuantity" not in purchase_mode_source or "inputQuickPrice" not in purchase_adapter_source:
+    raise SystemExit("Quick total-price editing is missing or does not use the actual purchased quantity")
 
 catalog_source = (root / "app/src/main/java/com/listamercado/app/data/ProductCatalogRepository.kt").read_text(encoding="utf-8")
 barcode_lookup_source = (root / "app/src/main/java/com/listamercado/app/data/BarcodeLookupRepository.kt").read_text(encoding="utf-8")
@@ -309,8 +309,24 @@ if "AndroidMarket.toggleFavorite" not in map_html or "AndroidMarket.listAction" 
 if "Sua localização foi obtida normalmente" not in map_source or "temporariamente indisponível" not in map_source:
     raise SystemExit("Market empty/error messaging must distinguish location from Overpass availability")
 
+shopping_item_model = (root / "app/src/main/java/com/listamercado/app/model/ShoppingItem.kt").read_text(encoding="utf-8")
+shopping_list_model = (root / "app/src/main/java/com/listamercado/app/model/ShoppingList.kt").read_text(encoding="utf-8")
+purchase_item_layout = (root / "app/src/main/res/layout/item_purchase_mode.xml").read_text(encoding="utf-8")
+if "var purchasedQuantity: Double" not in shopping_item_model or "purchasedSubtotal" not in shopping_item_model:
+    raise SystemExit("Planned vs purchased quantity model is missing")
+if "items.sumOf { it.subtotal }" not in shopping_list_model or "it.purchasedSubtotal" not in shopping_list_model:
+    raise SystemExit("Estimated total must use planned quantity and cart total must use purchased quantity")
+if "inputPurchasedQuantity" not in purchase_adapter_source or "onPurchasedQuantityChanged" not in purchase_adapter_source:
+    raise SystemExit("Purchase mode must let the user enter the actually purchased quantity")
+if "Total pago" not in purchase_item_layout or "Comprado" not in purchase_item_layout:
+    raise SystemExit("Purchase mode labels for actual quantity / paid total are missing")
+if "item.ensurePurchasedQuantity()" not in purchase_mode_source or "item.ensurePurchasedQuantity()" not in detail_source:
+    raise SystemExit("Mark-as-purchased flow must initialize actual quantity from planned quantity when needed")
+if "item.purchasedSubtotal" not in compare_source or "comprado:" not in compare_source:
+    raise SystemExit("Price history must show actual purchased quantity and paid total")
+
 backup_source = (root / "app/src/main/java/com/listamercado/app/data/BackupRepository.kt").read_text(encoding="utf-8")
-if 'const val SCHEMA_VERSION = 4' not in backup_source or '"meu-supermercado-backup"' not in backup_source:
+if 'const val SCHEMA_VERSION = 5' not in backup_source or '"meu-supermercado-backup"' not in backup_source:
     raise SystemExit("Versioned JSON backup format is missing")
 if 'put("templates",' not in backup_source or 'put("favorite", favorite)' not in backup_source or 'put("recurringFrequency", recurringFrequency' not in backup_source:
     raise SystemExit("Backup must preserve templates, product favorites and recurrence")
@@ -318,6 +334,8 @@ if 'put("marketPreferences",' not in backup_source or 'put("marketKey", marketKe
     raise SystemExit("Schema 3 backup must preserve market favorites/radius and list associations")
 if 'put("priceTarget", priceTarget' not in backup_source or 'put("priceTargetUnit", priceTargetUnit' not in backup_source:
     raise SystemExit("Schema 4 backup must preserve product price targets")
+if 'put("purchasedQuantity", purchasedQuantity)' not in backup_source or 'put("paidTotal", item.purchasedSubtotal)' not in backup_source:
+    raise SystemExit("Schema 5 backup must preserve actual purchased quantity and paid total")
 if "parseAndValidate" not in backup_source or "mergeWith" not in backup_source or "replaceWith" not in backup_source:
     raise SystemExit("Backup validation/import modes are missing")
 if 'put("priceHistory", history)' not in backup_source or "createCsvExport" not in backup_source:

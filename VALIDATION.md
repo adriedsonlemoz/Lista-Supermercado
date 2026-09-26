@@ -1,20 +1,23 @@
-# Validação — 1.0.22+26
+# Validação — 1.0.23+27
 
-- [x] versionName `1.0.22`
-- [x] versionCode `26`
-- [x] VERSION `1.0.22+26`
+- [x] versionName `1.0.23`
+- [x] versionCode `27`
+- [x] VERSION `1.0.23+27`
 - [x] app_identity.json e github-manager.json sincronizados
-- [x] WhatsNewContent sincronizado com versionCode 26
-- [x] Preço-alvo opcional persistido no catálogo com unidade normalizada
-- [x] Preço-alvo pode ser definido, editado e removido
-- [x] Lista normal mostra abaixo/dentro/acima do alvo com texto + símbolo
-- [x] Modo compra atualiza o status do alvo após alteração do preço
-- [x] Histórico compara atual, alvo, último anterior e média histórica
-- [x] Backup JSON atualizado para schema 4 e compatível com schemas anteriores
-- [x] Exportação CSV inclui preço-alvo e unidade
-- [x] Funcionalidades anteriores de scanner, backup, recorrentes, modelos e mercados preservadas
+- [x] WhatsNewContent sincronizado com versionCode 27
+- [x] ShoppingItem separa quantidade planejada e quantidade comprada
+- [x] Estimativa usa quantidade planejada
+- [x] Carrinho usa quantidade realmente comprada
+- [x] Modo compra permite editar quantidade comprada e total pago
+- [x] Marcação rápida assume a quantidade planejada quando nenhuma quantidade real foi informada
+- [x] Lista normal mostra Planejado/Comprado em itens concluídos
+- [x] Histórico mostra quantidade comprada e total pago e usa compras concluídas nos indicadores
+- [x] Backup JSON atualizado para schema 5 e compatível com schemas anteriores
+- [x] CSV inclui quantidade planejada e quantidade comprada
+- [x] Modelos, duplicações e recorrentes zeram quantidade comprada
+- [x] Funcionalidades anteriores de scanner, preço-alvo, backup, recorrentes, modelos e mercados preservadas
 - [x] compileSdk 35, targetSdk 35, minSdk 26, AGP 8.7.3, Kotlin 2.0.21 e Java/JVM 17 preservados
 - [x] Workflow principal sem actions/upload-artifact e sem source.zip
 - [ ] Build Gradle completo depende do GitHub Actions porque este ambiente não possui Android SDK/Gradle configurado.
 - [x] 50 XMLs analisados e bem formados
-- [x] Smoke test Kotlin do PriceTargetHelper passou para abaixo/dentro/acima e normalização g → kg
+- [x] Smoke test Kotlin confirmou: planejado 5 × R$ 4 = R$ 20 estimados; comprado 3 × R$ 4 = R$ 12 no carrinho

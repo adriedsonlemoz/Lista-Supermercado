@@ -22,7 +22,8 @@ import java.util.Locale
 
 class PurchaseModeAdapter(
     private val onPurchased: (ShoppingItem) -> Unit,
-    private val onPriceChanged: (ShoppingItem, Double) -> Unit
+    private val onPriceChanged: (ShoppingItem, Double) -> Unit,
+    private val onPurchasedQuantityChanged: (ShoppingItem, Double) -> Unit
 ) : RecyclerView.Adapter<PurchaseModeAdapter.Holder>() {
     private val items = mutableListOf<ShoppingItem>()
     private var catalogByName: Map<String, CatalogProduct> = emptyMap()
@@ -51,12 +52,33 @@ class PurchaseModeAdapter(
         private val name: TextView = view.findViewById(R.id.textPurchaseItemName)
         private val quantity: TextView = view.findViewById(R.id.textPurchaseItemQuantity)
         private val category: TextView = view.findViewById(R.id.textPurchaseItemCategory)
+        private val purchasedQuantityLayout: TextInputLayout = view.findViewById(R.id.layoutPurchasedQuantity)
+        private val purchasedQuantity: TextInputEditText = view.findViewById(R.id.inputPurchasedQuantity)
         private val priceLayout: TextInputLayout = view.findViewById(R.id.layoutQuickPrice)
         private val price: TextInputEditText = view.findViewById(R.id.inputQuickPrice)
         private val unitPrice: TextView = view.findViewById(R.id.textPurchaseUnitPrice)
         private val targetStatus: TextView = view.findViewById(R.id.textPurchaseTargetStatus)
         private var binding = false
         private var boundItem: ShoppingItem? = null
+
+        private val quantityWatcher = object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+
+            override fun afterTextChanged(s: Editable?) {
+                if (binding) return
+                val item = boundItem ?: return
+                val value = parseNumber(s?.toString()).coerceAtLeast(0.0)
+                onPurchasedQuantityChanged(item, value)
+                if (item.unitPrice > 0.0 && value > 0.0) {
+                    binding = true
+                    price.setText(priceFormat.format(item.unitPrice * value))
+                    price.setSelection(price.text?.length ?: 0)
+                    binding = false
+                }
+                updatePriceSummary(item)
+            }
+        }
 
         private val priceWatcher = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
@@ -65,19 +87,14 @@ class PurchaseModeAdapter(
             override fun afterTextChanged(s: Editable?) {
                 if (binding) return
                 val item = boundItem ?: return
-                val raw = s?.toString()?.trim().orEmpty()
-                val normalized = if (raw.contains(',')) {
-                    raw.replace(".", "").replace(',', '.')
-                } else {
-                    raw
-                }
-                val total = normalized.toDoubleOrNull() ?: 0.0
-                onPriceChanged(item, total.coerceAtLeast(0.0))
+                val total = parseNumber(s?.toString()).coerceAtLeast(0.0)
+                onPriceChanged(item, total)
                 updatePriceSummary(item)
             }
         }
 
         init {
+            purchasedQuantity.addTextChangedListener(quantityWatcher)
             price.addTextChangedListener(priceWatcher)
         }
 
@@ -86,35 +103,53 @@ class PurchaseModeAdapter(
             check.setOnCheckedChangeListener(null)
             check.isChecked = false
             name.text = item.name
-            quantity.text = "${quantityFormat.format(item.quantity)} ${item.unit}"
+            quantity.text = "Planejado: ${quantityFormat.format(item.quantity)} ${item.unit}"
             category.text = item.category
-            priceLayout.hint = "Preço total"
+            purchasedQuantityLayout.suffixText = item.unit
+            priceLayout.hint = "Total pago"
 
+            val actualQuantity = item.purchasedQuantity.takeIf { it > 0.0 } ?: item.quantity
             binding = true
-            price.setText(if (item.unitPrice > 0.0) priceFormat.format(item.subtotal) else "")
+            purchasedQuantity.setText(quantityFormat.format(actualQuantity))
+            purchasedQuantity.setSelection(purchasedQuantity.text?.length ?: 0)
+            price.setText(if (item.unitPrice > 0.0) priceFormat.format(item.unitPrice * actualQuantity) else "")
             price.setSelection(price.text?.length ?: 0)
             binding = false
-            updatePriceSummary(item)
+            updatePriceSummary(item, actualQuantity)
 
             check.setOnCheckedChangeListener { _, checked ->
                 if (checked) onPurchased(item)
             }
             itemView.setOnClickListener {
-                price.requestFocus()
-                price.setSelection(price.text?.length ?: 0)
+                purchasedQuantity.requestFocus()
+                purchasedQuantity.setSelection(purchasedQuantity.text?.length ?: 0)
             }
         }
 
-        private fun updatePriceSummary(item: ShoppingItem) {
+        private fun updatePriceSummary(item: ShoppingItem, overrideQuantity: Double? = null) {
+            val actualQuantity = overrideQuantity
+                ?: item.purchasedQuantity.takeIf { it > 0.0 }
+                ?: item.quantity
             unitPrice.text = if (item.unitPrice > 0.0) {
-                "${PriceUnitHelper.formattedUnitPrice(item, currency)} • total ${currency.format(item.subtotal)}"
+                "${PriceUnitHelper.formattedUnitPrice(item, currency)} • total ${currency.format(item.unitPrice * actualQuantity)}"
             } else {
-                "Informe o preço e marque como comprado"
+                "Informe quanto comprou e o total pago"
             }
             val product = catalogByName[com.listamercado.app.data.ProductCatalogRepository.normalizeName(item.name)]
             val text = PriceTargetHelper.statusText(item, product, currency)
             targetStatus.text = text.orEmpty()
             targetStatus.visibility = if (text.isNullOrBlank()) View.GONE else View.VISIBLE
+        }
+
+        private fun parseNumber(raw: String?): Double {
+            val value = raw?.trim().orEmpty()
+            if (value.isBlank()) return 0.0
+            val normalized = if (value.contains(',')) {
+                value.replace(".", "").replace(',', '.')
+            } else {
+                value
+            }
+            return normalized.toDoubleOrNull() ?: 0.0
         }
     }
 }
