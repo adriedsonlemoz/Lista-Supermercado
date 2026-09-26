@@ -68,6 +68,33 @@ class ProductCatalogRepository(context: Context) {
             .toList()
     }
 
+    fun replaceProducts(products: List<CatalogProduct>) {
+        saveProducts(products.map { it.copy() })
+    }
+
+    fun mergeProducts(imported: List<CatalogProduct>) {
+        val merged = loadProducts()
+        imported.forEach { incoming ->
+            val normalized = normalizeName(incoming.name)
+            if (normalized.isBlank()) return@forEach
+            val existing = merged.firstOrNull { it.normalizedName == normalized }
+            if (existing == null) {
+                merged += incoming.copy(normalizedName = normalized)
+            } else if (incoming.updatedAt >= existing.updatedAt) {
+                existing.name = incoming.name.trim()
+                existing.normalizedName = normalized
+                existing.category = incoming.category
+                existing.unit = incoming.unit
+                existing.lastUnitPrice = incoming.lastUnitPrice.coerceAtLeast(0.0)
+                existing.barcode = sanitizeBarcode(incoming.barcode) ?: existing.barcode
+                existing.updatedAt = incoming.updatedAt
+            } else if (existing.barcode.isNullOrBlank()) {
+                existing.barcode = sanitizeBarcode(incoming.barcode)
+            }
+        }
+        saveProducts(merged)
+    }
+
     private fun mergeItem(
         products: MutableList<CatalogProduct>,
         item: ShoppingItem,

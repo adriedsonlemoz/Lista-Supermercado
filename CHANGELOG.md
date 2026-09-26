@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.19+21 — 2026-09-26
+
+- Implementado backup completo em JSON com `schemaVersion = 1`.
+- Exportação inclui listas, itens, quantidades, unidades, preços, orçamento, estado comprado, observações, catálogo e histórico de preços derivado das listas.
+- Adicionada importação pelo seletor de arquivos do Android com validação de formato e schema.
+- Antes de importar, o app mostra quantidade de listas, itens, produtos do catálogo e registros de preço.
+- Adicionadas opções **Mesclar**, **Substituir** e **Cancelar**, com confirmação adicional antes da substituição.
+- Adicionada exportação CSV tabular de listas/itens e catálogo.
+- Tema escuro atualizado de preto fechado para grafite azulado mais visível.
+- Tela **Adicionar item** redesenhada com seções Produto, Compra e Detalhes, superfícies preenchidas e menos contornos.
+- Fluxos existentes de catálogo e leitura offline de código de barras preservados.
+- Tela de novidades atualizada para versionCode 21.
+
 ## 1.0.18.1+20 — 2026-09-26
 
 - Corrigida a falha do workflow em `:app:checkReleaseAarMetadata`.

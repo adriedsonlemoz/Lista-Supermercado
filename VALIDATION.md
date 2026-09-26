@@ -1,21 +1,26 @@
-# Validação — 1.0.18.1+20
+# Validação — 1.0.19+21
 
-- [x] versionName `1.0.18.1`
-- [x] versionCode `20`
-- [x] VERSION `1.0.18.1+20`
+- [x] versionName `1.0.19`
+- [x] versionCode `21`
+- [x] VERSION `1.0.19+21`
 - [x] app_identity.json sincronizado e JSON válido
 - [x] github-manager.json sincronizado e JSON válido
-- [x] WhatsNewContent sincronizado com versionCode 20
-- [x] Erro do Build #13 identificado em `:app:checkReleaseAarMetadata`
-- [x] CameraX 1.6.2 removido da configuração de dependências
-- [x] `camera-camera2`, `camera-lifecycle` e `camera-view` fixados em CameraX 1.5.3
-- [x] compileSdk 35 preservado
-- [x] targetSdk 35 preservado
-- [x] AGP 8.7.3 preservado
-- [x] Kotlin 2.0.21 preservado
-- [x] Java/JVM 17 preservado
-- [x] minSdk 26 preservado
-- [x] Leitor local de código de barras e ML Kit bundled preservados
-- [x] Catálogo offline e associação de códigos preservados
-- [x] Validação preventiva adicionada contra CameraX 1.6.x nesta base técnica
-- [ ] Build Gradle completo ainda precisa ser confirmado pelo workflow GitHub Actions, que possui Android SDK e acesso às dependências remotas.
+- [x] WhatsNewContent sincronizado com versionCode 21
+- [x] Tema escuro alterado para superfícies grafite azuladas, sem fundo preto puro
+- [x] Tela Adicionar/Editar item reorganizada em Produto, Compra e Detalhes
+- [x] Campos do editor usam superfícies preenchidas e menos contornos
+- [x] Leitor de código de barras e catálogo offline preservados
+- [x] Backup JSON com schema versionado (`schemaVersion = 1`)
+- [x] Backup inclui listas, itens, quantidades, unidades, preços, orçamento, estado comprado, observações e catálogo
+- [x] Histórico de preços é incluído no backup e continua restaurável pelas ocorrências de produtos nas listas
+- [x] Exportação usa o seletor de arquivos do Android, sem pasta fixa obrigatória
+- [x] Importação usa o seletor de arquivos do Android e valida formato/schema antes de alterar dados
+- [x] Resumo pré-importação mostra listas, itens, produtos do catálogo e registros de preço
+- [x] Importação oferece Mesclar, Substituir e Cancelar
+- [x] Substituição exige confirmação destrutiva adicional
+- [x] Exportação CSV disponível para itens e catálogo
+- [x] compileSdk 35, targetSdk 35, minSdk 26, AGP 8.7.3, Kotlin 2.0.21 e Java/JVM 17 preservados
+- [x] CameraX 1.5.3 preservado
+- [x] Workflow principal permanece `Build and Release Android APK`
+- [x] Workflow não usa `actions/upload-artifact` e não gera `source.zip`
+- [ ] Build Gradle completo precisa ser confirmado pelo GitHub Actions, pois este ambiente não possui Android SDK/Gradle configurado.

@@ -4,7 +4,7 @@ Aplicativo Android nativo, leve e offline para organizar compras em listas separ
 
 ## Versão
 
-`1.0.18.1+20`
+`1.0.19+21`
 
 ## Identidade técnica
 
@@ -36,7 +36,9 @@ Aplicativo Android nativo, leve e offline para organizar compras em listas separ
 - Configurações por engrenagem no topo;
 - aparência Sistema/Claro/Escuro;
 - Últimas alterações, Sobre e Doação via Pix;
-- armazenamento local offline.
+- armazenamento local offline;
+- backup completo em JSON com schema versionado, importação validada e opções de mesclar/substituir;
+- exportação CSV de itens e catálogo usando o seletor de arquivos do Android.
 
 ## Persistência e histórico
 
@@ -139,3 +141,13 @@ O editor ganhou leitura de código de barras pela câmera. A leitura usa o model
 - CameraX fixado em `1.5.3`, mantendo compatibilidade com `compileSdk 35`, AGP `8.7.3`, Kotlin `2.0.21` e Java 17.
 - O leitor de código de barras e o catálogo offline permanecem inalterados funcionalmente.
 - `scripts/validate_source.py` passa a bloquear CameraX 1.6.x enquanto a base técnica permanecer em compileSdk 35 / AGP 8.7.3.
+
+
+## Backup, restauração e refinamento visual — 1.0.19+21
+
+- Configurações ganhou **Exportar backup**, **Importar backup** e **Exportar CSV**.
+- O backup JSON possui schema versionado e inclui listas, itens, preços, orçamento, estado de compra, observações, catálogo e uma visão derivada do histórico de preços.
+- A importação valida o arquivo e mostra um resumo antes de permitir **Mesclar** ou **Substituir**.
+- Arquivos são escolhidos pelo Storage Access Framework do Android; não existe pasta fixa obrigatória.
+- O tema escuro recebeu superfícies mais claramente grafite/azuladas, sem preto puro, mantendo violeta/lilás como destaque.
+- A tela **Adicionar item** foi reorganizada em blocos de Produto, Compra e Detalhes, com campos preenchidos, menos bordas e ação de leitura de código integrada.

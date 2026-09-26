@@ -1,11 +1,19 @@
-# Release 1.0.18.1+20
+# Release — Meu Supermercado 1.0.19+21
 
-Correção de build da etapa de catálogo e leitura de código de barras.
+## Destaques
 
-- Corrigida a falha `checkReleaseAarMetadata` observada no Build and Release Android APK #13.
-- CameraX 1.6.2 foi removido porque exige compileSdk 36 e AGP 8.9.1+, acima do padrão técnico atual.
-- CameraX fixado em 1.5.3, mantendo compileSdk/targetSdk 35, AGP 8.7.3, Kotlin 2.0.21 e Java 17.
-- Funcionalidades da v1.0.18+19 foram preservadas: catálogo local, sugestões, associação de código e leitura offline pela câmera.
-- Validação preventiva adicionada para detectar regressões de compatibilidade da dependência CameraX.
-- Workflow principal permanece único, gera APK Release assinado e publica o `.apk` diretamente na GitHub Release.
-- APK permanece fora do ZIP do código-fonte e não há geração de `source.zip`.
+- Backup completo em JSON usando o seletor de arquivos do Android.
+- Importação validada com resumo e opções **Mesclar** ou **Substituir**.
+- Exportação CSV de itens e catálogo para uso em planilhas.
+- Tema escuro atualizado para uma base grafite/azulada, evitando preto puro.
+- Tela **Adicionar item** redesenhada com hierarquia mais clara e menos contornos.
+
+## Backup
+
+O schema inicial é `1`. O JSON contém listas, itens, orçamento, preços, estado de compra, catálogo e uma visão derivada do histórico de preços. O histórico usado pelo aplicativo continua tendo como fonte as ocorrências dos produtos nas próprias listas, portanto a restauração das listas preserva esse histórico sem manter um segundo banco paralelo.
+
+A importação sempre valida o arquivo antes de gravar dados. **Mesclar** conserva os dados locais e incorpora o backup; **Substituir** troca listas e catálogo após uma confirmação adicional.
+
+## Build
+
+O workflow de produção continua sendo `.github/workflows/android-release.yml`, gera APK Release assinado e publica o `.apk` diretamente na GitHub Release. O APK não faz parte do ZIP do código-fonte.

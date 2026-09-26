@@ -140,8 +140,8 @@ night_colors = (root / "app/src/main/res/values-night/colors.xml").read_text(enc
 if "#2E6B47" in colors or "#2E6B47" in night_colors or 'color name="on_primary"' not in colors:
     raise SystemExit("Updated violet theme / explicit on-primary contrast is missing")
 
-if "#101820" not in night_colors or "#121B24" not in night_colors:
-    raise SystemExit("Vigia-style graphite dark surfaces are missing")
+if "#111F2B" not in night_colors or "#142330" not in night_colors:
+    raise SystemExit("Updated graphite-blue dark surfaces are missing")
 
 # Android resources in qualified folders (such as values-night) must have default declarations.
 # Missing defaults fail lintVitalRelease and can crash when queried in another configuration.
@@ -205,6 +205,25 @@ if "CatalogActivity" not in manifest or "BarcodeScannerActivity" not in manifest
     raise SystemExit("Catalog/scanner activities are missing from AndroidManifest.xml")
 if "rowCatalog" not in settings_layout or "CatalogActivity::class.java" not in settings_activity_source:
     raise SystemExit("Catalog entry point is missing from Settings")
+
+backup_source = (root / "app/src/main/java/com/listamercado/app/data/BackupRepository.kt").read_text(encoding="utf-8")
+if 'const val SCHEMA_VERSION = 1' not in backup_source or '"meu-supermercado-backup"' not in backup_source:
+    raise SystemExit("Versioned JSON backup format is missing")
+if "parseAndValidate" not in backup_source or "mergeWith" not in backup_source or "replaceWith" not in backup_source:
+    raise SystemExit("Backup validation/import modes are missing")
+if 'put("priceHistory", history)' not in backup_source or "createCsvExport" not in backup_source:
+    raise SystemExit("Price-history backup or CSV export is missing")
+if "rowExportBackup" not in settings_layout or "rowImportBackup" not in settings_layout or "rowExportCsv" not in settings_layout:
+    raise SystemExit("Backup/CSV controls are missing from Settings")
+if "ActivityResultContracts.CreateDocument" not in settings_activity_source or "ActivityResultContracts.OpenDocument" not in settings_activity_source:
+    raise SystemExit("Backup must use Android document pickers instead of a fixed folder")
+if 'setPositiveButton("Mesclar")' not in settings_activity_source or 'setNeutralButton("Substituir")' not in settings_activity_source:
+    raise SystemExit("Import summary must offer merge and replace modes")
+item_layout = (root / "app/src/main/res/layout/dialog_item.xml").read_text(encoding="utf-8")
+if "PRODUTO" not in item_layout or "COMPRA" not in item_layout or "DETALHES" not in item_layout:
+    raise SystemExit("Redesigned item editor sections are missing")
+if "Widget.Material3.TextInputLayout.FilledBox" not in item_layout:
+    raise SystemExit("Item editor must use the reduced-outline filled field style")
 
 # Keep source packages clean: APKs are release outputs and must not be committed/zipped.
 apks = [p.relative_to(root).as_posix() for p in root.rglob("*.apk")]

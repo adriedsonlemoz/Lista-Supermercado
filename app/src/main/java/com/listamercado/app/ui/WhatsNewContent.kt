@@ -1,26 +1,30 @@
 package com.listamercado.app.ui
 
 object WhatsNewContent {
-    const val CONTENT_VERSION_CODE = 20
+    const val CONTENT_VERSION_CODE = 21
     const val TITLE = "O que mudou nesta atualização"
-    const val SUBTITLE = "Correção de compatibilidade do leitor de código de barras com a base Android do aplicativo."
+    const val SUBTITLE = "Backup completo e uma interface escura mais azulada e confortável."
 
     val changes = listOf(
         Change(
-            "Build corrigido",
-            "Corrigida a incompatibilidade que impedia a compilação Release após a inclusão do leitor de código de barras."
+            "Backup e restauração",
+            "Configurações agora permite exportar todas as listas, itens, orçamento, preços e catálogo em JSON e restaurar pelo seletor de arquivos do Android."
         ),
         Change(
-            "CameraX compatível",
-            "O leitor agora usa uma versão do CameraX compatível com compileSdk 35 e com o Android Gradle Plugin adotado pelo projeto."
+            "Importação segura",
+            "O backup é validado antes da importação e mostra um resumo com listas, itens, produtos e registros de preço antes de escolher Mesclar ou Substituir."
         ),
         Change(
-            "Leitor preservado",
-            "A leitura local de códigos de barras, o catálogo offline e o preenchimento de produtos continuam funcionando sem consulta externa."
+            "Exportação CSV",
+            "Itens das listas e produtos do catálogo também podem ser exportados em CSV para consulta em planilhas."
         ),
         Change(
-            "Proteção contra regressão",
-            "A validação do código-fonte agora verifica também a versão do CameraX para evitar repetir a incompatibilidade no workflow."
+            "Tema escuro renovado",
+            "O preto fechado foi substituído por superfícies grafite azuladas mais claras, mantendo o violeta como destaque."
+        ),
+        Change(
+            "Adicionar item redesenhado",
+            "O editor foi reorganizado em Produto, Compra e Detalhes, com campos preenchidos, menos contornos e leitura de código mais integrada."
         )
     )
 

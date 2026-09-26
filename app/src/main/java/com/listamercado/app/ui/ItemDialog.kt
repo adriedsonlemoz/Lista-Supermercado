@@ -68,9 +68,9 @@ object ItemDialog {
 
         title.text = if (existing == null) "Adicionar item" else "Editar item"
         subtitle.text = if (existing == null) {
-            "Digite ou escolha um produto conhecido; o catálogo funciona offline."
+            "Escolha do catálogo ou cadastre um produto novo."
         } else {
-            "Atualize o item sem perder o histórico de preço ou o vínculo do catálogo."
+            "Altere os dados sem perder o histórico da lista."
         }
 
         category.setSimpleItems(categories.toTypedArray())
@@ -84,9 +84,9 @@ object ItemDialog {
 
         fun renderBarcodeStatus(isNew: Boolean = false) {
             barcodeStatus.text = when {
-                selectedBarcode.isNullOrBlank() -> "Sem código de barras"
-                isNew -> "Código ${selectedBarcode}: novo produto; será associado ao salvar"
-                else -> "Código de barras: $selectedBarcode"
+                selectedBarcode.isNullOrBlank() -> "Sem código associado"
+                isNew -> "Novo código • será associado ao salvar"
+                else -> "Código associado • $selectedBarcode"
             }
         }
 
