@@ -4,7 +4,7 @@ Aplicativo Android nativo, leve e offline para organizar compras em listas separ
 
 ## Versão
 
-`1.0.6+7`
+`1.0.7+8`
 
 ## Identidade técnica
 
@@ -46,3 +46,11 @@ O projeto mantém somente `.github/workflows/android-release.yml` como workflow 
 O APK de produção fica fora do ZIP do código-fonte e o workflow não usa `actions/upload-artifact` nem gera `source.zip`.
 
 Os nomes de Secrets aceitos estão documentados em `SIGNING-SECRETS.txt`.
+
+
+## Melhorias visuais da v1.0.7+8
+
+- Corrigido o problema de conteúdo encostando na barra de notificações e na navegação com tratamento de insets.
+- Tela de adicionar/editar item refeita como bottom sheet moderna, com campos mais agradáveis, dropdowns melhores e botões mais claros.
+- Caixa de renomear/criar lista refeita no mesmo padrão visual moderno.
+- Campos de busca principais migrados para caixas Material 3 mais consistentes.

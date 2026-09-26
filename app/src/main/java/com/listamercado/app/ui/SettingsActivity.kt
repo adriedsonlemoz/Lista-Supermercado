@@ -13,6 +13,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.listamercado.app.BuildConfig
 import com.listamercado.app.R
 import com.listamercado.app.data.SettingsRepository
+import com.listamercado.app.util.InsetsHelper
 import com.listamercado.app.util.ThemeController
 
 class SettingsActivity : AppCompatActivity() {
@@ -23,6 +24,7 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         ThemeController.applySavedMode(this)
         setContentView(R.layout.activity_settings)
+        InsetsHelper.applyScaffold(this, findViewById(R.id.rootSettings))
         settings = SettingsRepository(this)
         appearanceValue = findViewById(R.id.textAppearanceValue)
         appearanceValue.text = ThemeController.label(settings.themeMode())

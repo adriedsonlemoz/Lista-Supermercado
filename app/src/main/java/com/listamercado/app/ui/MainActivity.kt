@@ -16,6 +16,7 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import com.listamercado.app.R
 import com.listamercado.app.data.ShoppingRepository
 import com.listamercado.app.model.ShoppingList
+import com.listamercado.app.util.InsetsHelper
 import com.listamercado.app.util.ThemeController
 
 class MainActivity : AppCompatActivity() {
@@ -32,6 +33,12 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         repository = ShoppingRepository(this)
         bindViews()
+        InsetsHelper.applyScaffold(
+            activity = this,
+            root = findViewById(R.id.rootMain),
+            scrollable = findViewById(R.id.recyclerLists),
+            fab = findViewById(R.id.fabNewList)
+        )
     }
 
     override fun onResume() {

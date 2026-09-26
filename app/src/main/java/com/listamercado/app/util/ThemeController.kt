@@ -19,6 +19,12 @@ object ThemeController {
         )
     }
 
+    fun isDark(context: Context): Boolean = when (SettingsRepository(context).themeMode()) {
+        SettingsRepository.THEME_DARK -> true
+        SettingsRepository.THEME_LIGHT -> false
+        else -> false
+    }
+
     fun label(mode: String): String = when (mode) {
         SettingsRepository.THEME_LIGHT -> "Claro"
         SettingsRepository.THEME_DARK -> "Escuro"

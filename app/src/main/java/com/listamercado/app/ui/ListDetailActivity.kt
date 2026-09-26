@@ -17,6 +17,7 @@ import com.listamercado.app.R
 import com.listamercado.app.data.ShoppingRepository
 import com.listamercado.app.model.ShoppingItem
 import com.listamercado.app.model.ShoppingList
+import com.listamercado.app.util.InsetsHelper
 import com.listamercado.app.util.ThemeController
 import java.text.NumberFormat
 import java.util.Locale
@@ -49,6 +50,12 @@ class ListDetailActivity : AppCompatActivity() {
         }
         current = list
         bindViews()
+        InsetsHelper.applyScaffold(
+            activity = this,
+            root = findViewById(R.id.rootDetail),
+            scrollable = findViewById(R.id.recyclerItems),
+            fab = findViewById(R.id.fabAddItem)
+        )
         render()
     }
 

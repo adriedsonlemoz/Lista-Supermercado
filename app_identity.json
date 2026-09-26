@@ -2,8 +2,8 @@
   "publicName": "Lista de Mercado",
   "technicalName": "listamercado",
   "applicationId": "com.listamercado.app",
-  "versionName": "1.0.6",
-  "versionCode": 7,
+  "versionName": "1.0.7",
+  "versionCode": 8,
   "platform": "Android",
   "framework": "Android nativo",
   "language": "Kotlin"

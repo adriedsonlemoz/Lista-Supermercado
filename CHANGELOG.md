@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.7+8 — 2026-09-25
+
+- Reformulada a experiência visual das caixas de adicionar e renomear em bottom sheets modernas.
+- Melhorado o formulário de item com campos mais arredondados, dropdown de categoria/unidade e ações mais claras.
+- Corrigido o layout para respeitar barra de status, teclado e barra de navegação.
+- Melhoradas as caixas de busca principais com visual Material 3 mais consistente.
+- Mantida a estrutura por listas, comparação e histórico de preços.
+
 ## 1.0.6+7 — 2026-09-25
 
 - Nova tela inicial baseada em listas de compras, em vez de itens soltos.

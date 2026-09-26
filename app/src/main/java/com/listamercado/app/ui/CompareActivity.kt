@@ -15,6 +15,7 @@ import com.listamercado.app.data.ShoppingRepository
 import com.listamercado.app.model.ComparisonRow
 import com.listamercado.app.model.ShoppingItem
 import com.listamercado.app.model.ShoppingList
+import com.listamercado.app.util.InsetsHelper
 import com.listamercado.app.util.ThemeController
 import java.text.DateFormat
 import java.text.NumberFormat
@@ -40,6 +41,7 @@ class CompareActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         ThemeController.applySavedMode(this)
         setContentView(R.layout.activity_compare)
+        InsetsHelper.applyScaffold(this, findViewById(R.id.rootCompare), findViewById(R.id.recyclerComparison))
         lists += ShoppingRepository(this).loadLists().sortedByDescending { it.createdAt }
         bindViews()
         populateSelectors()
