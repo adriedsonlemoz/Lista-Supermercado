@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.18.1+20 — 2026-09-26
+
+- Corrigida a falha do workflow em `:app:checkReleaseAarMetadata`.
+- A causa era o CameraX `1.6.2`, que exige compileSdk 36 e Android Gradle Plugin 8.9.1 ou superior.
+- CameraX (`camera-camera2`, `camera-lifecycle` e `camera-view`) foi fixado em `1.5.3`, compatível com a base compileSdk 35 do projeto.
+- Mantidos AGP 8.7.3, Kotlin 2.0.21, Java 17, targetSdk 35 e minSdk 26.
+- Leitor de código de barras, catálogo local e ML Kit embarcado foram preservados.
+- Adicionada validação preventiva para impedir CameraX 1.6.x sem atualização coordenada da toolchain Android.
+- Tela de novidades atualizada para o novo versionCode.
+
 ## 1.0.18+19 — 2026-09-26
 
 - Criado catálogo local/offline com produtos já cadastrados nas listas.

@@ -4,7 +4,7 @@ Aplicativo Android nativo, leve e offline para organizar compras em listas separ
 
 ## Versão
 
-`1.0.18+19`
+`1.0.18.1+20`
 
 ## Identidade técnica
 
@@ -132,3 +132,10 @@ Cada lista possui agora um **Modo compra** dedicado ao uso dentro do supermercad
 O aplicativo mantém agora um catálogo local/offline formado pelos produtos já usados nas listas. Nomes equivalentes são consolidados por forma normalizada para evitar duplicações no catálogo. Ao adicionar um item, o campo de nome sugere produtos conhecidos e pode preencher categoria, unidade e último preço registrado.
 
 O editor ganhou leitura de código de barras pela câmera. A leitura usa o modelo embarcado do ML Kit, disponível sem conexão após a instalação: códigos conhecidos preenchem o produto; códigos desconhecidos apenas ficam associados aos dados que o usuário informar, sem consultar serviços externos nem inventar nome ou preço. O catálogo pode ser consultado em **Configurações > Catálogo de produtos**.
+
+## Correção de build — 1.0.18.1+20
+
+- Corrigida a falha `checkReleaseAarMetadata` introduzida pelo CameraX 1.6.2.
+- CameraX fixado em `1.5.3`, mantendo compatibilidade com `compileSdk 35`, AGP `8.7.3`, Kotlin `2.0.21` e Java 17.
+- O leitor de código de barras e o catálogo offline permanecem inalterados funcionalmente.
+- `scripts/validate_source.py` passa a bloquear CameraX 1.6.x enquanto a base técnica permanecer em compileSdk 35 / AGP 8.7.3.

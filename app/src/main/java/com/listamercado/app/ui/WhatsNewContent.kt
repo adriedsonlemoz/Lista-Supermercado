@@ -1,26 +1,26 @@
 package com.listamercado.app.ui
 
 object WhatsNewContent {
-    const val CONTENT_VERSION_CODE = 19
+    const val CONTENT_VERSION_CODE = 20
     const val TITLE = "O que mudou nesta atualização"
-    const val SUBTITLE = "Catálogo local de produtos e leitura de código de barras sem depender de consulta externa."
+    const val SUBTITLE = "Correção de compatibilidade do leitor de código de barras com a base Android do aplicativo."
 
     val changes = listOf(
         Change(
-            "Catálogo offline",
-            "Os produtos já cadastrados nas listas passam a formar um catálogo local com nome, categoria, unidade padrão, último preço e código de barras opcional."
+            "Build corrigido",
+            "Corrigida a incompatibilidade que impedia a compilação Release após a inclusão do leitor de código de barras."
         ),
         Change(
-            "Sugestões ao adicionar",
-            "Ao digitar o nome de um item, o app sugere produtos conhecidos e pode preencher categoria, unidade e último preço já registrado. Nomes equivalentes são consolidados para evitar duplicações no catálogo."
+            "CameraX compatível",
+            "O leitor agora usa uma versão do CameraX compatível com compileSdk 35 e com o Android Gradle Plugin adotado pelo projeto."
         ),
         Change(
-            "Leitor de código de barras",
-            "O editor de item ganhou leitura pela câmera. Se o código já estiver no catálogo, os dados são preenchidos; se for novo, ele é associado somente ao produto informado pelo usuário."
+            "Leitor preservado",
+            "A leitura local de códigos de barras, o catálogo offline e o preenchimento de produtos continuam funcionando sem consulta externa."
         ),
         Change(
-            "Sem dados inventados",
-            "A leitura funciona localmente com o modelo embarcado no APK e não consulta nomes ou preços na internet. O catálogo pode ser consultado nas Configurações."
+            "Proteção contra regressão",
+            "A validação do código-fonte agora verifica também a versão do CameraX para evitar repetir a incompatibilidade no workflow."
         )
     )
 

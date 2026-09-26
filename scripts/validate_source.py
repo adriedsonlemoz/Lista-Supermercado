@@ -190,12 +190,17 @@ if 'implementation("com.google.mlkit:barcode-scanning:17.3.0")' not in app_gradl
 if "play-services-mlkit-barcode-scanning" in app_gradle:
     raise SystemExit("Barcode scanning must not depend on the dynamically downloaded Play Services model")
 for camera_dep in (
-    'implementation("androidx.camera:camera-camera2:1.6.2")',
-    'implementation("androidx.camera:camera-lifecycle:1.6.2")',
-    'implementation("androidx.camera:camera-view:1.6.2")',
+    'implementation("androidx.camera:camera-camera2:1.5.3")',
+    'implementation("androidx.camera:camera-lifecycle:1.5.3")',
+    'implementation("androidx.camera:camera-view:1.5.3")',
 ):
     if camera_dep not in app_gradle:
         raise SystemExit(f"CameraX dependency missing: {camera_dep}")
+if re.search(r'androidx\.camera:camera-[^:\"]+:1\.6\.', app_gradle):
+    raise SystemExit(
+        "CameraX 1.6.x is incompatible with this project's compileSdk 35 / AGP 8.7.3 baseline; "
+        "keep the scanner on the validated 1.5.3 line unless the Android toolchain is upgraded together"
+    )
 if "CatalogActivity" not in manifest or "BarcodeScannerActivity" not in manifest:
     raise SystemExit("Catalog/scanner activities are missing from AndroidManifest.xml")
 if "rowCatalog" not in settings_layout or "CatalogActivity::class.java" not in settings_activity_source:

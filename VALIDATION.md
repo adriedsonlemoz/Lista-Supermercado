@@ -1,29 +1,21 @@
-# Validação — 1.0.18+19
+# Validação — 1.0.18.1+20
 
-- [x] versionName `1.0.18`
-- [x] versionCode `19`
-- [x] VERSION `1.0.18+19`
+- [x] versionName `1.0.18.1`
+- [x] versionCode `20`
+- [x] VERSION `1.0.18.1+20`
 - [x] app_identity.json sincronizado e JSON válido
 - [x] github-manager.json sincronizado e JSON válido
-- [x] WhatsNewContent sincronizado com versionCode 19
-- [x] Catálogo local/offline criado em armazenamento próprio
-- [x] Produtos existentes são importados do conteúdo já cadastrado nas listas
-- [x] Deduplicação do catálogo usa nome normalizado, sem inventar dados externos
-- [x] Catálogo guarda nome, categoria, unidade padrão, último preço e código de barras opcional
-- [x] Editor de item sugere produtos já conhecidos
-- [x] Selecionar produto conhecido reaproveita categoria, unidade e último preço
-- [x] Leitor de código de barras usa câmera local, CameraX e ML Kit bundled
-- [x] Código conhecido preenche dados do catálogo
-- [x] Código desconhecido exige que o usuário informe/associe o produto antes de salvar
-- [x] Associação de código novo também funciona ao selecionar um produto já conhecido
-- [x] Não existe consulta externa de nome/preço por código de barras
-- [x] Permissão `CAMERA` adicionada e câmera declarada como recurso opcional para não bloquear o restante do app
-- [x] Tela Catálogo de produtos acessível em Configurações
-- [x] Modo compra atualiza o último preço conhecido do catálogo
-- [x] `validate_version.py`, `validate_source.py` e `validate_workflow.py` executados com sucesso
-- [x] 42 XMLs de `app/src/main` analisados sem erro de sintaxe
-- [x] Apenas `android-release.yml` permanece em `.github/workflows`
-- [x] Workflow não usa `actions/upload-artifact`
-- [x] Workflow não gera `source.zip`
-- [x] Nenhum APK está armazenado dentro do código-fonte
-- [ ] Build Gradle local não executado: o ambiente atual não possui executável Gradle nem Android SDK local; o workflow continua preparado para compilar com Gradle 8.9 e Java 17.
+- [x] WhatsNewContent sincronizado com versionCode 20
+- [x] Erro do Build #13 identificado em `:app:checkReleaseAarMetadata`
+- [x] CameraX 1.6.2 removido da configuração de dependências
+- [x] `camera-camera2`, `camera-lifecycle` e `camera-view` fixados em CameraX 1.5.3
+- [x] compileSdk 35 preservado
+- [x] targetSdk 35 preservado
+- [x] AGP 8.7.3 preservado
+- [x] Kotlin 2.0.21 preservado
+- [x] Java/JVM 17 preservado
+- [x] minSdk 26 preservado
+- [x] Leitor local de código de barras e ML Kit bundled preservados
+- [x] Catálogo offline e associação de códigos preservados
+- [x] Validação preventiva adicionada contra CameraX 1.6.x nesta base técnica
+- [ ] Build Gradle completo ainda precisa ser confirmado pelo workflow GitHub Actions, que possui Android SDK e acesso às dependências remotas.
