@@ -26,6 +26,9 @@ object PriceUnitHelper {
         else -> "Preço unitário"
     }
 
+    fun displayUnitPrice(internalPrice: Double, unit: String): Pair<Double, String> =
+        editorAmount(internalPrice, unit) to priceUnit(unit)
+
     fun normalizedPrice(item: ShoppingItem): Double = editorAmount(item.unitPrice, item.unit)
 
     fun normalizedUnit(item: ShoppingItem): String = priceUnit(item.unit)

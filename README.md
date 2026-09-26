@@ -4,7 +4,7 @@ Aplicativo Android nativo, leve e offline para organizar compras em listas separ
 
 ## Versão
 
-`1.0.17+18`
+`1.0.18+19`
 
 ## Identidade técnica
 
@@ -26,6 +26,8 @@ Aplicativo Android nativo, leve e offline para organizar compras em listas separ
 - itens com quantidade, unidade, categoria, preço e observação;
 - marcação de comprado e totais estimado/no carrinho;
 - modo de compra rápida por lista, mostrando apenas pendentes, checkbox grande, preço total direto no item, carrinho/orçamento em tempo real e ação para desfazer;
+- catálogo local/offline com sugestões ao adicionar itens, último preço, unidade/categoria padrão e código de barras opcional;
+- leitor de código de barras pela câmera, com modelo embarcado e sem consulta externa de nomes ou preços;
 - busca por lista, supermercado, produto ou categoria;
 - filtros Todos/Pendentes/Comprados adaptados à largura da tela;
 - preço com formatação automática em real;
@@ -123,3 +125,10 @@ A busca agora é aberta pela lupa no cabeçalho, ao lado das Configurações. O 
 
 Cada lista possui agora um **Modo compra** dedicado ao uso dentro do supermercado. A tela trabalha sobre os mesmos itens persistidos da lista normal, mostra apenas produtos pendentes, oferece checkbox grande, quantidade em destaque e entrada rápida do preço total da quantidade comprada. Ao marcar um item, ele sai da lista ativa, o carrinho e o orçamento são recalculados imediatamente e uma ação permite desfazer. Nenhum conjunto paralelo de itens ou histórico é criado.
 
+
+
+## Catálogo e código de barras — 1.0.18+19
+
+O aplicativo mantém agora um catálogo local/offline formado pelos produtos já usados nas listas. Nomes equivalentes são consolidados por forma normalizada para evitar duplicações no catálogo. Ao adicionar um item, o campo de nome sugere produtos conhecidos e pode preencher categoria, unidade e último preço registrado.
+
+O editor ganhou leitura de código de barras pela câmera. A leitura usa o modelo embarcado do ML Kit, disponível sem conexão após a instalação: códigos conhecidos preenchem o produto; códigos desconhecidos apenas ficam associados aos dados que o usuário informar, sem consultar serviços externos nem inventar nome ou preço. O catálogo pode ser consultado em **Configurações > Catálogo de produtos**.

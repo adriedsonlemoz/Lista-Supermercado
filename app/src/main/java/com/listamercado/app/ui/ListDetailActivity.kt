@@ -22,6 +22,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.google.android.material.textfield.TextInputLayout
 import com.listamercado.app.R
+import com.listamercado.app.data.ProductCatalogRepository
 import com.listamercado.app.data.ShoppingRepository
 import com.listamercado.app.model.ShoppingItem
 import com.listamercado.app.model.ShoppingList
@@ -32,6 +33,7 @@ import java.util.Locale
 
 class ListDetailActivity : AppCompatActivity() {
     private lateinit var repository: ShoppingRepository
+    private lateinit var catalogRepository: ProductCatalogRepository
     private val lists = mutableListOf<ShoppingList>()
     private lateinit var current: ShoppingList
     private lateinit var adapter: ShoppingItemAdapter
@@ -50,10 +52,21 @@ class ListDetailActivity : AppCompatActivity() {
     private lateinit var budgetProgress: LinearProgressIndicator
     private var filter = Filter.ALL
     private val currency = NumberFormat.getCurrencyInstance(Locale("pt", "BR"))
+    private var pendingBarcodeConsumer: ((String) -> Unit)? = null
     private val purchaseModeLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
         reloadCurrentList()
+    }
+    private val barcodeScannerLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val barcode = result.data?.getStringExtra(BarcodeScannerActivity.EXTRA_BARCODE)
+        val consumer = pendingBarcodeConsumer
+        pendingBarcodeConsumer = null
+        if (result.resultCode == RESULT_OK && !barcode.isNullOrBlank()) {
+            consumer?.invoke(barcode)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,7 +75,9 @@ class ListDetailActivity : AppCompatActivity() {
         setContentView(R.layout.activity_list_detail)
 
         repository = ShoppingRepository(this)
+        catalogRepository = ProductCatalogRepository(this)
         lists += repository.loadLists()
+        catalogRepository.seedFromLists(lists)
         val id = intent.getLongExtra(EXTRA_LIST_ID, -1L)
         val list = lists.firstOrNull { it.id == id }
         if (list == null) {
@@ -213,15 +228,31 @@ class ListDetailActivity : AppCompatActivity() {
         }
     }
 
-    private fun addItem() = ItemDialog.show(this) { newItem ->
+    private fun addItem() = ItemDialog.show(
+        context = this,
+        catalogRepository = catalogRepository,
+        onRequestBarcode = { consumer -> requestBarcode(consumer) }
+    ) { newItem, barcode ->
         current.items += newItem
+        catalogRepository.recordItem(newItem, barcode)
         persistAndRender()
     }
 
-    private fun editItem(item: ShoppingItem) = ItemDialog.show(this, item) { edited ->
+    private fun editItem(item: ShoppingItem) = ItemDialog.show(
+        context = this,
+        catalogRepository = catalogRepository,
+        existing = item,
+        onRequestBarcode = { consumer -> requestBarcode(consumer) }
+    ) { edited, barcode ->
         val index = current.items.indexOfFirst { it.id == item.id }
         if (index >= 0) current.items[index] = edited
+        catalogRepository.recordItem(edited, barcode)
         persistAndRender()
+    }
+
+    private fun requestBarcode(consumer: (String) -> Unit) {
+        pendingBarcodeConsumer = consumer
+        barcodeScannerLauncher.launch(Intent(this, BarcodeScannerActivity::class.java))
     }
 
     private fun confirmDelete(item: ShoppingItem) {

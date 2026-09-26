@@ -3,6 +3,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera.any" android:required="false" />
 
     <application
         android:allowBackup="true"
@@ -14,6 +16,8 @@
         <activity android:name=".ui.WhatsNewActivity" android:exported="false" android:launchMode="singleTop" />
         <activity android:name=".ui.NearbyMarketsActivity" android:exported="false" />
         <activity android:name=".ui.SettingsActivity" android:exported="false" />
+        <activity android:name=".ui.CatalogActivity" android:exported="false" />
+        <activity android:name=".ui.BarcodeScannerActivity" android:exported="false" />
         <activity android:name=".ui.CompareActivity" android:exported="false" />
         <activity android:name=".ui.PurchaseModeActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".ui.ListDetailActivity" android:exported="false" />

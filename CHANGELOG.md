@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.18+19 — 2026-09-26
+
+- Criado catálogo local/offline com produtos já cadastrados nas listas.
+- Catálogo guarda nome, categoria, unidade padrão, último preço e código de barras opcional.
+- Adicionada deduplicação por nome normalizado, ignorando acentos, diferenças entre maiúsculas/minúsculas e espaços extras.
+- Editor de item passou a sugerir produtos conhecidos e preencher automaticamente categoria, unidade e último preço ao selecionar uma sugestão.
+- Adicionado leitor de código de barras pela câmera com CameraX e modelo ML Kit embarcado no APK.
+- Códigos conhecidos carregam o produto; códigos desconhecidos são associados somente aos dados digitados pelo usuário, sem consulta externa.
+- Adicionada tela **Catálogo de produtos** em Configurações para consultar os dados locais.
+- Alterações de preço feitas no Modo compra atualizam o último preço do catálogo.
+- Tela de novidades atualizada para esta versão.
+
 ## 1.0.17+18 — 2026-09-26
 
 - Adicionado botão **Modo compra** dentro de cada lista.

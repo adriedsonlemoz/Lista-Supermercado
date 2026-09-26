@@ -10,11 +10,19 @@ required = [
     "app/build.gradle.kts",
     "app/src/main/AndroidManifest.xml",
     "app/src/main/java/com/listamercado/app/model/ShoppingList.kt",
+    "app/src/main/java/com/listamercado/app/model/CatalogProduct.kt",
+    "app/src/main/java/com/listamercado/app/data/ProductCatalogRepository.kt",
     "app/src/main/java/com/listamercado/app/ui/ListDetailActivity.kt",
     "app/src/main/java/com/listamercado/app/ui/PurchaseModeActivity.kt",
     "app/src/main/java/com/listamercado/app/ui/PurchaseModeAdapter.kt",
+    "app/src/main/java/com/listamercado/app/ui/CatalogActivity.kt",
+    "app/src/main/java/com/listamercado/app/ui/CatalogProductAdapter.kt",
+    "app/src/main/java/com/listamercado/app/ui/BarcodeScannerActivity.kt",
     "app/src/main/res/layout/activity_purchase_mode.xml",
     "app/src/main/res/layout/item_purchase_mode.xml",
+    "app/src/main/res/layout/activity_catalog.xml",
+    "app/src/main/res/layout/item_catalog_product.xml",
+    "app/src/main/res/layout/activity_barcode_scanner.xml",
     "app/src/main/java/com/listamercado/app/ui/SettingsActivity.kt",
     "app/src/main/java/com/listamercado/app/ui/CompareActivity.kt",
     "app/src/main/java/com/listamercado/app/ui/NearbyMarketsActivity.kt",
@@ -79,6 +87,9 @@ for permission in (
 ):
     if permission not in manifest:
         raise SystemExit(f"Missing map permission in AndroidManifest.xml: {permission}")
+
+if "android.permission.CAMERA" not in manifest:
+    raise SystemExit("Missing CAMERA permission for local barcode scanning")
 
 map_source = (root / "app/src/main/java/com/listamercado/app/ui/NearbyMarketsActivity.kt").read_text(encoding="utf-8")
 if "overpass-api.de" not in map_source or 'shop"="supermarket' not in map_source:
@@ -160,6 +171,35 @@ if "filter { !it.purchased }" not in purchase_mode_source or 'setAction("Desfaze
     raise SystemExit("Purchase mode must focus pending items and support undo")
 if "totalPrice / item.quantity" not in purchase_mode_source or "inputQuickPrice" not in purchase_adapter_source:
     raise SystemExit("Quick total-price editing is missing or does not preserve internal unit-price semantics")
+
+catalog_source = (root / "app/src/main/java/com/listamercado/app/data/ProductCatalogRepository.kt").read_text(encoding="utf-8")
+item_dialog_source = (root / "app/src/main/java/com/listamercado/app/ui/ItemDialog.kt").read_text(encoding="utf-8")
+scanner_source = (root / "app/src/main/java/com/listamercado/app/ui/BarcodeScannerActivity.kt").read_text(encoding="utf-8")
+settings_activity_source = (root / "app/src/main/java/com/listamercado/app/ui/SettingsActivity.kt").read_text(encoding="utf-8")
+settings_layout = (root / "app/src/main/res/layout/activity_settings.xml").read_text(encoding="utf-8")
+if "normalizeName" not in catalog_source or "Normalizer.normalize" not in catalog_source or "catalog_products_v1" not in catalog_source:
+    raise SystemExit("Normalized local product catalog persistence is missing")
+if "seedFromLists" not in catalog_source or "lastUnitPrice" not in catalog_source or "barcode" not in catalog_source:
+    raise SystemExit("Catalog must seed existing items and persist last price/barcode")
+if "MaterialAutoCompleteTextView" not in item_dialog_source or "findByBarcode" not in item_dialog_source or "buttonScanBarcode" not in item_dialog_source:
+    raise SystemExit("Known-product suggestions or barcode fill flow is missing from item editor")
+if "BarcodeScanning.getClient" not in scanner_source or "InputImage.fromMediaImage" not in scanner_source:
+    raise SystemExit("On-device barcode scanner implementation is missing")
+if 'implementation("com.google.mlkit:barcode-scanning:17.3.0")' not in app_gradle:
+    raise SystemExit("Bundled ML Kit barcode-scanning dependency is missing")
+if "play-services-mlkit-barcode-scanning" in app_gradle:
+    raise SystemExit("Barcode scanning must not depend on the dynamically downloaded Play Services model")
+for camera_dep in (
+    'implementation("androidx.camera:camera-camera2:1.6.2")',
+    'implementation("androidx.camera:camera-lifecycle:1.6.2")',
+    'implementation("androidx.camera:camera-view:1.6.2")',
+):
+    if camera_dep not in app_gradle:
+        raise SystemExit(f"CameraX dependency missing: {camera_dep}")
+if "CatalogActivity" not in manifest or "BarcodeScannerActivity" not in manifest:
+    raise SystemExit("Catalog/scanner activities are missing from AndroidManifest.xml")
+if "rowCatalog" not in settings_layout or "CatalogActivity::class.java" not in settings_activity_source:
+    raise SystemExit("Catalog entry point is missing from Settings")
 
 # Keep source packages clean: APKs are release outputs and must not be committed/zipped.
 apks = [p.relative_to(root).as_posix() for p in root.rglob("*.apk")]

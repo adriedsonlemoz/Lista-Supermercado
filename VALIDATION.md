@@ -1,25 +1,29 @@
-# Validação — 1.0.17+18
+# Validação — 1.0.18+19
 
-- [x] versionName `1.0.17`
-- [x] versionCode `18`
-- [x] VERSION `1.0.17+18`
-- [x] app_identity.json sincronizado
-- [x] github-manager.json sincronizado
-- [x] WhatsNewContent sincronizado com versionCode 18
-- [x] Botão **Modo compra** disponível dentro da lista
-- [x] Tela dedicada usa os mesmos itens persistidos da lista original
-- [x] Apenas itens pendentes aparecem na lista ativa do modo de compra
-- [x] Checkbox ampliado e quantidade/unidade em destaque
-- [x] Campo de preço rápido salva o total da quantidade sem alterar o modelo de preço interno
-- [x] Marcação de comprado atualiza carrinho/orçamento e remove o item da lista ativa
-- [x] Ação **Desfazer** restaura a marcação
-- [x] Botão para encerrar o modo e voltar à lista normal
-- [x] Histórico/comparação existentes continuam usando o mesmo registro do item
-- [x] Manifest registra PurchaseModeActivity
+- [x] versionName `1.0.18`
+- [x] versionCode `19`
+- [x] VERSION `1.0.18+19`
+- [x] app_identity.json sincronizado e JSON válido
+- [x] github-manager.json sincronizado e JSON válido
+- [x] WhatsNewContent sincronizado com versionCode 19
+- [x] Catálogo local/offline criado em armazenamento próprio
+- [x] Produtos existentes são importados do conteúdo já cadastrado nas listas
+- [x] Deduplicação do catálogo usa nome normalizado, sem inventar dados externos
+- [x] Catálogo guarda nome, categoria, unidade padrão, último preço e código de barras opcional
+- [x] Editor de item sugere produtos já conhecidos
+- [x] Selecionar produto conhecido reaproveita categoria, unidade e último preço
+- [x] Leitor de código de barras usa câmera local, CameraX e ML Kit bundled
+- [x] Código conhecido preenche dados do catálogo
+- [x] Código desconhecido exige que o usuário informe/associe o produto antes de salvar
+- [x] Associação de código novo também funciona ao selecionar um produto já conhecido
+- [x] Não existe consulta externa de nome/preço por código de barras
+- [x] Permissão `CAMERA` adicionada e câmera declarada como recurso opcional para não bloquear o restante do app
+- [x] Tela Catálogo de produtos acessível em Configurações
+- [x] Modo compra atualiza o último preço conhecido do catálogo
+- [x] `validate_version.py`, `validate_source.py` e `validate_workflow.py` executados com sucesso
+- [x] 42 XMLs de `app/src/main` analisados sem erro de sintaxe
 - [x] Apenas `android-release.yml` permanece em `.github/workflows`
 - [x] Workflow não usa `actions/upload-artifact`
 - [x] Workflow não gera `source.zip`
-- [x] APK não é armazenado dentro do ZIP do código-fonte
-- [x] Validadores `validate_version.py`, `validate_source.py` e `validate_workflow.py` executados com sucesso
-- [x] Todos os XMLs de `app/src/main` analisados sem erro de sintaxe
-- [ ] Build Gradle local não executado: o ZIP não contém Gradle Wrapper e o ambiente atual não possui executável `gradle`
+- [x] Nenhum APK está armazenado dentro do código-fonte
+- [ ] Build Gradle local não executado: o ambiente atual não possui executável Gradle nem Android SDK local; o workflow continua preparado para compilar com Gradle 8.9 e Java 17.

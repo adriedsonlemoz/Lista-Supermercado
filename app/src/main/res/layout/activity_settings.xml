@@ -91,6 +91,16 @@
             android:orientation="vertical"
             android:background="@drawable/bg_settings_group">
 
+            <LinearLayout android:id="@+id/rowCatalog" android:layout_width="match_parent" android:layout_height="76dp" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:clickable="true" android:focusable="true" android:background="?attr/selectableItemBackground" android:orientation="horizontal">
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Catálogo de produtos" android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="Produtos conhecidos, último preço e código de barras" android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
+                </LinearLayout>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="›" android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall" />
+            </LinearLayout>
+
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginStart="16dp" android:background="?attr/colorOutlineVariant" />
+
             <LinearLayout android:id="@+id/rowChanges" android:layout_width="match_parent" android:layout_height="68dp" android:gravity="center_vertical" android:paddingHorizontal="16dp" android:clickable="true" android:focusable="true" android:background="?attr/selectableItemBackground" android:orientation="horizontal">
                 <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Últimas alterações" android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="›" android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall" />

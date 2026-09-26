@@ -3,6 +3,7 @@ package com.listamercado.app.ui
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageButton
@@ -31,6 +32,9 @@ class SettingsActivity : AppCompatActivity() {
 
         findViewById<ImageButton>(R.id.buttonBackSettings).setOnClickListener { finish() }
         findViewById<View>(R.id.rowAppearance).setOnClickListener { chooseAppearance() }
+        findViewById<View>(R.id.rowCatalog).setOnClickListener {
+            startActivity(Intent(this, CatalogActivity::class.java))
+        }
         findViewById<View>(R.id.rowChanges).setOnClickListener { showChanges() }
         findViewById<View>(R.id.rowDonation).setOnClickListener { showDonation() }
         findViewById<View>(R.id.rowAbout).setOnClickListener { showAbout() }

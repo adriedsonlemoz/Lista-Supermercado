@@ -12,6 +12,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.snackbar.Snackbar
 import com.listamercado.app.R
+import com.listamercado.app.data.ProductCatalogRepository
 import com.listamercado.app.data.ShoppingRepository
 import com.listamercado.app.model.ShoppingItem
 import com.listamercado.app.model.ShoppingList
@@ -23,6 +24,7 @@ import kotlin.math.abs
 
 class PurchaseModeActivity : AppCompatActivity() {
     private lateinit var repository: ShoppingRepository
+    private lateinit var catalogRepository: ProductCatalogRepository
     private val lists = mutableListOf<ShoppingList>()
     private lateinit var current: ShoppingList
     private lateinit var adapter: PurchaseModeAdapter
@@ -41,7 +43,9 @@ class PurchaseModeActivity : AppCompatActivity() {
         setContentView(R.layout.activity_purchase_mode)
 
         repository = ShoppingRepository(this)
+        catalogRepository = ProductCatalogRepository(this)
         lists += repository.loadLists()
+        catalogRepository.seedFromLists(lists)
         val id = intent.getLongExtra(EXTRA_LIST_ID, -1L)
         val list = lists.firstOrNull { it.id == id }
         if (list == null) {
@@ -89,6 +93,7 @@ class PurchaseModeActivity : AppCompatActivity() {
 
     private fun updateQuickPrice(item: ShoppingItem, totalPrice: Double) {
         item.unitPrice = if (item.quantity > 0.0) totalPrice / item.quantity else 0.0
+        catalogRepository.recordItem(item)
         persist(renderItems = false)
     }
 
