@@ -4,7 +4,7 @@ Aplicativo Android nativo, leve e offline para organizar compras em listas separ
 
 ## Versão
 
-`1.0.7+8`
+`1.0.8+9`
 
 ## Identidade técnica
 
@@ -54,3 +54,11 @@ Os nomes de Secrets aceitos estão documentados em `SIGNING-SECRETS.txt`.
 - Tela de adicionar/editar item refeita como bottom sheet moderna, com campos mais agradáveis, dropdowns melhores e botões mais claros.
 - Caixa de renomear/criar lista refeita no mesmo padrão visual moderno.
 - Campos de busca principais migrados para caixas Material 3 mais consistentes.
+
+
+## Refinamento visual — 1.0.8+9
+
+- Tela inicial redesenhada com card de resumo geral, valor estimado, quantidade de listas, itens e comprados.
+- Cards das listas ganharam ícone, data de atualização, total e barra de progresso da compra.
+- Cards dos produtos foram reorganizados com preço total, preço unitário, chips de quantidade/categoria e ações mais limpas.
+- Estado vazio e busca da tela inicial foram refinados para seguir o mesmo padrão Material 3.

@@ -1,11 +1,13 @@
-# Validação — 1.0.7+8
+# Validação — 1.0.8+9
 
-- [x] versionName `1.0.7`
-- [x] versionCode `8`
-- [x] VERSION `1.0.7+8`
+- [x] versionName `1.0.8`
+- [x] versionCode `9`
+- [x] VERSION `1.0.8+9`
 - [x] app_identity.json sincronizado
 - [x] github-manager.json sincronizado
-- [x] Nova UI de bottom sheet para item
-- [x] Nova UI de bottom sheet para lista
-- [x] Insets aplicados para barra de status e navegação
-- [x] Busca principal em Material 3
+- [x] Tela inicial com resumo visual
+- [x] Cards das listas com progresso
+- [x] Cards dos itens com preço unitário/subtotal e chips
+- [x] Busca e estado vazio refinados
+- [x] Workflow único de Release preservado
+- [x] APK permanece fora do ZIP do código-fonte

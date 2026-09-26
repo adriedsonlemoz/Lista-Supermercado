@@ -25,7 +25,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter: ShoppingListAdapter
     private lateinit var search: EditText
     private lateinit var summary: TextView
-    private lateinit var emptyState: TextView
+    private lateinit var emptyState: View
+    private lateinit var dashboardTotal: TextView
+    private lateinit var dashboardLists: TextView
+    private lateinit var dashboardItems: TextView
+    private lateinit var dashboardPurchased: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,6 +55,10 @@ class MainActivity : AppCompatActivity() {
         search = findViewById(R.id.inputSearchLists)
         summary = findViewById(R.id.textHomeSummary)
         emptyState = findViewById(R.id.textEmptyLists)
+        dashboardTotal = findViewById(R.id.textDashboardTotal)
+        dashboardLists = findViewById(R.id.textDashboardLists)
+        dashboardItems = findViewById(R.id.textDashboardItems)
+        dashboardPurchased = findViewById(R.id.textDashboardPurchased)
 
         adapter = ShoppingListAdapter(
             onOpen = { openList(it) },
@@ -152,6 +160,18 @@ class MainActivity : AppCompatActivity() {
         adapter.submitList(visible)
         emptyState.visibility = if (visible.isEmpty()) View.VISIBLE else View.GONE
         val totalItems = lists.sumOf { it.items.size }
-        summary.text = "${lists.size} ${if (lists.size == 1) "lista" else "listas"} • $totalItems ${if (totalItems == 1) "item cadastrado" else "itens cadastrados"}"
+        val purchasedItems = lists.sumOf { it.purchasedCount }
+        val totalEstimated = lists.sumOf { it.estimatedTotal }
+        val currency = java.text.NumberFormat.getCurrencyInstance(java.util.Locale("pt", "BR"))
+
+        summary.text = when {
+            lists.isEmpty() -> "Organize suas compras e acompanhe seus preços"
+            lists.size == 1 -> "1 lista ativa • $totalItems ${if (totalItems == 1) "item" else "itens"}"
+            else -> "${lists.size} listas ativas • $totalItems itens cadastrados"
+        }
+        dashboardTotal.text = currency.format(totalEstimated)
+        dashboardLists.text = lists.size.toString()
+        dashboardItems.text = totalItems.toString()
+        dashboardPurchased.text = purchasedItems.toString()
     }
 }

@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.8+9 — 2026-09-25
+
+- Tela inicial redesenhada com resumo visual das compras.
+- Adicionado total estimado geral, número de listas, itens e produtos comprados.
+- Cards de listas modernizados com ícone, data de atualização e progresso visual.
+- Cards de produtos modernizados com preço unitário, subtotal, chips e ações reorganizadas.
+- Busca e estado vazio da tela inicial refinados.
+- Mantido o comportamento de listas, comparação, histórico, configurações e modo escuro.
+
 ## 1.0.7+8 — 2026-09-25
 
 - Reformulada a experiência visual das caixas de adicionar e renomear em bottom sheets modernas.

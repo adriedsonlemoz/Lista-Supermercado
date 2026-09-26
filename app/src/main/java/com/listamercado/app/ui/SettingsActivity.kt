@@ -58,11 +58,11 @@ class SettingsActivity : AppCompatActivity() {
             .setTitle("Últimas alterações")
             .setMessage(
                 "Versão ${BuildConfig.VERSION_NAME}+${BuildConfig.VERSION_CODE}\n\n" +
-                    "• Listas separadas por supermercado ou ocasião.\n" +
-                    "• Comparação entre listas e histórico de preços por produto.\n" +
-                    "• Nova tela de Configurações e escolha de aparência.\n" +
-                    "• Preço com formatação automática em real.\n" +
-                    "• Filtros reorganizados para caber em telas menores."
+                    "• Tela inicial redesenhada com resumo geral das compras.\n" +
+                    "• Cards das listas com progresso, total e última atualização.\n" +
+                    "• Cards dos produtos mais limpos, com quantidade e categoria em destaque.\n" +
+                    "• Preço unitário e subtotal agora têm hierarquia visual melhor.\n" +
+                    "• Mantidas comparação de listas, histórico de preços e modo escuro."
             )
             .setPositiveButton("Fechar", null)
             .show()

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout android:id="@+id/rootMain" xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootMain"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/colorSurface">
@@ -10,7 +11,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:paddingStart="18dp"
-        android:paddingTop="12dp"
+        android:paddingTop="10dp"
         android:paddingEnd="18dp">
 
         <LinearLayout
@@ -29,7 +30,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Minhas listas"
-                    android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
+                    android:textAppearance="@style/TextAppearance.Material3.HeadlineLarge"
                     android:textStyle="bold" />
 
                 <TextView
@@ -37,30 +38,118 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="0 listas • 0 itens cadastrados"
+                    android:text="Organize suas compras e acompanhe seus preços"
                     android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
             </LinearLayout>
 
-            <ImageButton
-                android:id="@+id/buttonSettings"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Configurações"
-                android:padding="12dp"
-                android:src="@drawable/ic_settings" />
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                app:cardBackgroundColor="?attr/colorSecondaryContainer"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="0dp">
+
+                <ImageButton
+                    android:id="@+id/buttonSettings"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Configurações"
+                    android:padding="13dp"
+                    android:src="@drawable/ic_settings"
+                    android:tint="?attr/colorOnSecondaryContainer" />
+            </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
 
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            app:cardBackgroundColor="?attr/colorPrimaryContainer"
+            app:cardCornerRadius="26dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Resumo das compras"
+                    android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+                    android:textColor="?attr/colorOnPrimaryContainer" />
+
+                <TextView
+                    android:id="@+id/textDashboardTotal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="R$ 0,00"
+                    android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
+                    android:textColor="?attr/colorOnPrimaryContainer"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="valor estimado em todas as listas"
+                    android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                    android:textColor="?attr/colorOnPrimaryContainer" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView android:id="@+id/textDashboardLists" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textAppearance="@style/TextAppearance.Material3.TitleLarge" android:textColor="?attr/colorOnPrimaryContainer" android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="listas" android:textAppearance="@style/TextAppearance.Material3.BodySmall" android:textColor="?attr/colorOnPrimaryContainer" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView android:id="@+id/textDashboardItems" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textAppearance="@style/TextAppearance.Material3.TitleLarge" android:textColor="?attr/colorOnPrimaryContainer" android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="itens" android:textAppearance="@style/TextAppearance.Material3.BodySmall" android:textColor="?attr/colorOnPrimaryContainer" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView android:id="@+id/textDashboardPurchased" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0" android:textAppearance="@style/TextAppearance.Material3.TitleLarge" android:textColor="?attr/colorOnPrimaryContainer" android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="comprados" android:textAppearance="@style/TextAppearance.Material3.BodySmall" android:textColor="?attr/colorOnPrimaryContainer" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
         <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            style="@style/Widget.Material3.TextInputLayout.FilledBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="14dp"
-            android:hint="Buscar lista, supermercado ou produto"
-            app:boxCornerRadiusBottomEnd="18dp"
-            app:boxCornerRadiusBottomStart="18dp"
-            app:boxCornerRadiusTopEnd="18dp"
-            app:boxCornerRadiusTopStart="18dp">
+            android:hint="Buscar lista, mercado ou produto"
+            app:boxBackgroundColor="?attr/colorSurfaceVariant"
+            app:boxCornerRadiusBottomEnd="20dp"
+            app:boxCornerRadiusBottomStart="20dp"
+            app:boxCornerRadiusTopEnd="20dp"
+            app:boxCornerRadiusTopStart="20dp"
+            app:boxStrokeWidth="0dp"
+            app:boxStrokeWidthFocused="0dp"
+            app:startIconDrawable="@drawable/ic_search">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/inputSearchLists"
@@ -73,18 +162,27 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonCompare"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+            style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:text="Comparar listas e preços"
-            app:icon="@drawable/ic_compare" />
+            app:icon="@drawable/ic_compare"
+            app:iconGravity="textStart" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:layout_marginBottom="2dp"
+            android:text="Suas listas"
+            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+            android:textStyle="bold" />
 
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:layout_marginTop="8dp">
+            android:layout_weight="1">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerLists"
@@ -93,15 +191,38 @@
                 android:clipToPadding="false"
                 android:paddingBottom="96dp" />
 
-            <TextView
+            <LinearLayout
                 android:id="@+id/textEmptyLists"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="center"
-                android:padding="32dp"
-                android:text="Nenhuma lista ainda.\nCrie uma lista para cada supermercado ou dia de compra."
-                android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
+                android:orientation="vertical"
+                android:padding="32dp">
+
+                <ImageView
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
+                    android:alpha="0.7"
+                    android:src="@drawable/ic_store"
+                    android:tint="?attr/colorOnSurfaceVariant" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="Nenhuma lista ainda"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:gravity="center"
+                    android:text="Crie uma lista para cada supermercado, ocasião ou dia de compra."
+                    android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
+            </LinearLayout>
         </FrameLayout>
     </LinearLayout>
 
@@ -114,5 +235,4 @@
         android:contentDescription="Criar nova lista"
         android:text="Nova lista"
         app:icon="@drawable/ic_add" />
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

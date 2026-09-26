@@ -1,8 +1,8 @@
-# Release 1.0.7+8
+# Release 1.0.8+9
 
-Melhorias visuais e de usabilidade.
+Refinamento visual da tela inicial e dos cards.
 
-- Nova UI moderna para adicionar/editar item.
-- Nova UI moderna para criar/renomear lista.
-- Correção de sobreposição com barra de notificações e barra de navegação.
-- Busca principal com caixas mais modernas.
+- Dashboard compacto com resumo das compras.
+- Cards de listas com progresso e total.
+- Cards de produtos mais modernos e informativos.
+- Melhor hierarquia visual, mantendo as funcionalidades existentes.
