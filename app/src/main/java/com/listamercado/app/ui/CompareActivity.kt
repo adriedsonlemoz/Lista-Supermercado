@@ -15,6 +15,7 @@ import com.listamercado.app.data.ShoppingRepository
 import com.listamercado.app.model.ComparisonRow
 import com.listamercado.app.model.ShoppingItem
 import com.listamercado.app.model.ShoppingList
+import com.listamercado.app.util.PriceUnitHelper
 import com.listamercado.app.util.InsetsHelper
 import com.listamercado.app.util.ThemeController
 import java.text.DateFormat
@@ -130,16 +131,18 @@ class CompareActivity : AppCompatActivity() {
 
     private fun compareProduct(first: ShoppingItem?, second: ShoppingItem?, firstName: String, secondName: String): ComparisonRow {
         val title = first?.name ?: second?.name ?: "Produto"
-        val firstPrice = first?.takeIf { it.unitPrice > 0 }?.unitPrice
-        val secondPrice = second?.takeIf { it.unitPrice > 0 }?.unitPrice
-        val firstLabel = firstPrice?.let { "${currency.format(it)}/${first?.unit}" } ?: "sem preço"
-        val secondLabel = secondPrice?.let { "${currency.format(it)}/${second?.unit}" } ?: "sem preço"
+        val firstPrice = first?.takeIf { it.unitPrice > 0 }?.let(PriceUnitHelper::normalizedPrice)
+        val secondPrice = second?.takeIf { it.unitPrice > 0 }?.let(PriceUnitHelper::normalizedPrice)
+        val firstUnit = first?.let(PriceUnitHelper::normalizedUnit)
+        val secondUnit = second?.let(PriceUnitHelper::normalizedUnit)
+        val firstLabel = firstPrice?.let { "${currency.format(it)}/$firstUnit" } ?: "sem preço"
+        val secondLabel = secondPrice?.let { "${currency.format(it)}/$secondUnit" } ?: "sem preço"
         val subtitle = "$firstName: $firstLabel • $secondName: $secondLabel"
         val detail = when {
             first == null -> "Só aparece em $secondName"
             second == null -> "Só aparece em $firstName"
             firstPrice == null || secondPrice == null -> "Preço ainda não informado em uma das listas"
-            first.unit != second.unit -> "Unidades diferentes (${first.unit} e ${second.unit}); o aplicativo não calcula diferença direta."
+            firstUnit != secondUnit -> "Unidades diferentes ($firstUnit e $secondUnit); o aplicativo não calcula diferença direta."
             abs(firstPrice - secondPrice) < 0.005 -> "Mesmo preço unitário"
             secondPrice > firstPrice -> "${currency.format(secondPrice - firstPrice)} mais caro na segunda lista"
             else -> "${currency.format(firstPrice - secondPrice)} mais barato na segunda lista"
@@ -159,7 +162,7 @@ class CompareActivity : AppCompatActivity() {
         val rows = occurrences.map { (list, item) ->
             ComparisonRow(
                 title = list.name,
-                subtitle = "${date.format(Date(list.createdAt))} • ${priceLabel(item.unitPrice.takeIf { it > 0 })} por ${item.unit}",
+                subtitle = "${date.format(Date(list.createdAt))} • ${if (item.unitPrice > 0) PriceUnitHelper.formattedUnitPrice(item, currency) else "sem preço"}",
                 detail = "${formatQuantity(item.quantity)} ${item.unit} • subtotal ${currency.format(item.subtotal)}"
             )
         }
@@ -178,18 +181,18 @@ class CompareActivity : AppCompatActivity() {
             return "$productName • encontrado em $occurrenceCount ${if (occurrenceCount == 1) "lista" else "listas"}\nNenhum preço informado ainda."
         }
 
-        val preferredGroup = priced.groupBy { it.second.unit }
+        val preferredGroup = priced.groupBy { PriceUnitHelper.normalizedUnit(it.second) }
             .maxByOrNull { it.value.size }
             ?: return "$productName • sem histórico compatível"
         val unit = preferredGroup.key
         val compatible = preferredGroup.value.sortedByDescending { it.first.createdAt }
-        val values = compatible.map { it.second.unitPrice }
+        val values = compatible.map { PriceUnitHelper.normalizedPrice(it.second) }
         val latest = compatible.first()
         val minimum = values.minOrNull() ?: 0.0
         val maximum = values.maxOrNull() ?: 0.0
         val average = values.average()
         val trend = compatible.getOrNull(1)?.let { previous ->
-            val difference = latest.second.unitPrice - previous.second.unitPrice
+            val difference = PriceUnitHelper.normalizedPrice(latest.second) - PriceUnitHelper.normalizedPrice(previous.second)
             when {
                 abs(difference) < 0.005 -> "Sem alteração desde o registro anterior"
                 difference > 0 -> "Subiu ${currency.format(difference)} desde o registro anterior"
@@ -197,7 +200,7 @@ class CompareActivity : AppCompatActivity() {
             }
         } ?: "Primeiro preço registrado nessa unidade"
 
-        val mixedUnits = priced.map { it.second.unit }.distinct().size > 1
+        val mixedUnits = priced.map { PriceUnitHelper.normalizedUnit(it.second) }.distinct().size > 1
         val unitNote = if (mixedUnits) " • indicadores em $unit" else " • $unit"
         return buildString {
             append(productName)
@@ -205,7 +208,7 @@ class CompareActivity : AppCompatActivity() {
             append(occurrenceCount)
             append(if (occurrenceCount == 1) " registro" else " registros")
             append(unitNote)
-            append("\nÚltimo: ${currency.format(latest.second.unitPrice)} • menor: ${currency.format(minimum)}")
+            append("\nÚltimo: ${currency.format(PriceUnitHelper.normalizedPrice(latest.second))} • menor: ${currency.format(minimum)}")
             append("\nMédia: ${currency.format(average)} • maior: ${currency.format(maximum)}")
             append("\n$trend")
         }

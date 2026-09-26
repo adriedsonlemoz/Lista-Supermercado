@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.listamercado.app.R
 import com.listamercado.app.model.ShoppingItem
+import com.listamercado.app.util.PriceUnitHelper
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.text.NumberFormat
@@ -57,7 +58,7 @@ class ShoppingItemAdapter(
 
             if (item.unitPrice > 0.0) {
                 totalPrice.text = currency.format(item.subtotal)
-                unitPrice.text = "${currency.format(item.unitPrice)}/${item.unit}"
+                unitPrice.text = PriceUnitHelper.formattedUnitPrice(item, currency)
             } else {
                 totalPrice.text = "Sem preço"
                 unitPrice.text = "Toque para informar"

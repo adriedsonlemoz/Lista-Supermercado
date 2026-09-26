@@ -1,15 +1,23 @@
 package com.listamercado.app.ui
 
 object WhatsNewContent {
-    const val CONTENT_VERSION_CODE = 12
+    const val CONTENT_VERSION_CODE = 14
     const val TITLE = "O que mudou nesta atualização"
-    const val SUBTITLE = "Orçamento, histórico inteligente de preços e um tema escuro mais consistente."
+    const val SUBTITLE = "Preços da Cicloviagem preenchidos e modo escuro mais confortável."
 
     val changes = listOf(
-        Change("Orçamento por lista", "Defina um limite de gastos e acompanhe quanto resta ou quanto a compra passou do orçamento."),
-        Change("Histórico inteligente", "Agora cada produto mostra último preço, menor, maior, média e tendência em relação ao registro anterior."),
-        Change("Atalho pelo produto", "No menu de cada item, Histórico de preço abre diretamente a análise daquele produto."),
-        Change("Nova cor do aplicativo", "O verde foi substituído por violeta/lilás, com texto correto nos botões e contraste melhor no modo escuro.")
+        Change(
+            "Cicloviagem com preços",
+            "Os valores que já tínhamos definido para a lista Cicloviagem agora vêm preenchidos automaticamente. Preços que você já alterou manualmente são preservados."
+        ),
+        Change(
+            "Preços por kg e litro",
+            "Itens em gramas e mililitros mostram o valor de referência por kg ou litro, deixando a leitura mais natural sem alterar o total da compra."
+        ),
+        Change(
+            "Novo modo escuro",
+            "O preto puro foi trocado por um grafite azulado escuro, com superfícies em camadas e melhor contraste, inspirado no visual noturno do Vigia IA."
+        )
     )
 
     data class Change(val title: String, val description: String)

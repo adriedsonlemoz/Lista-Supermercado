@@ -12,6 +12,7 @@ import com.listamercado.app.R
 import com.listamercado.app.model.ShoppingItem
 import com.listamercado.app.util.CurrencyTextWatcher
 import com.listamercado.app.util.InsetsHelper
+import com.listamercado.app.util.PriceUnitHelper
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
@@ -58,13 +59,19 @@ object ItemDialog {
         existing?.let {
             name.setText(it.name)
             quantity.setText(it.quantity.toInput())
-            priceWatcher.setAmount(it.unitPrice)
+            priceWatcher.setAmount(PriceUnitHelper.editorAmount(it.unitPrice, it.unit))
             note.setText(it.note)
             category.setText(it.category, false)
             unit.setText(it.unit, false)
+            priceLayout.hint = PriceUnitHelper.inputHint(it.unit)
         } ?: run {
             quantity.setText("1")
             quantity.setSelection(quantity.text?.length ?: 0)
+            priceLayout.hint = PriceUnitHelper.inputHint(units.first())
+        }
+
+        unit.setOnItemClickListener { _, _, _, _ ->
+            priceLayout.hint = PriceUnitHelper.inputHint(unit.text?.toString().orEmpty())
         }
 
         val dialog = BottomSheetDialog(context)
@@ -102,7 +109,10 @@ object ItemDialog {
             val item = (existing?.copy() ?: ShoppingItem(name = itemName)).apply {
                 this.name = itemName
                 this.quantity = parsedQuantity
-                this.unitPrice = priceWatcher.amount().coerceAtLeast(0.0)
+                this.unitPrice = PriceUnitHelper.internalAmount(
+                    priceWatcher.amount().coerceAtLeast(0.0),
+                    unitValue
+                )
                 this.category = categoryValue
                 this.unit = unitValue
                 this.note = note.text?.toString()?.trim().orEmpty()

@@ -1,9 +1,7 @@
-# Release 1.0.11+12
+# Release 1.0.13+14
 
-## Novidades
-
-- Orçamento por lista com acompanhamento em tempo real.
-- Histórico inteligente de preços por produto.
-- Atalho de histórico no menu do item.
-- Tema violeta/lilás no lugar do verde, com contraste corrigido no modo escuro.
-- Tela de atualização sincronizada com a versão.
+- Cicloviagem com preços de referência preenchidos.
+- Migração sem sobrescrever preços editados pelo usuário.
+- Leitura de preço por kg/L para itens cadastrados em g/mL.
+- Tema escuro grafite azulado, menos agressivo que preto puro.
+- Tela de novidades atualizada.

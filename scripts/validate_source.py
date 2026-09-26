@@ -17,6 +17,7 @@ required = [
     "app/src/main/java/com/listamercado/app/ui/WhatsNewActivity.kt",
     "app/src/main/java/com/listamercado/app/ui/WhatsNewContent.kt",
     "app/src/main/java/com/listamercado/app/ui/BudgetDialog.kt",
+    "app/src/main/java/com/listamercado/app/util/PriceUnitHelper.kt",
     "app/src/main/res/layout/dialog_budget.xml",
     "app/src/main/assets/nearby_markets_map.html",
     "app_identity.json",
@@ -84,6 +85,18 @@ main_source = (root / "app/src/main/java/com/listamercado/app/ui/MainActivity.kt
 if "lastSeenWhatsNewVersionCode" not in settings_source or "WhatsNewActivity" not in main_source:
     raise SystemExit("Per-version What's New flow is missing")
 
+whats_activity = (root / "app/src/main/java/com/listamercado/app/ui/WhatsNewActivity.kt").read_text(encoding="utf-8")
+if "savedInstanceState == null" not in main_source:
+    raise SystemExit("What's New launch must be guarded against MainActivity recreation")
+if "FLAG_ACTIVITY_SINGLE_TOP" not in main_source or "FLAG_ACTIVITY_CLEAR_TOP" not in main_source:
+    raise SystemExit("What's New launch flags for duplicate-instance prevention are missing")
+if "markWhatsNewSeen(BuildConfig.VERSION_CODE)" not in whats_activity or "acknowledgeAndClose" not in whats_activity:
+    raise SystemExit("What's New must be marked seen only when the user acknowledges it")
+if ".commit()" not in settings_source:
+    raise SystemExit("What's New acknowledgement must be synchronously persisted with commit()")
+if 'android:launchMode="singleTop"' not in manifest:
+    raise SystemExit("WhatsNewActivity must use singleTop to prevent duplicate instances")
+
 current_version = (root / "VERSION").read_text(encoding="utf-8").strip()
 changelog = (root / "CHANGELOG.md").read_text(encoding="utf-8")
 if f"## {current_version}" not in changelog:
@@ -111,6 +124,16 @@ colors = (root / "app/src/main/res/values/colors.xml").read_text(encoding="utf-8
 night_colors = (root / "app/src/main/res/values-night/colors.xml").read_text(encoding="utf-8")
 if "#2E6B47" in colors or "#2E6B47" in night_colors or 'color name="on_primary"' not in colors:
     raise SystemExit("Updated violet theme / explicit on-primary contrast is missing")
+
+if "#101820" not in night_colors or "#121B24" not in night_colors:
+    raise SystemExit("Vigia-style graphite dark surfaces are missing")
+
+if "KEY_CICLOVIAGEM_PRICES_V1" not in repo_source or '"arroz branco" to ("kg" to 18.0 / 5.0)' not in repo_source:
+    raise SystemExit("Cicloviagem reference-price migration is missing")
+
+price_helper = (root / "app/src/main/java/com/listamercado/app/util/PriceUnitHelper.kt").read_text(encoding="utf-8")
+if '"g", "mL" -> internalPrice * 1000.0' not in price_helper:
+    raise SystemExit("Readable kg/L price normalization is missing")
 
 # Keep source packages clean: APKs are release outputs and must not be committed/zipped.
 apks = [p.relative_to(root).as_posix() for p in root.rglob("*.apk")]

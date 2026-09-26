@@ -1,12 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="seed">#8B6CF6</color>
-    <color name="primary">#8B6CF6</color>
-    <color name="on_primary">#FFFFFF</color>
-    <color name="primary_container">#3B2A66</color>
-    <color name="on_primary_container">#F2ECFF</color>
-    <color name="secondary">#C9BEEA</color>
-    <color name="on_secondary">#241D35</color>
-    <color name="secondary_container">#3A3348</color>
-    <color name="on_secondary_container">#EEE8F7</color>
+    <color name="seed">#9A86FF</color>
+    <color name="primary">#9A86FF</color>
+    <color name="on_primary">#171126</color>
+    <color name="primary_container">#3C326A</color>
+    <color name="on_primary_container">#F0ECFF</color>
+    <color name="secondary">#C7BDF2</color>
+    <color name="on_secondary">#211A38</color>
+    <color name="secondary_container">#353047</color>
+    <color name="on_secondary_container">#EEEAF8</color>
+
+    <!-- Fundo grafite azulado: menos preto puro e mais próximo do visual noturno do Vigia IA. -->
+    <color name="dark_background">#101820</color>
+    <color name="dark_surface">#121B24</color>
+    <color name="dark_surface_variant">#1D2833</color>
+    <color name="dark_surface_lowest">#0D141B</color>
+    <color name="dark_surface_low">#151F29</color>
+    <color name="dark_surface_container">#19242F</color>
+    <color name="dark_surface_high">#202C38</color>
+    <color name="dark_surface_highest">#273440</color>
+    <color name="dark_on_surface">#E7EDF4</color>
+    <color name="dark_on_surface_variant">#BCC6D1</color>
+    <color name="dark_outline">#8995A2</color>
+    <color name="dark_outline_variant">#3B4855</color>
 </resources>

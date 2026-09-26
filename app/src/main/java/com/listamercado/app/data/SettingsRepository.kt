@@ -13,9 +13,13 @@ class SettingsRepository(context: Context) {
 
     fun lastSeenWhatsNewVersionCode(): Int = prefs.getInt(KEY_LAST_WHATS_NEW_VERSION, 0)
 
-    fun markWhatsNewSeen(versionCode: Int) {
-        prefs.edit().putInt(KEY_LAST_WHATS_NEW_VERSION, versionCode).apply()
-    }
+    /**
+     * Uses commit() intentionally: acknowledging the update must be persisted before
+     * WhatsNewActivity closes, so an Activity recreation or process restart cannot
+     * make the same version appear again.
+     */
+    fun markWhatsNewSeen(versionCode: Int): Boolean =
+        prefs.edit().putInt(KEY_LAST_WHATS_NEW_VERSION, versionCode).commit()
 
     companion object {
         const val THEME_SYSTEM = "system"

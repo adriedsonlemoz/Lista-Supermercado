@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.0.13+14 — 2026-09-25
+
+- Preenchidos os preços de referência já definidos para a lista inicial Cicloviagem.
+- Migração segura: itens já alterados pelo usuário não têm seus preços sobrescritos.
+- Valores de itens em g/mL passam a ser exibidos de forma legível por kg/L, mantendo os subtotais corretos.
+- Modo escuro deixou de usar preto puro e passou para grafite azulado, com superfícies em camadas.
+- Paleta violeta ajustada para melhor contraste sobre o novo fundo escuro.
+- Tela de novidades atualizada para a versão atual.
+
+## 1.0.12+13 — 2026-09-25
+
+- Corrigida a tela de novidades que podia aparecer mais de uma vez na mesma versão.
+- A tela principal só dispara novidades em uma criação nova, evitando duplicação por recriação de Activity.
+- `WhatsNewActivity` agora usa `singleTop` e flags de navegação para impedir instâncias duplicadas.
+- A versão é marcada como vista somente ao tocar em **Continuar**.
+- A gravação da confirmação usa `commit()` para garantir persistência antes de fechar a tela.
+- Uma instância restaurada fecha automaticamente caso a versão já tenha sido confirmada.
+
 ## 1.0.11+12 — 2026-09-25
 
 - Adicionado orçamento por lista, com valor restante ou excedido e progresso visual.

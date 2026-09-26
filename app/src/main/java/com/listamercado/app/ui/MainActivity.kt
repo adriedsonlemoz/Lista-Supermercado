@@ -45,7 +45,9 @@ class MainActivity : AppCompatActivity() {
             scrollable = findViewById(R.id.recyclerLists),
             fab = findViewById(R.id.fabNewList)
         )
-        showWhatsNewIfNeeded()
+        if (savedInstanceState == null) {
+            showWhatsNewIfNeeded()
+        }
     }
 
     override fun onResume() {
@@ -91,7 +93,10 @@ class MainActivity : AppCompatActivity() {
     private fun showWhatsNewIfNeeded() {
         val settings = SettingsRepository(this)
         if (settings.lastSeenWhatsNewVersionCode() < BuildConfig.VERSION_CODE) {
-            startActivity(Intent(this, WhatsNewActivity::class.java))
+            val intent = Intent(this, WhatsNewActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            }
+            startActivity(intent)
         }
     }
 

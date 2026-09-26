@@ -4,7 +4,7 @@ Aplicativo Android nativo, leve e offline para organizar compras em listas separ
 
 ## Versão
 
-`1.0.10+11`
+`1.0.13+14`
 
 ## Identidade técnica
 
@@ -87,3 +87,13 @@ O aplicativo cria uma única vez a lista padrão **Cicloviagem**, com 18 itens i
 - Atalho “Histórico de preço” diretamente no menu de cada produto.
 - Paleta principal alterada de verde para violeta/lilás, incluindo mapa, ícone e botões principais.
 - Contraste de `colorOnPrimary` definido explicitamente para impedir texto azul sobre botões preenchidos.
+
+
+## Correção da tela de atualização — 1.0.12+13
+
+A tela de novidades agora é protegida contra abertura duplicada durante recriações de Activity/tema. A confirmação é persistida de forma síncrona ao tocar em **Continuar**, e instâncias restauradas fecham automaticamente se a versão já tiver sido vista.
+
+
+## v1.0.13+14 — Cicloviagem e tema escuro
+
+A lista inicial Cicloviagem recebe os preços de referência que já tinham sido definidos nas conversas de planejamento. Em instalações existentes, apenas itens ainda sem preço são preenchidos. O tema escuro usa agora um grafite azulado (`#101820`/`#121B24`) em vez de preto puro, mantendo o violeta como destaque.
