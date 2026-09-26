@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.20+23 — 2026-09-26
+
+- Adicionado suporte a **produtos favoritos** no catálogo, com favoritos priorizados nas sugestões.
+- Adicionada configuração de **produto recorrente** com frequência semanal, quinzenal ou mensal.
+- Nova tela **Adicionar recorrentes** dentro das listas para selecionar rapidamente produtos recorrentes sem duplicar itens já presentes.
+- Adicionados modelos iniciais **Cicloviagem**, **Compra do mês**, **Churrasco**, **Camping** e **Limpeza**.
+- Somente o modelo **Cicloviagem** possui itens predefinidos; os demais começam vazios.
+- O botão **Nova lista** agora permite escolher entre lista vazia e criação a partir de modelo.
+- Qualquer lista do usuário pode ser transformada em modelo pelo menu de ações.
+- Modelos personalizados podem ser excluídos sem afetar listas já criadas.
+- Backup JSON atualizado para schema 2, incluindo favoritos, recorrência e modelos personalizados.
+- Tela de novidades atualizada exclusivamente com as mudanças desta versão.
+
 ## 1.0.19.1+22 — 2026-09-26
 
 - Refinada a tela **Adicionar item**, com foco especial no campo principal **Nome do produto**, que deixou de usar a apresentação comprimida e passou a ter entrada mais alta, placeholder e ajuda visual.

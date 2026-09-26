@@ -18,6 +18,7 @@ import com.listamercado.app.data.BackupRepository
 import com.listamercado.app.data.ProductCatalogRepository
 import com.listamercado.app.data.SettingsRepository
 import com.listamercado.app.data.ShoppingRepository
+import com.listamercado.app.data.TemplateRepository
 import com.listamercado.app.util.InsetsHelper
 import com.listamercado.app.util.ThemeController
 import java.text.SimpleDateFormat
@@ -49,7 +50,8 @@ class SettingsActivity : AppCompatActivity() {
         settings = SettingsRepository(this)
         backupRepository = BackupRepository(
             ShoppingRepository(this),
-            ProductCatalogRepository(this)
+            ProductCatalogRepository(this),
+            TemplateRepository(this)
         )
         appearanceValue = findViewById(R.id.textAppearanceValue)
         appearanceValue.text = ThemeController.label(settings.themeMode())
@@ -135,8 +137,9 @@ class SettingsActivity : AppCompatActivity() {
             append("Listas: ${summary.listCount}\n")
             append("Itens: ${summary.itemCount}\n")
             append("Produtos no catálogo: ${summary.productCount}\n")
-            append("Registros de preço: ${summary.priceRecordCount}\n\n")
-            append("Mesclar mantém os dados atuais e acrescenta/atualiza os do backup. Substituir troca listas e catálogo pelos dados do arquivo.")
+            append("Registros de preço: ${summary.priceRecordCount}\n")
+            append("Modelos personalizados: ${summary.templateCount}\n\n")
+            append("Mesclar mantém os dados atuais e acrescenta/atualiza os do backup. Substituir troca listas, catálogo e, quando presentes no schema, modelos personalizados.")
         }
         MaterialAlertDialogBuilder(this)
             .setTitle("Importar backup")
@@ -150,7 +153,7 @@ class SettingsActivity : AppCompatActivity() {
     private fun confirmReplace(snapshot: BackupRepository.BackupSnapshot) {
         MaterialAlertDialogBuilder(this)
             .setTitle("Substituir dados atuais?")
-            .setMessage("As listas e o catálogo atuais serão substituídos pelos dados deste backup. Esta ação não pode ser desfeita pelo aplicativo.")
+            .setMessage("As listas e o catálogo atuais serão substituídos pelos dados deste backup. Em backups schema 2, os modelos personalizados também serão substituídos. Esta ação não pode ser desfeita pelo aplicativo.")
             .setNegativeButton("Cancelar", null)
             .setPositiveButton("Substituir") { _, _ -> performImport(snapshot, replace = true) }
             .show()

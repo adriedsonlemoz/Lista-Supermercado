@@ -17,6 +17,8 @@
         <activity android:name=".ui.NearbyMarketsActivity" android:exported="false" />
         <activity android:name=".ui.SettingsActivity" android:exported="false" />
         <activity android:name=".ui.CatalogActivity" android:exported="false" />
+        <activity android:name=".ui.TemplatesActivity" android:exported="false" />
+        <activity android:name=".ui.RecurringProductsActivity" android:exported="false" />
         <activity android:name=".ui.BarcodeScannerActivity" android:exported="false" />
         <activity android:name=".ui.CompareActivity" android:exported="false" />
         <activity android:name=".ui.PurchaseModeActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />

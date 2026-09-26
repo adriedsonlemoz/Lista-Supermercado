@@ -42,8 +42,25 @@ class ProductCatalogRepository(context: Context) {
             }
         }
 
-        if (changed || firstSeed) saveProducts(products)
-        if (firstSeed) prefs.edit().putBoolean(KEY_INITIAL_SEED_DONE, true).apply()
+        val quantityMigration = !prefs.getBoolean(KEY_LAST_QUANTITY_MIGRATED_V1, false)
+        if (quantityMigration) {
+            lists.sortedBy { it.updatedAt }.forEach { list ->
+                list.items.forEach { item ->
+                    val existing = findByName(products, item.name)
+                    if (existing != null && item.quantity > 0.0 && existing.lastQuantity != item.quantity) {
+                        existing.lastQuantity = item.quantity
+                        existing.updatedAt = maxOf(existing.updatedAt, list.updatedAt)
+                        changed = true
+                    }
+                }
+            }
+        }
+
+        if (changed || firstSeed || quantityMigration) saveProducts(products)
+        val editor = prefs.edit()
+        if (firstSeed) editor.putBoolean(KEY_INITIAL_SEED_DONE, true)
+        if (quantityMigration) editor.putBoolean(KEY_LAST_QUANTITY_MIGRATED_V1, true)
+        editor.apply()
     }
 
     fun recordItem(item: ShoppingItem, barcode: String? = null) {
@@ -64,8 +81,41 @@ class ProductCatalogRepository(context: Context) {
         return loadProducts()
             .asSequence()
             .filter { normalizedQuery.isBlank() || it.normalizedName.contains(normalizedQuery) }
-            .sortedBy { it.name.lowercase(Locale("pt", "BR")) }
+            .sortedWith(compareByDescending<CatalogProduct> { it.favorite }.thenBy { it.name.lowercase(Locale("pt", "BR")) })
             .toList()
+    }
+
+    fun setFavorite(productId: Long, favorite: Boolean) {
+        val products = loadProducts()
+        val product = products.firstOrNull { it.id == productId } ?: return
+        product.favorite = favorite
+        product.updatedAt = System.currentTimeMillis()
+        saveProducts(products)
+    }
+
+    fun setRecurringFrequency(productId: Long, frequency: String?) {
+        val products = loadProducts()
+        val product = products.firstOrNull { it.id == productId } ?: return
+        product.recurringFrequency = frequency
+        product.updatedAt = System.currentTimeMillis()
+        saveProducts(products)
+    }
+
+    fun recurringProducts(): List<CatalogProduct> = loadProducts()
+        .filter { !it.recurringFrequency.isNullOrBlank() }
+        .sortedWith(compareByDescending<CatalogProduct> { it.favorite }.thenBy { it.name.lowercase(Locale("pt", "BR")) })
+
+    fun markRecurringAdded(productIds: Collection<Long>) {
+        if (productIds.isEmpty()) return
+        val products = loadProducts()
+        val now = System.currentTimeMillis()
+        var changed = false
+        products.filter { it.id in productIds }.forEach {
+            it.lastRecurringAddedAt = now
+            it.updatedAt = now
+            changed = true
+        }
+        if (changed) saveProducts(products)
     }
 
     fun replaceProducts(products: List<CatalogProduct>) {
@@ -87,6 +137,10 @@ class ProductCatalogRepository(context: Context) {
                 existing.unit = incoming.unit
                 existing.lastUnitPrice = incoming.lastUnitPrice.coerceAtLeast(0.0)
                 existing.barcode = sanitizeBarcode(incoming.barcode) ?: existing.barcode
+                existing.favorite = incoming.favorite
+                existing.recurringFrequency = incoming.recurringFrequency
+                existing.lastQuantity = incoming.lastQuantity.coerceAtLeast(0.01)
+                existing.lastRecurringAddedAt = incoming.lastRecurringAddedAt.coerceAtLeast(0L)
                 existing.updatedAt = incoming.updatedAt
             } else if (existing.barcode.isNullOrBlank()) {
                 existing.barcode = sanitizeBarcode(incoming.barcode)
@@ -126,6 +180,10 @@ class ProductCatalogRepository(context: Context) {
                     existing.lastUnitPrice = item.unitPrice
                     changed = true
                 }
+                if (item.quantity > 0.0 && existing.lastQuantity != item.quantity) {
+                    existing.lastQuantity = item.quantity
+                    changed = true
+                }
             }
             if (!barcode.isNullOrBlank() && existing.barcode != barcode) {
                 products.filter { it.id != existing.id && it.barcode == barcode }
@@ -149,6 +207,7 @@ class ProductCatalogRepository(context: Context) {
             unit = item.unit,
             lastUnitPrice = item.unitPrice.coerceAtLeast(0.0),
             barcode = barcode,
+            lastQuantity = item.quantity.coerceAtLeast(0.01),
             updatedAt = now
         )
         return true
@@ -191,6 +250,10 @@ class ProductCatalogRepository(context: Context) {
         put("unit", unit)
         put("lastUnitPrice", lastUnitPrice)
         put("barcode", barcode ?: JSONObject.NULL)
+        put("favorite", favorite)
+        put("recurringFrequency", recurringFrequency ?: JSONObject.NULL)
+        put("lastQuantity", lastQuantity)
+        put("lastRecurringAddedAt", lastRecurringAddedAt)
         put("updatedAt", updatedAt)
     }
 
@@ -205,6 +268,10 @@ class ProductCatalogRepository(context: Context) {
             unit = optString("unit", "un"),
             lastUnitPrice = optDouble("lastUnitPrice", 0.0).coerceAtLeast(0.0),
             barcode = sanitizeBarcode(rawBarcode),
+            favorite = optBoolean("favorite", false),
+            recurringFrequency = if (isNull("recurringFrequency")) null else optString("recurringFrequency").takeIf { it.isNotBlank() },
+            lastQuantity = optDouble("lastQuantity", 1.0).coerceAtLeast(0.01),
+            lastRecurringAddedAt = optLong("lastRecurringAddedAt", 0L).coerceAtLeast(0L),
             updatedAt = optLong("updatedAt", System.currentTimeMillis())
         )
     }
@@ -213,6 +280,7 @@ class ProductCatalogRepository(context: Context) {
         private const val PREFS_NAME = "lista_mercado_catalog"
         private const val KEY_PRODUCTS = "catalog_products_v1"
         private const val KEY_INITIAL_SEED_DONE = "catalog_seed_from_lists_v1"
+        private const val KEY_LAST_QUANTITY_MIGRATED_V1 = "catalog_last_quantity_migrated_v1"
 
         fun normalizeName(value: String): String {
             val withoutAccents = Normalizer.normalize(value.trim(), Normalizer.Form.NFD)

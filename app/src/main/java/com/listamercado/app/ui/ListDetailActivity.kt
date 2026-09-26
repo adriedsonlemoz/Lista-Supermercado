@@ -58,6 +58,11 @@ class ListDetailActivity : AppCompatActivity() {
     ) {
         reloadCurrentList()
     }
+    private val recurringProductsLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) reloadCurrentList()
+    }
     private val barcodeScannerLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -132,6 +137,7 @@ class ListDetailActivity : AppCompatActivity() {
         findViewById<MaterialButton>(R.id.buttonPending).setOnClickListener { setFilter(Filter.PENDING) }
         findViewById<MaterialButton>(R.id.buttonPurchased).setOnClickListener { setFilter(Filter.PURCHASED) }
         findViewById<MaterialButton>(R.id.buttonPurchaseMode).setOnClickListener { openPurchaseMode() }
+        findViewById<MaterialButton>(R.id.buttonAddRecurring).setOnClickListener { openRecurringProducts() }
         clearPurchased.setOnClickListener { clearPurchased() }
         budgetButton.setOnClickListener { editBudget() }
 
@@ -187,6 +193,13 @@ class ListDetailActivity : AppCompatActivity() {
         imm.hideSoftInputFromWindow(search.windowToken, 0)
     }
 
+
+    private fun openRecurringProducts() {
+        recurringProductsLauncher.launch(
+            Intent(this, RecurringProductsActivity::class.java)
+                .putExtra(RecurringProductsActivity.EXTRA_LIST_ID, current.id)
+        )
+    }
 
     private fun openPurchaseMode() {
         purchaseModeLauncher.launch(

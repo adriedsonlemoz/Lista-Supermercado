@@ -12,19 +12,30 @@ required = [
     "app/src/main/java/com/listamercado/app/model/ShoppingList.kt",
     "app/src/main/java/com/listamercado/app/model/CatalogProduct.kt",
     "app/src/main/java/com/listamercado/app/model/BarcodeLookupResult.kt",
+    "app/src/main/java/com/listamercado/app/model/ListTemplate.kt",
+    "app/src/main/java/com/listamercado/app/model/Recurrence.kt",
     "app/src/main/java/com/listamercado/app/data/ProductCatalogRepository.kt",
     "app/src/main/java/com/listamercado/app/data/BarcodeLookupRepository.kt",
+    "app/src/main/java/com/listamercado/app/data/TemplateRepository.kt",
     "app/src/main/java/com/listamercado/app/ui/ListDetailActivity.kt",
     "app/src/main/java/com/listamercado/app/ui/PurchaseModeActivity.kt",
     "app/src/main/java/com/listamercado/app/ui/PurchaseModeAdapter.kt",
     "app/src/main/java/com/listamercado/app/ui/CatalogActivity.kt",
     "app/src/main/java/com/listamercado/app/ui/CatalogProductAdapter.kt",
     "app/src/main/java/com/listamercado/app/ui/BarcodeScannerActivity.kt",
+    "app/src/main/java/com/listamercado/app/ui/TemplatesActivity.kt",
+    "app/src/main/java/com/listamercado/app/ui/TemplateAdapter.kt",
+    "app/src/main/java/com/listamercado/app/ui/RecurringProductsActivity.kt",
+    "app/src/main/java/com/listamercado/app/ui/RecurringProductAdapter.kt",
     "app/src/main/res/layout/activity_purchase_mode.xml",
     "app/src/main/res/layout/item_purchase_mode.xml",
     "app/src/main/res/layout/activity_catalog.xml",
     "app/src/main/res/layout/item_catalog_product.xml",
     "app/src/main/res/layout/activity_barcode_scanner.xml",
+    "app/src/main/res/layout/activity_templates.xml",
+    "app/src/main/res/layout/item_list_template.xml",
+    "app/src/main/res/layout/activity_recurring_products.xml",
+    "app/src/main/res/layout/item_recurring_product.xml",
     "app/src/main/java/com/listamercado/app/ui/SettingsActivity.kt",
     "app/src/main/java/com/listamercado/app/ui/CompareActivity.kt",
     "app/src/main/java/com/listamercado/app/ui/NearbyMarketsActivity.kt",
@@ -216,9 +227,36 @@ if "CatalogActivity" not in manifest or "BarcodeScannerActivity" not in manifest
 if "rowCatalog" not in settings_layout or "CatalogActivity::class.java" not in settings_activity_source:
     raise SystemExit("Catalog entry point is missing from Settings")
 
+template_source = (root / "app/src/main/java/com/listamercado/app/data/TemplateRepository.kt").read_text(encoding="utf-8")
+templates_activity = (root / "app/src/main/java/com/listamercado/app/ui/TemplatesActivity.kt").read_text(encoding="utf-8")
+recurring_activity = (root / "app/src/main/java/com/listamercado/app/ui/RecurringProductsActivity.kt").read_text(encoding="utf-8")
+catalog_model = (root / "app/src/main/java/com/listamercado/app/model/CatalogProduct.kt").read_text(encoding="utf-8")
+catalog_activity = (root / "app/src/main/java/com/listamercado/app/ui/CatalogActivity.kt").read_text(encoding="utf-8")
+list_actions_source = (root / "app/src/main/java/com/listamercado/app/ui/ListActionsDialog.kt").read_text(encoding="utf-8")
+if "var favorite: Boolean" not in catalog_model or "var recurringFrequency: String?" not in catalog_model:
+    raise SystemExit("Catalog favorite/recurrence fields are missing")
+if "setFavorite" not in catalog_source or "setRecurringFrequency" not in catalog_source or "recurringProducts" not in catalog_source:
+    raise SystemExit("Catalog favorite/recurrence persistence is missing")
+recurrence_source = (root / "app/src/main/java/com/listamercado/app/model/Recurrence.kt").read_text(encoding="utf-8")
+if 'const val WEEKLY = "weekly"' not in recurrence_source or 'const val BIWEEKLY = "biweekly"' not in recurrence_source or 'const val MONTHLY = "monthly"' not in recurrence_source:
+    raise SystemExit("Weekly/biweekly/monthly recurrence options are missing")
+if "buttonAddRecurring" not in detail_source or "RecurringProductsActivity" not in manifest or "selectedProducts" not in recurring_activity:
+    raise SystemExit("Add recurring products flow is missing")
+for name in ("Cicloviagem", "Compra do mês", "Churrasco", "Camping", "Limpeza"):
+    if name not in template_source:
+        raise SystemExit(f"Initial list template missing: {name}")
+if 'ListTemplate(BUILTIN_MONTHLY_ID, "Compra do mês", builtIn = true)' not in template_source or 'ListTemplate(BUILTIN_CAMPING_ID, "Camping", builtIn = true)' not in template_source:
+    raise SystemExit("Non-Cicloviagem initial templates must remain empty")
+if "saveFromList" not in template_source or "createListFromTemplate" not in template_source or "buttonActionTemplate" not in list_actions_source:
+    raise SystemExit("Save-list-as-template flow is missing")
+if "TemplatesActivity" not in manifest or "Usar modelo" not in main_source or "templateRepository.createListFromTemplate" not in templates_activity:
+    raise SystemExit("Create-list-from-template flow is missing")
+
 backup_source = (root / "app/src/main/java/com/listamercado/app/data/BackupRepository.kt").read_text(encoding="utf-8")
-if 'const val SCHEMA_VERSION = 1' not in backup_source or '"meu-supermercado-backup"' not in backup_source:
+if 'const val SCHEMA_VERSION = 2' not in backup_source or '"meu-supermercado-backup"' not in backup_source:
     raise SystemExit("Versioned JSON backup format is missing")
+if 'put("templates",' not in backup_source or 'put("favorite", favorite)' not in backup_source or 'put("recurringFrequency", recurringFrequency' not in backup_source:
+    raise SystemExit("Schema 2 backup must preserve templates, favorites and recurrence")
 if "parseAndValidate" not in backup_source or "mergeWith" not in backup_source or "replaceWith" not in backup_source:
     raise SystemExit("Backup validation/import modes are missing")
 if 'put("priceHistory", history)' not in backup_source or "createCsvExport" not in backup_source:

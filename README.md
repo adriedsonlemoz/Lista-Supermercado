@@ -4,7 +4,7 @@ Aplicativo Android nativo, leve e offline para organizar compras em listas separ
 
 ## Versão
 
-`1.0.19.1+22`
+`1.0.20+23`
 
 ## Identidade técnica
 
@@ -27,6 +27,8 @@ Aplicativo Android nativo, leve e offline para organizar compras em listas separ
 - marcação de comprado e totais estimado/no carrinho;
 - modo de compra rápida por lista, mostrando apenas pendentes, checkbox grande, preço total direto no item, carrinho/orçamento em tempo real e ação para desfazer;
 - catálogo local/offline com sugestões ao adicionar itens, último preço, unidade/categoria padrão e código de barras opcional;
+- produtos favoritos e recorrentes com frequência semanal, quinzenal ou mensal;
+- modelos de lista iniciais e modelos personalizados criados a partir de qualquer lista;
 - leitor de código de barras pela câmera, com catálogo local offline e consulta opcional na internet apenas quando o código ainda não for conhecido;
 - busca por lista, supermercado, produto ou categoria;
 - filtros Todos/Pendentes/Comprados adaptados à largura da tela;
@@ -142,6 +144,16 @@ O editor ganhou leitura de código de barras pela câmera. A leitura usa o model
 - O leitor de código de barras e o catálogo offline permanecem inalterados funcionalmente.
 - `scripts/validate_source.py` passa a bloquear CameraX 1.6.x enquanto a base técnica permanecer em compileSdk 35 / AGP 8.7.3.
 
+
+## Favoritos, recorrentes e modelos — 1.0.20+23
+
+- Produtos do catálogo podem ser marcados como **favoritos** e ficam priorizados nas sugestões.
+- Qualquer produto conhecido pode ser configurado como recorrente com frequência **semanal**, **quinzenal** ou **mensal**.
+- Cada lista possui a ação **Recorrentes**, que abre uma tela de seleção e adiciona os produtos escolhidos sem duplicar nomes já existentes na lista.
+- O fluxo **Nova lista** oferece **Lista vazia** ou **Usar modelo**.
+- Modelos iniciais: **Cicloviagem**, **Compra do mês**, **Churrasco**, **Camping** e **Limpeza**. Apenas Cicloviagem contém itens predefinidos; os demais são intencionalmente vazios.
+- O menu de ações de qualquer lista permite **Salvar modelo**, preservando itens, quantidades, unidades, preços e orçamento, mas zerando o estado de comprado ao reutilizar.
+- O backup JSON usa schema 2 e inclui favoritos, recorrência e modelos personalizados.
 
 ## Refinos no cadastro e leitura de código — 1.0.19.1+22
 

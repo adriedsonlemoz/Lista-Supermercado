@@ -44,54 +44,16 @@ class ShoppingRepository(context: Context) {
 
     private fun createCyclingTripList(): ShoppingList {
         val now = System.currentTimeMillis()
-        val items = listOf(
-            starterItem(now, 1, "Arroz branco", 5.0, "kg", "Mercearia", 18.0 / 5.0),
-            starterItem(now, 2, "Óleo de soja", 900.0, "mL", "Mercearia", 8.0 / 900.0),
-            starterItem(now, 3, "Sal", 1.0, "kg", "Mercearia", 1.89),
-            starterItem(now, 4, "Tempero pronto", 300.0, "g", "Mercearia", 2.50 / 300.0),
-            starterItem(now, 5, "Macarrão instantâneo", 20.0, "pacote", "Mercearia", 2.0),
-            starterItem(now, 6, "Ovos", 30.0, "un", "Mercearia", 18.0 / 30.0),
-            starterItem(now, 7, "Farinha de mandioca", 1.0, "kg", "Mercearia", 4.39),
-            starterItem(now, 8, "Batata", 2.0, "kg", "Hortifruti", 0.0),
-            starterItem(now, 9, "Cenoura", 1.0, "kg", "Hortifruti", 3.00),
-            starterItem(now, 10, "Pepino", 1.0, "kg", "Hortifruti", 1.57),
-            starterItem(now, 11, "Repolho", 1.0, "un", "Hortifruti", 1.00),
-            starterItem(now, 12, "Cebola", 1.0, "kg", "Hortifruti", 5.50),
-            starterItem(now, 13, "Tomate", 1.0, "kg", "Hortifruti", 4.54),
-            starterItem(now, 14, "Abobrinha", 500.0, "g", "Hortifruti", 1.94 / 1000.0),
-            starterItem(now, 15, "Beterraba", 500.0, "g", "Hortifruti", 3.15 / 1000.0),
-            starterItem(now, 16, "Pimentão", 500.0, "g", "Hortifruti", 2.50 / 1000.0),
-            starterItem(now, 17, "Sardinha", 5.0, "lata", "Mercearia", 6.29),
-            starterItem(now, 18, "Suco em pó", 20.0, "un", "Bebidas", 0.95)
-        ).toMutableList()
-
         return ShoppingList(
             id = now,
             name = CICLOVIAGEM_NAME,
             createdAt = now,
             updatedAt = now,
-            items = items
+            items = cyclingTripTemplateItems(now)
         )
     }
 
-    private fun starterItem(
-        baseId: Long,
-        offset: Int,
-        name: String,
-        quantity: Double,
-        unit: String,
-        category: String,
-        unitPrice: Double
-    ) = ShoppingItem(
-        id = baseId + offset,
-        name = name,
-        quantity = quantity,
-        unit = unit,
-        unitPrice = unitPrice,
-        category = category,
-        note = "",
-        purchased = false
-    )
+
 
 
     private fun applyCyclingTripReferencePrices(lists: MutableList<ShoppingList>): MutableList<ShoppingList> {
@@ -208,5 +170,45 @@ class ShoppingRepository(context: Context) {
         private const val KEY_CICLOVIAGEM_CREATED = "starter_cicloviagem_created"
         private const val KEY_CICLOVIAGEM_PRICES_V1 = "starter_cicloviagem_prices_v1"
         private const val CICLOVIAGEM_NAME = "Cicloviagem"
+
+        fun cyclingTripTemplateItems(baseId: Long = System.currentTimeMillis()): MutableList<ShoppingItem> = listOf(
+            templateItem(baseId, 1, "Arroz branco", 5.0, "kg", "Mercearia", 18.0 / 5.0),
+            templateItem(baseId, 2, "Óleo de soja", 900.0, "mL", "Mercearia", 8.0 / 900.0),
+            templateItem(baseId, 3, "Sal", 1.0, "kg", "Mercearia", 1.89),
+            templateItem(baseId, 4, "Tempero pronto", 300.0, "g", "Mercearia", 2.50 / 300.0),
+            templateItem(baseId, 5, "Macarrão instantâneo", 20.0, "pacote", "Mercearia", 2.0),
+            templateItem(baseId, 6, "Ovos", 30.0, "un", "Mercearia", 18.0 / 30.0),
+            templateItem(baseId, 7, "Farinha de mandioca", 1.0, "kg", "Mercearia", 4.39),
+            templateItem(baseId, 8, "Batata", 2.0, "kg", "Hortifruti", 0.0),
+            templateItem(baseId, 9, "Cenoura", 1.0, "kg", "Hortifruti", 3.00),
+            templateItem(baseId, 10, "Pepino", 1.0, "kg", "Hortifruti", 1.57),
+            templateItem(baseId, 11, "Repolho", 1.0, "un", "Hortifruti", 1.00),
+            templateItem(baseId, 12, "Cebola", 1.0, "kg", "Hortifruti", 5.50),
+            templateItem(baseId, 13, "Tomate", 1.0, "kg", "Hortifruti", 4.54),
+            templateItem(baseId, 14, "Abobrinha", 500.0, "g", "Hortifruti", 1.94 / 1000.0),
+            templateItem(baseId, 15, "Beterraba", 500.0, "g", "Hortifruti", 3.15 / 1000.0),
+            templateItem(baseId, 16, "Pimentão", 500.0, "g", "Hortifruti", 2.50 / 1000.0),
+            templateItem(baseId, 17, "Sardinha", 5.0, "lata", "Mercearia", 6.29),
+            templateItem(baseId, 18, "Suco em pó", 20.0, "un", "Bebidas", 0.95)
+        ).toMutableList()
+
+        private fun templateItem(
+            baseId: Long,
+            offset: Int,
+            name: String,
+            quantity: Double,
+            unit: String,
+            category: String,
+            unitPrice: Double
+        ) = ShoppingItem(
+            id = baseId + offset,
+            name = name,
+            quantity = quantity,
+            unit = unit,
+            unitPrice = unitPrice,
+            category = category,
+            note = "",
+            purchased = false
+        )
     }
 }

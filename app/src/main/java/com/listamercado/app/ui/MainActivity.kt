@@ -15,12 +15,15 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.listamercado.app.BuildConfig
 import com.listamercado.app.R
 import com.listamercado.app.data.SettingsRepository
 import com.listamercado.app.data.ShoppingRepository
+import com.listamercado.app.data.TemplateRepository
 import com.listamercado.app.model.ShoppingList
 import com.listamercado.app.util.InsetsHelper
 import com.listamercado.app.util.ThemeController
@@ -160,6 +163,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun createList() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Nova lista")
+            .setItems(arrayOf("Lista vazia", "Usar modelo")) { _, which ->
+                if (which == 0) createEmptyList() else startActivity(Intent(this, TemplatesActivity::class.java))
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
+    }
+
+    private fun createEmptyList() {
         ListDialog.show(this) { name ->
             lists.add(0, ShoppingList(name = name))
             repository.saveLists(lists)
@@ -177,8 +190,21 @@ class MainActivity : AppCompatActivity() {
             listName = list.name,
             onRename = { renameList(list) },
             onDuplicate = { duplicateList(list) },
+            onSaveTemplate = { saveAsTemplate(list) },
             onDelete = { confirmDelete(list) }
         )
+    }
+
+    private fun saveAsTemplate(list: ShoppingList) {
+        ListDialog.show(
+            context = this,
+            initialName = "${list.name} - modelo",
+            titleOverride = "Salvar como modelo",
+            subtitleOverride = "Itens, quantidades e orçamento serão reutilizáveis em novas listas."
+        ) { name ->
+            TemplateRepository(this).saveFromList(list, name)
+            Snackbar.make(findViewById(android.R.id.content), "Modelo salvo", Snackbar.LENGTH_SHORT).show()
+        }
     }
 
     private fun renameList(list: ShoppingList) {

@@ -10,10 +10,13 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.listamercado.app.R
 import com.listamercado.app.data.ProductCatalogRepository
 import com.listamercado.app.data.ShoppingRepository
 import com.listamercado.app.util.InsetsHelper
+import com.listamercado.app.model.CatalogProduct
+import com.listamercado.app.model.Recurrence
 import com.listamercado.app.util.ThemeController
 
 class CatalogActivity : AppCompatActivity() {
@@ -43,7 +46,13 @@ class CatalogActivity : AppCompatActivity() {
         search = findViewById(R.id.inputCatalogSearch)
         count = findViewById(R.id.textCatalogCount)
         empty = findViewById(R.id.textCatalogEmpty)
-        adapter = CatalogProductAdapter()
+        adapter = CatalogProductAdapter(
+            onFavorite = { product ->
+                catalogRepository.setFavorite(product.id, !product.favorite)
+                render()
+            },
+            onRecurring = { product -> chooseRecurrence(product) }
+        )
         findViewById<RecyclerView>(R.id.recyclerCatalog).apply {
             layoutManager = LinearLayoutManager(this@CatalogActivity)
             adapter = this@CatalogActivity.adapter
@@ -54,6 +63,21 @@ class CatalogActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = render()
             override fun afterTextChanged(s: Editable?) = Unit
         })
+    }
+
+    private fun chooseRecurrence(product: CatalogProduct) {
+        val labels = arrayOf("Não recorrente") + Recurrence.labels()
+        val values = arrayOf<String?>(null) + Recurrence.values()
+        val checked = values.indexOf(product.recurringFrequency).coerceAtLeast(0)
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Recorrência de ${product.name}")
+            .setSingleChoiceItems(labels, checked) { dialog, which ->
+                catalogRepository.setRecurringFrequency(product.id, values[which])
+                dialog.dismiss()
+                render()
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
     }
 
     private fun render() {

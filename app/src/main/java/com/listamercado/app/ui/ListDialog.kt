@@ -12,7 +12,13 @@ import com.listamercado.app.util.InsetsHelper
 import androidx.appcompat.app.AppCompatActivity
 
 object ListDialog {
-    fun show(context: AppCompatActivity, initialName: String = "", onSave: (String) -> Unit) {
+    fun show(
+        context: AppCompatActivity,
+        initialName: String = "",
+        titleOverride: String? = null,
+        subtitleOverride: String? = null,
+        onSave: (String) -> Unit
+    ) {
         val view = LayoutInflater.from(context).inflate(R.layout.dialog_list, null)
         val sheet = view.findViewById<android.view.View>(R.id.sheetListRoot)
         val title = view.findViewById<android.widget.TextView>(R.id.textListSheetTitle)
@@ -23,8 +29,8 @@ object ListDialog {
         val buttonCancel = view.findViewById<MaterialButton>(R.id.buttonCancelList)
         val buttonClose = view.findViewById<ImageButton>(R.id.buttonCloseListSheet)
 
-        title.text = if (initialName.isBlank()) "Nova lista" else "Renomear lista"
-        subtitle.text = if (initialName.isBlank()) {
+        title.text = titleOverride ?: if (initialName.isBlank()) "Nova lista" else "Renomear lista"
+        subtitle.text = subtitleOverride ?: if (initialName.isBlank()) {
             "Crie uma lista para cada mercado, data de compra ou ocasião."
         } else {
             "Dê um nome mais claro para identificar seu mercado ou compra."

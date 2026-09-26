@@ -2,6 +2,7 @@ package com.listamercado.app.data
 
 import com.listamercado.app.BuildConfig
 import com.listamercado.app.model.CatalogProduct
+import com.listamercado.app.model.ListTemplate
 import com.listamercado.app.model.ShoppingItem
 import com.listamercado.app.model.ShoppingList
 import org.json.JSONArray
@@ -12,19 +13,22 @@ import java.util.Locale
 
 class BackupRepository(
     private val shoppingRepository: ShoppingRepository,
-    private val catalogRepository: ProductCatalogRepository
+    private val catalogRepository: ProductCatalogRepository,
+    private val templateRepository: TemplateRepository
 ) {
     data class BackupSummary(
         val listCount: Int,
         val productCount: Int,
         val priceRecordCount: Int,
-        val itemCount: Int
+        val itemCount: Int,
+        val templateCount: Int
     )
 
     data class BackupSnapshot(
         val schemaVersion: Int,
         val lists: MutableList<ShoppingList>,
         val products: MutableList<CatalogProduct>,
+        val templates: MutableList<ListTemplate>,
         val summary: BackupSummary
     )
 
@@ -33,6 +37,7 @@ class BackupRepository(
         catalogRepository.seedFromLists(lists)
         val products = catalogRepository.loadProducts()
         val history = buildPriceHistory(lists)
+        val templates = templateRepository.loadUserTemplates()
 
         return JSONObject().apply {
             put("format", BACKUP_FORMAT)
@@ -41,6 +46,7 @@ class BackupRepository(
             put("appVersion", "${BuildConfig.VERSION_NAME}+${BuildConfig.VERSION_CODE}")
             put("lists", JSONArray().apply { lists.forEach { put(it.toBackupJson()) } })
             put("catalog", JSONArray().apply { products.forEach { put(it.toBackupJson()) } })
+            put("templates", JSONArray().apply { templates.forEach { put(it.toBackupJson()) } })
             put("priceHistory", history)
         }.toString(2)
     }
@@ -53,13 +59,13 @@ class BackupRepository(
         val lines = mutableListOf<String>()
         lines += listOf(
             "tipo", "lista", "produto", "quantidade", "unidade", "preco_unitario",
-            "categoria", "comprado", "orcamento_lista", "codigo_barras", "atualizado_em"
+            "categoria", "comprado", "orcamento_lista", "codigo_barras", "favorito", "recorrencia", "atualizado_em"
         ).joinToString(",", transform = ::csv)
 
         lists.forEach { list ->
             if (list.items.isEmpty()) {
                 lines += listOf(
-                    "LISTA", list.name, "", "", "", "", "", "", number(list.budget), "", instant(list.updatedAt)
+                    "LISTA", list.name, "", "", "", "", "", "", number(list.budget), "", "", "", instant(list.updatedAt)
                 ).joinToString(",", transform = ::csv)
             } else {
                 list.items.forEach { item ->
@@ -74,6 +80,8 @@ class BackupRepository(
                         item.purchased.toString(),
                         number(list.budget),
                         catalogByName[ProductCatalogRepository.normalizeName(item.name)]?.barcode.orEmpty(),
+                        "",
+                        "",
                         instant(list.updatedAt)
                     ).joinToString(",", transform = ::csv)
                 }
@@ -92,6 +100,8 @@ class BackupRepository(
                 "",
                 "",
                 product.barcode.orEmpty(),
+                product.favorite.toString(),
+                product.recurringFrequency.orEmpty(),
                 instant(product.updatedAt)
             ).joinToString(",", transform = ::csv)
         }
@@ -127,31 +137,59 @@ class BackupRepository(
         val products = MutableList(catalogArray.length()) { index ->
             parseProduct(catalogArray.getJSONObject(index), index)
         }
+        val templateArray = root.optJSONArray("templates") ?: JSONArray()
+        val templates = MutableList(templateArray.length()) { index ->
+            parseTemplate(templateArray.getJSONObject(index), index)
+        }
 
         val duplicateListIds = lists.groupingBy { it.id }.eachCount().filterValues { it > 1 }
         if (duplicateListIds.isNotEmpty()) throw IllegalArgumentException("O backup contém listas duplicadas pelo identificador.")
         val duplicateProductIds = products.groupingBy { it.id }.eachCount().filterValues { it > 1 }
         if (duplicateProductIds.isNotEmpty()) throw IllegalArgumentException("O backup contém produtos duplicados pelo identificador.")
+        val duplicateTemplateIds = templates.groupingBy { it.id }.eachCount().filterValues { it > 1 }
+        if (duplicateTemplateIds.isNotEmpty()) throw IllegalArgumentException("O backup contém modelos duplicados pelo identificador.")
 
         val summary = BackupSummary(
             listCount = lists.size,
             productCount = products.size,
             priceRecordCount = lists.sumOf { list -> list.items.count { it.unitPrice > 0.0 } },
-            itemCount = lists.sumOf { it.items.size }
+            itemCount = lists.sumOf { it.items.size },
+            templateCount = templates.size
         )
-        return BackupSnapshot(schema, lists, products, summary)
+        return BackupSnapshot(schema, lists, products, templates, summary)
     }
 
     fun replaceWith(snapshot: BackupSnapshot) {
         shoppingRepository.saveLists(snapshot.lists)
-        catalogRepository.replaceProducts(snapshot.products)
+        val products = if (snapshot.schemaVersion >= 2) snapshot.products else preserveNewCatalogFields(snapshot.products)
+        catalogRepository.replaceProducts(products)
+        if (snapshot.schemaVersion >= 2) {
+            templateRepository.replaceUserTemplates(snapshot.templates)
+        }
     }
 
     fun mergeWith(snapshot: BackupSnapshot) {
         val mergedLists = mergeLists(shoppingRepository.loadLists(), snapshot.lists)
         shoppingRepository.saveLists(mergedLists)
-        catalogRepository.mergeProducts(snapshot.products)
+        val products = if (snapshot.schemaVersion >= 2) snapshot.products else preserveNewCatalogFields(snapshot.products)
+        catalogRepository.mergeProducts(products)
+        if (snapshot.schemaVersion >= 2) {
+            templateRepository.mergeUserTemplates(snapshot.templates)
+        }
         catalogRepository.seedFromLists(mergedLists)
+    }
+
+    private fun preserveNewCatalogFields(imported: MutableList<CatalogProduct>): MutableList<CatalogProduct> {
+        val current = catalogRepository.loadProducts().associateBy { ProductCatalogRepository.normalizeName(it.name) }
+        return imported.map { incoming ->
+            val existing = current[ProductCatalogRepository.normalizeName(incoming.name)]
+            if (existing == null) incoming.copy() else incoming.copy(
+                favorite = existing.favorite,
+                recurringFrequency = existing.recurringFrequency,
+                lastQuantity = existing.lastQuantity,
+                lastRecurringAddedAt = existing.lastRecurringAddedAt
+            )
+        }.toMutableList()
     }
 
     private fun mergeLists(
@@ -244,6 +282,10 @@ class BackupRepository(
             barcode = ProductCatalogRepository.sanitizeBarcode(
                 if (json.isNull("barcode")) null else json.optString("barcode")
             ),
+            favorite = json.optBoolean("favorite", false),
+            recurringFrequency = if (json.isNull("recurringFrequency")) null else json.optString("recurringFrequency").takeIf { it.isNotBlank() },
+            lastQuantity = json.optDouble("lastQuantity", 1.0).coerceAtLeast(0.01),
+            lastRecurringAddedAt = json.optLong("lastRecurringAddedAt", 0L).coerceAtLeast(0L),
             updatedAt = json.optLong("updatedAt", id).coerceAtLeast(1L)
         )
     }
@@ -276,7 +318,38 @@ class BackupRepository(
         put("unit", unit)
         put("lastUnitPrice", lastUnitPrice)
         put("barcode", barcode ?: JSONObject.NULL)
+        put("favorite", favorite)
+        put("recurringFrequency", recurringFrequency ?: JSONObject.NULL)
+        put("lastQuantity", lastQuantity)
+        put("lastRecurringAddedAt", lastRecurringAddedAt)
         put("updatedAt", updatedAt)
+    }
+
+    private fun ListTemplate.toBackupJson() = JSONObject().apply {
+        put("id", id)
+        put("name", name)
+        put("budget", budget)
+        put("updatedAt", updatedAt)
+        put("items", JSONArray().apply { items.forEach { put(it.toBackupJson()) } })
+    }
+
+    private fun parseTemplate(json: JSONObject, index: Int): ListTemplate {
+        val id = json.optLong("id", 0L)
+        val name = json.optString("name", "").trim()
+        if (id == 0L) throw IllegalArgumentException("Modelo ${index + 1}: identificador inválido.")
+        if (name.isBlank()) throw IllegalArgumentException("Modelo ${index + 1}: nome vazio.")
+        val itemArray = json.optJSONArray("items") ?: JSONArray()
+        val items = MutableList(itemArray.length()) { itemIndex ->
+            parseItem(itemArray.getJSONObject(itemIndex), "modelo $name", itemIndex).apply { purchased = false }
+        }
+        return ListTemplate(
+            id = id,
+            name = name,
+            builtIn = false,
+            budget = json.optDouble("budget", 0.0).validMoney("Modelo '$name': orçamento inválido."),
+            items = items,
+            updatedAt = json.optLong("updatedAt", kotlin.math.abs(id)).coerceAtLeast(1L)
+        )
     }
 
     private fun buildPriceHistory(lists: List<ShoppingList>) = JSONArray().apply {
@@ -305,7 +378,7 @@ class BackupRepository(
     private fun instant(epochMillis: Long): String = runCatching { Instant.ofEpochMilli(epochMillis).toString() }.getOrDefault("")
 
     companion object {
-        const val SCHEMA_VERSION = 1
+        const val SCHEMA_VERSION = 2
         private const val BACKUP_FORMAT = "meu-supermercado-backup"
     }
 }

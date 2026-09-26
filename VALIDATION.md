@@ -1,21 +1,27 @@
-# Validação — 1.0.19.1+22
+# Validação — 1.0.20+23
 
-- [x] versionName `1.0.19.1`
-- [x] versionCode `22`
-- [x] VERSION `1.0.19.1+22`
-- [x] app_identity.json sincronizado e JSON válido
-- [x] github-manager.json sincronizado e JSON válido
-- [x] WhatsNewContent sincronizado com versionCode 22
-- [x] Tela Adicionar/Editar item refinada visualmente, com campo de nome mais legível e placeholder
-- [x] Editor mostra feedback de consulta/identificação do código de barras
-- [x] Consulta online opcional para códigos desconhecidos implementada sem inventar preço
-- [x] Catálogo local/offline continua sendo a fonte primária de preenchimento
-- [x] Leitor de código ganhou botão de luz, vibração ao reconhecer e seleção mais estável do código central
-- [x] Backup JSON, importação validada e exportação CSV preservados
+- [x] versionName `1.0.20`
+- [x] versionCode `23`
+- [x] VERSION `1.0.20+23`
+- [x] app_identity.json e github-manager.json sincronizados
+- [x] WhatsNewContent sincronizado com versionCode 23 e somente mudanças desta versão
+- [x] Produto favorito persistido no catálogo local
+- [x] Favoritos priorizados nas sugestões do catálogo
+- [x] Produto recorrente com semanal, quinzenal e mensal
+- [x] Tela Adicionar recorrentes criada e integrada à lista
+- [x] Itens recorrentes usam quantidade/unidade/último preço conhecidos e não duplicam produto já presente
+- [x] Modelos iniciais Cicloviagem, Compra do mês, Churrasco, Camping e Limpeza
+- [x] Somente Cicloviagem possui itens predefinidos
+- [x] Qualquer lista pode ser salva como modelo
+- [x] Nova lista pode ser criada vazia ou a partir de modelo
+- [x] Modelos personalizados podem ser excluídos sem alterar listas existentes
+- [x] Backup JSON atualizado para schema 2 e inclui favoritos, recorrência e modelos personalizados
+- [x] Compatibilidade de importação com backup schema 1 preservada
 - [x] compileSdk 35, targetSdk 35, minSdk 26, AGP 8.7.3, Kotlin 2.0.21 e Java/JVM 17 preservados
 - [x] CameraX 1.5.3 e ML Kit embarcado preservados
-- [x] Workflow principal permanece `Build and Release Android APK`
-- [x] Workflow não usa `actions/upload-artifact` e não gera `source.zip`
+- [x] Workflow principal permanece Build and Release Android APK
+- [x] Workflow não usa actions/upload-artifact e não gera source.zip
 - [x] scripts/validate_version.py, scripts/validate_source.py e scripts/validate_workflow.py executados com sucesso
-- [x] XMLs analisados e bem formados
-- [ ] Build Gradle completo precisa ser confirmado pelo GitHub Actions, pois este ambiente não possui Android SDK/Gradle configurado.
+- [x] 49 XMLs do projeto analisados e bem formados
+- [x] Modelos Kotlin puros (ShoppingItem, ShoppingList, CatalogProduct, ListTemplate e Recurrence) compilados com kotlinc
+- [ ] Build Gradle completo depende do GitHub Actions, pois este ambiente não possui Android SDK/Gradle configurado.
