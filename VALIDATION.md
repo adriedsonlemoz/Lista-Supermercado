@@ -1,12 +1,12 @@
-# Validação — 1.0.13+14
+# Validação — 1.0.14+15
 
-- [x] versionName `1.0.13`
-- [x] versionCode `14`
-- [x] VERSION `1.0.13+14`
+- [x] versionName `1.0.14`
+- [x] versionCode `15`
+- [x] VERSION `1.0.14+15`
 - [x] app_identity.json sincronizado
 - [x] github-manager.json sincronizado
-- [x] Preços de referência da Cicloviagem incluídos
-- [x] Migração só preenche itens com preço zero
-- [x] Preços em g/mL exibidos por kg/L
-- [x] Fundo escuro grafite azulado
-- [x] WhatsNewContent atualizado para versionCode 14
+- [x] 12 cores do `values-night/colors.xml` possuem declarações padrão em `values/colors.xml`
+- [x] tema grafite azulado preservado
+- [x] `validate_source.py` verifica recursos noturnos sem default
+- [x] `WhatsNewContent.kt` atualizado para versionCode 15
+- [x] workflow de APK Release assinado preservado

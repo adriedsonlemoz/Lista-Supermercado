@@ -1,22 +1,22 @@
 package com.listamercado.app.ui
 
 object WhatsNewContent {
-    const val CONTENT_VERSION_CODE = 14
+    const val CONTENT_VERSION_CODE = 15
     const val TITLE = "O que mudou nesta atualização"
-    const val SUBTITLE = "Preços da Cicloviagem preenchidos e modo escuro mais confortável."
+    const val SUBTITLE = "Correção do tema escuro e do build Release."
 
     val changes = listOf(
         Change(
-            "Cicloviagem com preços",
-            "Os valores que já tínhamos definido para a lista Cicloviagem agora vêm preenchidos automaticamente. Preços que você já alterou manualmente são preservados."
+            "Build Release corrigido",
+            "Corrigimos as cores do tema que existiam apenas no modo noturno e faziam o Android Lint bloquear a geração do APK Release."
         ),
         Change(
-            "Preços por kg e litro",
-            "Itens em gramas e mililitros mostram o valor de referência por kg ou litro, deixando a leitura mais natural sem alterar o total da compra."
+            "Tema escuro preservado",
+            "O grafite azulado inspirado no Vigia IA continua no modo escuro; a correção adiciona apenas valores padrão seguros para outras configurações do Android."
         ),
         Change(
-            "Novo modo escuro",
-            "O preto puro foi trocado por um grafite azulado escuro, com superfícies em camadas e melhor contraste, inspirado no visual noturno do Vigia IA."
+            "Validação mais forte",
+            "O projeto agora verifica automaticamente se recursos declarados em values-night também possuem um valor padrão em values, evitando que o mesmo erro volte em versões futuras."
         )
     )
 

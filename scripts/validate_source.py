@@ -128,6 +128,17 @@ if "#2E6B47" in colors or "#2E6B47" in night_colors or 'color name="on_primary"'
 if "#101820" not in night_colors or "#121B24" not in night_colors:
     raise SystemExit("Vigia-style graphite dark surfaces are missing")
 
+# Android resources in qualified folders (such as values-night) must have default declarations.
+# Missing defaults fail lintVitalRelease and can crash when queried in another configuration.
+base_color_names = set(re.findall(r'<color\s+name="([^"]+)"', colors))
+night_color_names = set(re.findall(r'<color\s+name="([^"]+)"', night_colors))
+missing_default_colors = sorted(night_color_names - base_color_names)
+if missing_default_colors:
+    raise SystemExit(
+        "values-night/colors.xml contains colors without base declarations in values/colors.xml: "
+        + ", ".join(missing_default_colors)
+    )
+
 if "KEY_CICLOVIAGEM_PRICES_V1" not in repo_source or '"arroz branco" to ("kg" to 18.0 / 5.0)' not in repo_source:
     raise SystemExit("Cicloviagem reference-price migration is missing")
 

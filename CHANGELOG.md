@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.14+15 — 2026-09-25
+
+- Corrigido o erro de `lintVitalRelease` que impedia a geração do APK.
+- Adicionadas declarações padrão em `values/colors.xml` para todas as 12 cores definidas em `values-night/colors.xml`.
+- Mantido o novo fundo grafite azulado no modo escuro.
+- Adicionada validação preventiva para detectar recursos de cor noturnos sem equivalente padrão antes do build.
+- Tela de novidades atualizada para esta versão.
+
 ## 1.0.13+14 — 2026-09-25
 
 - Preenchidos os preços de referência já definidos para a lista inicial Cicloviagem.

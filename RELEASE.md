@@ -1,7 +1,8 @@
-# Release 1.0.13+14
+# Release 1.0.14+15
 
-- Cicloviagem com preços de referência preenchidos.
-- Migração sem sobrescrever preços editados pelo usuário.
-- Leitura de preço por kg/L para itens cadastrados em g/mL.
-- Tema escuro grafite azulado, menos agressivo que preto puro.
-- Tela de novidades atualizada.
+Correção do build Release.
+
+- Resolve 12 erros `MissingDefaultResource` em `lintVitalRelease`.
+- Mantém a paleta grafite azulada do modo escuro.
+- Adiciona validação preventiva dos recursos `values-night`.
+- Mantém geração de APK Release assinado e publicação direta na GitHub Release.

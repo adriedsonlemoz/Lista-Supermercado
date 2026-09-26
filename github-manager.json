@@ -2,15 +2,15 @@
   "product": "Lista de Mercado",
   "name": "listamercado",
   "displayName": "Lista de Mercado",
-  "version": "1.0.13+14",
+  "version": "1.0.14+15",
   "packageFormat": 2,
   "projectType": "android-app",
   "framework": "android-native",
   "language": "kotlin",
   "android": {
     "applicationId": "com.listamercado.app",
-    "versionName": "1.0.13",
-    "versionCode": 14,
+    "versionName": "1.0.14",
+    "versionCode": 15,
     "minSdk": 26,
     "targetSdk": 35,
     "compileSdk": 35
